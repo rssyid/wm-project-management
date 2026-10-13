@@ -170,7 +170,8 @@ Selama `WAITING_BAST`: kiriman, koreksi, log progres, revisi jadwal ditolak (409
 - Freeze: selama `ON_HOLD` (seluruh proyek) dan `JEDA_SPK_BATAL` (fisik terkait), hari kerja tidak dihitung — rencana linear digeser sejumlah hari freeze.
 - Kurva S: rencana = kumulatif berbobot rencana linear baseline per minggu; aktual = progres berbobot per akhir minggu.
 - Gantt matriks mingguan (satu-satunya visualisasi jadwal), hierarki Proyek → Pekerjaan → tender attempt / fisik / Paket Kerja. W1 = Senin minggu tanggal paling awal dari baseline, revisi, actual semua proses.
-- Warna: baseline abu-abu (tidak dihapus, bagian yang dilepas tetap abu-abu); tambahan revisi pertama kuning; tambahan revisi berikutnya oranye; tambahan lama tetap kuning; sel revisi berpola garis. Simbol `#` berjalan, `✓` selesai; simbol tidak mengganti warna. Tender `#` sejak Mulai Tender, USPK milestone; paket `#` PR → COMPLETED lalu `✓`; fisik `✓` saat 100%.
+- Warna: baseline abu-abu (tidak dihapus, bagian yang dilepas tetap abu-abu); tambahan revisi pertama kuning; tambahan revisi berikutnya oranye; tambahan lama tetap kuning; sel revisi bewarna solid tanpa pola garis (D-27). Simbol `#` berjalan, `✓` selesai; simbol tidak mengganti warna. Tender `#` sejak Mulai Tender, USPK milestone; paket `#` PR → COMPLETED lalu `✓`; fisik `✓` saat 100%.
+- Penanda waktu: garis vertikal merah penuh setinggi tabel pada batas kanan minggu berjalan (minggu dengan tanggal hari ini).
 
 ## 12. BAST, tahan, batal, arsip, hapus
 
