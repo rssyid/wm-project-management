@@ -21,8 +21,9 @@ Definisikan sekali di `src/app/globals.css` (Tailwind v4 `@theme` + variabel sha
 | `--ews-yellow` | `#7A5F08` (teks) / `#FBF3D5` (latar) | EWS kuning |
 | `--ews-red` | `#B3261E` (teks) / `#FBE9E7` (latar) | EWS merah, aksi destruktif |
 | `--gantt-base` | `#C8CDCB` | Sel baseline |
-| `--gantt-rev1` | `#F2D16B` | Tambahan revisi pertama |
-| `--gantt-rev2` | `#F0A04B` | Tambahan revisi berikutnya |
+| `--gantt-rev1` | `#FFFF00` | Tambahan revisi pertama (D-33) |
+| `--gantt-rev2` | `#FFC000` | Tambahan revisi berikutnya (D-33) |
+| `--gantt-edge` | `#FF0000` (rgb 255 0 0) | Garis penanda minggu berjalan di Gantt, hanya Gantt (D-35) |
 
 Badge status memakai latar lembut + teks gelap dari keluarga warna yang sama, bukan blok warna penuh. Kontras teks minimal WCAG AA.
 
