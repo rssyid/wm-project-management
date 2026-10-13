@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { formatDate, formatPercent, formatRupiah } from "@/shared/format";
+import {
+  formatDate,
+  formatDecimal,
+  formatPercent,
+  formatRupiah,
+  formatShortDate,
+} from "@/shared/format";
 
 describe("formatDate", () => {
   it("formats as d MMM yyyy with Indonesian month names", () => {
@@ -13,6 +19,12 @@ describe("formatDate", () => {
   });
 });
 
+describe("formatShortDate", () => {
+  it("drops the year and still uses WIB", () => {
+    expect(formatShortDate(new Date("2026-08-02T17:00:00Z"))).toBe("3 Agu");
+  });
+});
+
 describe("formatRupiah", () => {
   it("uses Rp prefix without space and dot thousands separator", () => {
     expect(formatRupiah("1250000000")).toBe("Rp1.250.000.000");
@@ -20,6 +32,13 @@ describe("formatRupiah", () => {
 
   it("keeps Decimal strings exact beyond float precision", () => {
     expect(formatRupiah("9007199254740993")).toBe("Rp9.007.199.254.740.993");
+  });
+});
+
+describe("formatDecimal", () => {
+  it("rounds to one decimal with a comma", () => {
+    expect(formatDecimal("12.34")).toBe("12,3");
+    expect(formatDecimal("0")).toBe("0,0");
   });
 });
 

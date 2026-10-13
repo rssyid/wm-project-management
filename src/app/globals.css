@@ -3,7 +3,12 @@
 /* Light mode only (rule 35 §7): no .dark class is ever set, so shadcn `dark:` classes never apply. */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Rule 35 §1: the only place hex colors are allowed. Light mode only. */
+/* Rule 35 §1: the only place hex colors are allowed.
+   D-23 (13 Okt 2026): --ews-yellow darkened from #8A6D0B to #7A5F08; on #FBF3D5 the old value
+   reached only 4.41:1 and failed WCAG AA, which rule 35 also requires.
+   D-24 (13 Okt 2026): --ews-green darkened from #2E7D4F to #2B7848 and given its own
+   --ews-green-soft; the old pairing reached 4.4:1 and sat on a blue-tinted background.
+   Light mode only. */
 :root {
   --ink: #1c2422;
   --ink-muted: #5a6662;
@@ -12,8 +17,11 @@
   --surface: #f5f6f4;
   --panel: #ffffff;
   --line: #dce1de;
-  --ews-green: #2e7d4f;
-  --ews-yellow: #8a6d0b;
+  --ews-green: #2b7848;
+  /* D-24: EWS green needs its own soft background; on --canal-soft (blue-tinted) the
+     contrast is only 4.3:1. Rule 35 §6 requires a soft background of the same color family. */
+  --ews-green-soft: #e8f2ec;
+  --ews-yellow: #7a5f08;
   --ews-yellow-soft: #fbf3d5;
   --ews-red: #b3261e;
   --ews-red-soft: #fbe9e7;
@@ -59,6 +67,7 @@
   --color-panel: var(--panel);
   --color-line: var(--line);
   --color-ews-green: var(--ews-green);
+  --color-ews-green-soft: var(--ews-green-soft);
   --color-ews-yellow: var(--ews-yellow);
   --color-ews-yellow-soft: var(--ews-yellow-soft);
   --color-ews-red: var(--ews-red);
@@ -105,6 +114,15 @@
   --radius-md: 4px;
   --radius-lg: 8px;
   --radius-xl: 8px;
+}
+
+/* docs/01 §11 (UI-03): revision cells carry a stripe pattern in addition to their color. */
+@utility gantt-stripes {
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0 4px,
+    rgb(0 0 0 / 0.2) 4px 6px
+  );
 }
 
 @layer base {

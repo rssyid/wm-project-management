@@ -20,7 +20,7 @@ export type StatusTone = "neutral" | "info" | "success" | "warning" | "danger";
 const TONE_CLASS: Record<StatusTone, string> = {
   neutral: "bg-surface text-ink border-line",
   info: "bg-canal-soft text-canal border-transparent",
-  success: "bg-canal-soft text-ews-green border-transparent",
+  success: "bg-ews-green-soft text-ews-green border-transparent",
   warning: "bg-ews-yellow-soft text-ews-yellow border-transparent",
   danger: "bg-ews-red-soft text-ews-red border-transparent",
 };
