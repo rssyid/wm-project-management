@@ -49,6 +49,21 @@ describe("data contoh Gantt prototipe", () => {
     }
   });
 
+  it("D-27: simbol hanya di atas sel berwarna (invariant)", () => {
+    // Simbol duduk di dalam sel bar, jadi sel tanpa rencana tidak boleh memuat simbol.
+    // Pergeseran satu karakter pada notasi plan/symbols akan melanggar ini.
+    for (const row of SAMPLE_GANTT) {
+      row.cells.forEach((cell, index) => {
+        if (cell.symbol !== null) {
+          expect(
+            cell.kind,
+            `${row.id} minggu ${index + 1} punya simbol tanpa warna`,
+          ).not.toBe("none");
+        }
+      });
+    }
+  });
+
   it("hanya revisi pertama yang boleh muncul sebelum revisi berikutnya di satu baris", () => {
     // docs/01 §11: tambahan lama tetap kuning, oranye hanya untuk revisi yang menyusul.
     for (const row of SAMPLE_GANTT) {
@@ -64,9 +79,11 @@ describe("data contoh Gantt prototipe", () => {
 
 describe("decode sel Gantt", () => {
   it("menerjemahkan baseline, revisi, dan simbol berjalan", () => {
+    // Tender #2: W1-W5 kosong, W6-W9 abu-abu dengan #, W10-W11 kuning tanpa simbol.
     const row = SAMPLE_GANTT.find((item) => item.id === "w1-t2");
     expect(row).toBeDefined();
-    expect(row?.cells.slice(0, 8).map((cell) => cell.kind)).toEqual([
+    expect(row?.cells.slice(0, 11).map((cell) => cell.kind)).toEqual([
+      "none",
       "none",
       "none",
       "none",
@@ -75,9 +92,11 @@ describe("decode sel Gantt", () => {
       "base",
       "base",
       "base",
+      "rev1",
+      "rev1",
     ]);
-    expect(row?.cells[4]?.symbol).toBe("#");
-    expect(row?.cells[9]?.kind).toBe("rev1");
+    expect(row?.cells[6]?.symbol).toBe("#");
+    expect(row?.cells[9]?.symbol).toBeNull();
   });
 
   it("menandai selesai hanya di baris paket yang selesai", () => {

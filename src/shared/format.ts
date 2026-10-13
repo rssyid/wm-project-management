@@ -10,12 +10,6 @@ const dateLong = new Intl.DateTimeFormat("id-ID", {
   timeZone: APP_TIME_ZONE,
 });
 
-const dateShort = new Intl.DateTimeFormat("id-ID", {
-  day: "numeric",
-  month: "short",
-  timeZone: APP_TIME_ZONE,
-});
-
 // D-29: Gantt memakai tanggal numerik karena kolom minggunya sempit dan label bulan
 // panjang tidak muat. Helper ini hanya dipakai Gantt; tabel lain tetap format panjang.
 const dateNumeric = new Intl.DateTimeFormat("id-ID", {
@@ -44,11 +38,6 @@ const oneDecimal = new Intl.NumberFormat("id-ID", {
 /** `10 Okt 2026` in Asia/Jakarta. */
 export function formatDate(value: Date): string {
   return dateLong.format(value);
-}
-
-/** `3 Agu` — Gantt week headers where the year is shown elsewhere. */
-export function formatShortDate(value: Date): string {
-  return dateShort.format(value);
 }
 
 /** D-29: `13/10/26` — Gantt Plan mulai dan Plan selesai. */

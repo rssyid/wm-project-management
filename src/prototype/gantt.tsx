@@ -1,10 +1,14 @@
+"use client";
+
 import { cn } from "cn";
 import { addWeeks } from "date-fns";
+import { useMemo, useState, useSyncExternalStore } from "react";
 
+import { Button } from "@/components/ui/button";
 import { formatGanttDate, formatGanttWeek } from "@/shared/format";
 
+import { currentWeekIndex, outlineNumbers } from "./gantt-model";
 import {
-  GANTT_CURRENT_WEEK,
   GANTT_FIRST_MONDAY,
   type GanttCellKind,
   type GanttRow,
@@ -27,6 +31,16 @@ const CELL_LABEL: Record<GanttCellKind, string> = {
 };
 
 const INDENT = ["pl-3", "pl-6", "pl-9"] as const;
+const RANGE_OPTIONS = [8, 16, 26, 52] as const;
+const NO_COLUMN_WIDTH = "w-10";
+
+const subscribeToNothing = () => () => {};
+
+// D-32: minggu berjalan hanya diketahui di browser. `cacheComponents` Next 16 menolak
+// `Date.now()` saat prerender, jadi server snapshot-nya null dan tabel ter-render tanpa
+// garis merah; browser mengisinya setelah hidrasi.
+const weekSnapshot = () => currentWeekIndex(GANTT_FIRST_MONDAY);
+const serverWeekSnapshot = () => null;
 
 function GanttLegend() {
   return (
@@ -78,24 +92,49 @@ export function GanttMatrix({
   rows: readonly GanttRow[];
   caption: string;
 }) {
-  const weekCount = rows[0]?.cells.length ?? 0;
+  const [weeks, setWeeks] = useState<number>(16);
+  const currentWeek = useSyncExternalStore(
+    subscribeToNothing,
+    weekSnapshot,
+    serverWeekSnapshot,
+  );
+
+  const numbers = useMemo(
+    () => outlineNumbers(rows.map((row) => row.depth)),
+    [rows],
+  );
+
   const firstMonday = new Date(`${GANTT_FIRST_MONDAY}T00:00:00+07:00`);
-  const weeks = Array.from({ length: weekCount }, (_, index) =>
+  const shown = Array.from({ length: weeks }, (_, index) =>
     addWeeks(firstMonday, index),
   );
 
-  // D-28: batas kanan minggu berjalan ditandai garis merah penuh dari header sampai baris
-  // terakhir. `border-r-ews-red` wajib, bukan `border-ews-red`: yang terakhir memberi warna
-  // ke keempat sisi sehingga garis bawah sel ikut merah dan muncul sebagai garis horizontal.
-  const weekEdge = (index: number) =>
-    index + 1 === GANTT_CURRENT_WEEK
-      ? "border-r-[3px] border-r-ews-red"
-      : "border-r border-line";
+  // Garis merah hanya tampil bila minggu berjalan masuk rentang aktif.
+  const showEdge = currentWeek !== null && currentWeek <= weeks;
+  const isEdge = (index: number) => showEdge && index + 1 === currentWeek;
+
+  // D-28: `border-r-ews-red` wajib, bukan `border-ews-red`; yang terakhir memberi warna
+  // keempat sisi sehingga garis bawah tiap sel ikut merah dan muncul sebagai garis horizontal.
+  const edgeClass = (index: number) =>
+    isEdge(index) ? "border-r-[3px] border-r-ews-red" : "border-r border-line";
 
   return (
     <div>
-      {/* WCAG 2.1.1: wadah yang bisa digeser harus bisa difokus, kalau tidak keyboard user
-          tidak bisa menjelajah kolom minggu di layar kecil. */}
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <span className="text-dense text-ink-muted">Rentang</span>
+        {RANGE_OPTIONS.map((option) => (
+          <Button
+            key={option}
+            size="sm"
+            variant={option === weeks ? "default" : "outline"}
+            onClick={() => setWeeks(option)}
+          >
+            {option} minggu
+          </Button>
+        ))}
+      </div>
+
+      {/* WCAG 2.1.1: wadah yang bisa digeser harus bisa difokus. */}
       <div
         className="overflow-x-auto rounded-lg border bg-panel"
         tabIndex={0}
@@ -108,49 +147,115 @@ export function GanttMatrix({
             <tr>
               <th
                 scope="col"
-                className="sticky left-0 z-10 min-w-56 border-r border-b border-line bg-surface px-3 py-2 text-left font-medium text-ink-muted md:min-w-72"
+                rowSpan={3}
+                className={cn(
+                  "sticky left-0 z-10 border-r border-b border-line bg-surface px-1 text-center font-medium text-ink-muted",
+                  NO_COLUMN_WIDTH,
+                )}
               >
-                Proses
+                No.
               </th>
               <th
                 scope="col"
-                className="hidden border-b border-line px-3 py-2 text-right font-medium text-ink-muted md:table-cell"
+                rowSpan={3}
+                className="sticky left-10 z-10 min-w-56 border-r border-b border-line bg-surface px-3 text-left font-medium text-ink-muted md:min-w-72"
               >
-                Plan mulai
+                Job Item
+              </th>
+              <th
+                scope="colgroup"
+                colSpan={2}
+                className="hidden border-b border-line px-3 py-1.5 text-center font-medium text-ink-muted md:table-cell"
+              >
+                Plan
+              </th>
+              {showEdge && currentWeek !== null ? (
+                <>
+                  <th
+                    scope="colgroup"
+                    colSpan={currentWeek}
+                    className={cn(
+                      "border-b border-line px-3 py-1.5 text-center font-medium text-ink-muted",
+                      edgeClass(currentWeek - 1),
+                    )}
+                  >
+                    Timeline
+                  </th>
+                  <th
+                    scope="colgroup"
+                    colSpan={weeks - currentWeek}
+                    className="border-b border-line px-3 py-1.5"
+                  />
+                </>
+              ) : (
+                <th
+                  scope="colgroup"
+                  colSpan={weeks}
+                  className="border-b border-line px-3 py-1.5 text-center font-medium text-ink-muted"
+                >
+                  Timeline
+                </th>
+              )}
+            </tr>
+            <tr>
+              <th
+                scope="col"
+                rowSpan={2}
+                className="hidden border-b border-line px-3 text-center font-medium text-ink-muted md:table-cell"
+              >
+                Start
               </th>
               <th
                 scope="col"
-                className="hidden border-b border-line px-3 py-2 text-right font-medium text-ink-muted md:table-cell"
+                rowSpan={2}
+                className="hidden border-b border-line px-3 text-center font-medium text-ink-muted md:table-cell"
               >
-                Plan selesai
+                End
               </th>
-              {weeks.map((monday, index) => (
+              {shown.map((monday, index) => (
                 <th
                   key={monday.toISOString()}
                   scope="col"
                   className={cn(
-                    "min-w-11 border-b border-line px-1 py-1.5 text-center leading-tight font-medium text-ink-muted",
-                    weekEdge(index),
+                    "min-w-11 border-b border-line px-1 py-1 text-center leading-tight font-medium text-ink-muted",
+                    edgeClass(index),
                   )}
                 >
-                  <span className="block leading-tight">W{index + 1}</span>
-                  <span className="block text-xs leading-tight font-normal tabular-nums">
-                    {formatGanttWeek(monday)}
-                  </span>
-                  {index + 1 === GANTT_CURRENT_WEEK ? (
-                    <span className="sr-only">, minggu berjalan</span>
-                  ) : null}
+                  W{index + 1}
+                </th>
+              ))}
+            </tr>
+            <tr>
+              {shown.map((monday, index) => (
+                <th
+                  key={monday.toISOString()}
+                  scope="col"
+                  aria-label={`W${index + 1}, ${formatGanttWeek(monday)}${isEdge(index) ? ", minggu berjalan" : ""}`}
+                  className={cn(
+                    "min-w-11 border-b border-line px-1 py-1 text-center text-xs leading-tight font-normal text-ink-muted tabular-nums",
+                    edgeClass(index),
+                  )}
+                >
+                  {formatGanttWeek(monday)}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => (
+            {rows.map((row, rowIndex) => (
               <tr key={row.id}>
+                <td
+                  className={cn(
+                    "sticky left-0 z-10 border-r border-b border-line bg-panel text-center align-middle",
+                    NO_COLUMN_WIDTH,
+                  )}
+                >
+                  {numbers[rowIndex]}
+                </td>
                 <th
                   scope="row"
                   className={cn(
-                    "sticky left-0 z-10 border-r border-b border-line bg-panel py-1 pr-3 text-left align-middle leading-tight",
+                    "sticky left-10 z-10 border-r border-b border-line bg-panel py-1 pr-3 text-left align-middle leading-tight",
                     INDENT[row.depth],
                     row.depth === 0 ? "font-semibold" : "font-normal",
                   )}
@@ -162,13 +267,13 @@ export function GanttMatrix({
                     {row.status}
                   </span>
                 </th>
-                <td className="hidden border-b border-line px-3 py-1 text-right tabular-nums md:table-cell">
+                <td className="hidden border-b border-line px-3 py-1 text-center tabular-nums md:table-cell">
                   {formatGanttDate(new Date(row.planStart))}
                 </td>
-                <td className="hidden border-r border-b border-line px-3 py-1 text-right tabular-nums md:table-cell">
+                <td className="hidden border-b border-line px-3 py-1 text-center tabular-nums md:table-cell">
                   {formatGanttDate(new Date(row.planEnd))}
                 </td>
-                {row.cells.map((cell, index) => {
+                {row.cells.slice(0, weeks).map((cell, index) => {
                   const symbolLabel =
                     cell.symbol === "#"
                       ? ", progres"
@@ -181,7 +286,7 @@ export function GanttMatrix({
                       aria-label={`${row.name}, W${index + 1}: ${CELL_LABEL[cell.kind]}${symbolLabel}`}
                       className={cn(
                         "h-8 border-b border-line p-0 text-center",
-                        weekEdge(index),
+                        edgeClass(index),
                       )}
                     >
                       <span

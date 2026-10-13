@@ -7,7 +7,6 @@ import {
   formatGanttWeek,
   formatPercent,
   formatRupiah,
-  formatShortDate,
 } from "@/shared/format";
 
 describe("formatDate", () => {
@@ -18,12 +17,6 @@ describe("formatDate", () => {
   it("uses Asia/Jakarta, so 17:00 UTC is already the next day", () => {
     expect(formatDate(new Date("2026-10-10T17:00:00Z"))).toBe("11 Okt 2026");
     expect(formatDate(new Date("2026-10-10T16:59:00Z"))).toBe("10 Okt 2026");
-  });
-});
-
-describe("formatShortDate", () => {
-  it("drops the year and still uses WIB", () => {
-    expect(formatShortDate(new Date("2026-08-02T17:00:00Z"))).toBe("3 Agu");
   });
 });
 

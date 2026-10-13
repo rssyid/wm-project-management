@@ -50,6 +50,71 @@ test.describe("shell aplikasi", () => {
     }
   });
 
+  test("D-30: header tiga baris dengan grup Plan dan Timeline", async ({
+    page,
+  }) => {
+    await page.goto("/portofolio");
+    const gantt = page.getByRole("table", { name: "Gantt portofolio" });
+    const head = gantt.locator("thead");
+    await expect(head.locator("tr")).toHaveCount(3);
+
+    // Baris 1: No. dan Job Item membentang tiga baris, Plan dua kolom, Timeline sisa minggu.
+    // Plan/Start/End disembunyikan di 375 px sehingga tidak ada di accessibility tree,
+    // jadi pakai locator biasa yang tidak bergantung pada visibilitas.
+    const first = head.locator("tr").nth(0);
+    await expect(first.locator("th", { hasText: "No." })).toHaveAttribute(
+      "rowspan",
+      "3",
+    );
+    await expect(first.locator("th", { hasText: "Job Item" })).toHaveAttribute(
+      "rowspan",
+      "3",
+    );
+    await expect(first.locator("th", { hasText: "Plan" })).toHaveAttribute(
+      "colspan",
+      "2",
+    );
+    await expect(first.locator("th", { hasText: "Timeline" })).toHaveAttribute(
+      "colspan",
+      /\d+/,
+    );
+
+    // Baris 2: Start dan End membentang dua baris, sisanya nomor minggu.
+    const second = head.locator("tr").nth(1);
+    await expect(second.locator("th", { hasText: "Start" })).toHaveAttribute(
+      "rowspan",
+      "2",
+    );
+    await expect(second.locator("th", { hasText: "End" })).toHaveAttribute(
+      "rowspan",
+      "2",
+    );
+
+    // Baris 3 hanya berisi tanggal dd/mem.
+    await expect(
+      head.locator("tr").nth(2).locator("th", { hasText: "03/08" }),
+    ).toBeVisible();
+  });
+
+  test("D-31: kolom No. bernomor otomatis sesuai jenjang", async ({ page }) => {
+    await page.goto("/portofolio");
+    const gantt = page.getByRole("table", { name: "Gantt portofolio" });
+    const numbers = await gantt
+      .locator("tbody tr td:first-child")
+      .allTextContents();
+    // Proyek, Pekerjaan 1 + empat anaknya, Pekerjaan 2 + anaknya.
+    expect(numbers.map((n) => n.trim())).toEqual([
+      "#",
+      "1",
+      "a",
+      "b",
+      "c",
+      "d",
+      "2",
+      "a",
+    ]);
+  });
+
   test("D-28: garis merah hanya di batas kanan minggu berjalan, legenda di bawah tabel", async ({
     page,
   }) => {
@@ -57,19 +122,24 @@ test.describe("shell aplikasi", () => {
     const gantt = page.getByRole("table", { name: "Gantt portofolio" });
     await expect(gantt).toBeVisible();
 
-    // Garis penanda hanya di tepi kanan W11 (minggu berjalan, 12 Okt 2026), setinggi tabel.
-    const headerRow = gantt.locator("thead tr");
-    await expect(headerRow.locator("th.border-r-\\[3px\\]")).toHaveCount(1);
-    await expect(headerRow.locator("th", { hasText: "W11" })).toHaveClass(
-      /border-r-ews-red/,
-    );
+    // Garis penanda hanya di tepi kanan W11 (12 Okt 2026), satu di setiap baris header
+    // dan di setiap baris badan.
+    const head = gantt.locator("thead");
+    for (const index of [0, 1, 2]) {
+      await expect(
+        head.locator("tr").nth(index).locator("th.border-r-\\[3px\\]"),
+      ).toHaveCount(1);
+    }
+    await expect(
+      head.locator("tr").nth(1).getByRole("columnheader", { name: "W11" }),
+    ).toHaveClass(/border-r-ews-red/);
+
     // Tidak boleh warna merah di sisi lain: itu memunculkan garis horizontal per baris.
     await expect(gantt.locator(".border-ews-red")).toHaveCount(0);
-    // Sel kosong pada minggu berjalan tetap tanpa warna latar.
     await expect(gantt.locator(".bg-canal-soft")).toHaveCount(0);
-    await expect(headerRow.locator("th", { hasText: "W11" })).toContainText(
-      "minggu berjalan",
-    );
+    await expect(
+      gantt.getByRole("columnheader", { name: /W11, 12\/10, minggu berjalan/ }),
+    ).toHaveCount(1);
 
     // Legenda berada setelah tabel, bukan sebelum.
     const legend = page.getByRole("list", { name: "Legenda Gantt" });
@@ -87,6 +157,29 @@ test.describe("shell aplikasi", () => {
     ]) {
       await expect(legend).toContainText(label);
     }
+  });
+
+  test("D-32: switcher mengubah jumlah minggu dan menyembunyikan garis saat di luar rentang", async ({
+    page,
+  }) => {
+    await page.goto("/portofolio");
+    const gantt = page.getByRole("table", { name: "Gantt portofolio" });
+    const weekHeaders = gantt.getByRole("columnheader", { name: /^W\d+$/ });
+
+    await expect(weekHeaders).toHaveCount(16);
+
+    await page.getByRole("button", { name: "26 minggu" }).click();
+    await expect(weekHeaders).toHaveCount(26);
+    await expect(gantt.locator(".border-r-ews-red").first()).toBeVisible();
+
+    // Pada 8 minggu, minggu berjalan (W11) di luar rentang sehingga garis hilang.
+    await page.getByRole("button", { name: "8 minggu" }).click();
+    await expect(weekHeaders).toHaveCount(8);
+    await expect(gantt.locator(".border-r-ews-red")).toHaveCount(0);
+
+    await page.getByRole("button", { name: "52 minggu" }).click();
+    await expect(weekHeaders).toHaveCount(52);
+    await expect(gantt.locator(".border-r-ews-red").first()).toBeVisible();
   });
 
   test("D-27: sel revisi bewarna solid tanpa pola garis", async ({ page }) => {

@@ -151,8 +151,9 @@ export type GanttRow = {
   cells: ReadonlyArray<{ kind: GanttCellKind; symbol: GanttSymbol }>;
 };
 
-// Compact notation: plan "." none, "b" baseline, "1" first revision, "2" later revision;
-// symbols "." none, "#" running, "v" done.
+// Notasi ringkas: plan "." kosong, "b" baseline, "1" revisi pertama, "2" revisi berikutnya;
+// simbol "." kosong, "#" berjalan, "v" selesai. Baris meny-padding sendiri hingga
+// GANTT_TOTAL_WEEKS agar pilihan 52 minggu tidak membuat tabel tidak rata.
 function row(
   id: string,
   depth: GanttRow["depth"],
@@ -170,6 +171,8 @@ function row(
     "2": "rev2",
   };
   const symbolOf: Record<string, GanttSymbol> = { ".": null, "#": "#", v: "✓" };
+  const paddedPlan = plan.padEnd(GANTT_TOTAL_WEEKS, ".");
+  const paddedSymbols = symbols.padEnd(GANTT_TOTAL_WEEKS, ".");
   return {
     id,
     depth,
@@ -177,17 +180,16 @@ function row(
     status,
     planStart,
     planEnd,
-    cells: [...plan].map((char, index) => ({
+    cells: [...paddedPlan].map((char, index) => ({
       kind: kindOf[char] ?? "none",
-      symbol: symbolOf[symbols[index] ?? "."] ?? null,
+      symbol: symbolOf[paddedSymbols[index] ?? "."] ?? null,
     })),
   };
 }
 
-// docs/01 §11: W1 is the Monday of the earliest week. 2026-08-03 is a Monday and 2026-10-12 is
-// W11, the week this prototype was reviewed.
+// docs/01 §11: W1 adalah Senin minggu tanggal paling awal. 2026-08-03 adalah Senin.
 export const GANTT_FIRST_MONDAY = "2026-08-03";
-export const GANTT_CURRENT_WEEK = 11;
+export const GANTT_TOTAL_WEEKS = 52;
 
 export const SAMPLE_GANTT: readonly GanttRow[] = [
   row(
@@ -197,8 +199,8 @@ export const SAMPLE_GANTT: readonly GanttRow[] = [
     "Proyek: Pengadaan",
     "2026-08-03",
     "2026-12-19",
-    "bbbbbbbbbbbbbbbbbbbb",
-    "....................",
+    "bbbbbbbbbbbbbbbb",
+    "................",
   ),
   row(
     "w1",
@@ -207,8 +209,8 @@ export const SAMPLE_GANTT: readonly GanttRow[] = [
     "Bobot 60,00%",
     "2026-08-03",
     "2026-12-19",
-    "bbbbbbbbbbbbbbbbbbbb",
-    "....................",
+    "bbbbbbbbbbbbbbbb",
+    "................",
   ),
   row(
     "w1-t1",
@@ -217,8 +219,8 @@ export const SAMPLE_GANTT: readonly GanttRow[] = [
     "Tender #1: Batal",
     "2026-08-03",
     "2026-08-29",
-    "bbbb................",
-    "##..................",
+    "bbbb",
+    "##..",
   ),
   row(
     "w1-t2",
@@ -227,8 +229,8 @@ export const SAMPLE_GANTT: readonly GanttRow[] = [
     "Tender #2: Berjalan",
     "2026-08-31",
     "2026-10-10",
-    "....bbbb11..........",
-    "....####............",
+    ".....bbbb11",
+    ".....####",
   ),
   row(
     "w1-f",
@@ -237,8 +239,8 @@ export const SAMPLE_GANTT: readonly GanttRow[] = [
     "Fisik: Belum mulai",
     "2026-10-05",
     "2026-12-19",
-    ".........bbbbbbbbb12",
-    "....................",
+    ".........bbbbbbb",
+    "................",
   ),
   row(
     "w1-pk",
@@ -247,8 +249,8 @@ export const SAMPLE_GANTT: readonly GanttRow[] = [
     "Paket: Produksi",
     "2026-08-31",
     "2026-10-24",
-    "....bbbbbbbb........",
-    "....####............",
+    "....bbbbbbbb",
+    ".....####",
   ),
   row(
     "w2",
@@ -257,8 +259,8 @@ export const SAMPLE_GANTT: readonly GanttRow[] = [
     "Bobot 40,00%",
     "2026-08-10",
     "2026-10-03",
-    ".bbbbbbbb...........",
-    "....................",
+    ".bbbbbbbb",
+    "................",
   ),
   row(
     "w2-pk",
@@ -267,7 +269,7 @@ export const SAMPLE_GANTT: readonly GanttRow[] = [
     "Paket: Selesai",
     "2026-08-10",
     "2026-10-03",
-    ".bbbbbbbb...........",
-    ".######v............",
+    ".bbbbbbbb",
+    ".######v.",
   ),
 ];
