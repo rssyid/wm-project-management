@@ -107,4 +107,23 @@ describe("pewarnaan Gantt", () => {
     );
     expect(source).not.toContain("gantt-stripes");
   });
+
+  it("garis merah dibatasi sisi kanan, tidak merembes ke bawah", async () => {
+    const source = await readFile(
+      path.join(process.cwd(), "src/prototype/gantt.tsx"),
+      "utf8",
+    );
+    // `border-ews-red` memberi warna keempat sisi sehingga garis bawah sel ikut merah
+    // dan muncul sebagai garis horizontal di setiap baris.
+    expect(source).toContain("border-r-ews-red");
+    expect(source).not.toMatch(/[\s"]border-ews-red[\s"]/);
+  });
+
+  it("sel kosong pada minggu berjalan tidak diberi warna latar", async () => {
+    const source = await readFile(
+      path.join(process.cwd(), "src/prototype/gantt.tsx"),
+      "utf8",
+    );
+    expect(source).not.toContain("bg-canal-soft");
+  });
 });

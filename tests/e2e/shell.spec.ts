@@ -57,11 +57,18 @@ test.describe("shell aplikasi", () => {
     const gantt = page.getByRole("table", { name: "Gantt portofolio" });
     await expect(gantt).toBeVisible();
 
-    // Garis penanda muncul tepat satu kali di baris header (W11 = 13 Okt 2026).
+    // Garis penanda hanya di tepi kanan W11 (minggu berjalan, 12 Okt 2026), setinggi tabel.
     const headerRow = gantt.locator("thead tr");
-    await expect(headerRow.locator("th.border-r-2")).toHaveCount(1);
+    await expect(headerRow.locator("th.border-r-\\[3px\\]")).toHaveCount(1);
     await expect(headerRow.locator("th", { hasText: "W11" })).toHaveClass(
-      /border-r-2/,
+      /border-r-ews-red/,
+    );
+    // Tidak boleh warna merah di sisi lain: itu memunculkan garis horizontal per baris.
+    await expect(gantt.locator(".border-ews-red")).toHaveCount(0);
+    // Sel kosong pada minggu berjalan tetap tanpa warna latar.
+    await expect(gantt.locator(".bg-canal-soft")).toHaveCount(0);
+    await expect(headerRow.locator("th", { hasText: "W11" })).toContainText(
+      "minggu berjalan",
     );
 
     // Legenda berada setelah tabel, bukan sebelum.
@@ -105,16 +112,21 @@ test.describe("shell aplikasi", () => {
     await expect(gantt).toBeVisible();
 
     if (isMobile) {
-      const before = await page
+      const identitas = page
         .locator("th", { hasText: "Normalisasi kanal" })
-        .first()
-        .boundingBox();
-      await gantt.evaluate((element) => element.scrollIntoView());
-      await page.mouse.wheel(400, 0);
-      const after = await page
-        .locator("th", { hasText: "Normalisasi kanal" })
-        .first()
-        .boundingBox();
+        .first();
+      const before = await identitas.boundingBox();
+
+      // scrollLeft langsung pada wadah, bukan page.mouse.wheel: wheel bergantung posisi
+      // pointer dan jadi flaky saat test berjalan paralel.
+      const scroller = page.getByRole("group", { name: "Gantt portofolio" });
+      const scrolled = await scroller.evaluate((element) => {
+        element.scrollLeft = 400;
+        return element.scrollLeft;
+      });
+      expect(scrolled).toBeGreaterThan(0);
+
+      const after = await identitas.boundingBox();
       expect(after?.x).toBe(before?.x);
     }
   });

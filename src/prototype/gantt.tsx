@@ -1,7 +1,7 @@
 import { cn } from "cn";
 import { addWeeks } from "date-fns";
 
-import { formatDate, formatShortDate } from "@/shared/format";
+import { formatGanttDate, formatGanttWeek } from "@/shared/format";
 
 import {
   GANTT_CURRENT_WEEK,
@@ -84,10 +84,12 @@ export function GanttMatrix({
     addWeeks(firstMonday, index),
   );
 
-  // D-28: batas kanan minggu berjalan ditandai garis merah penuh dari header sampai baris terakhir.
+  // D-28: batas kanan minggu berjalan ditandai garis merah penuh dari header sampai baris
+  // terakhir. `border-r-ews-red` wajib, bukan `border-ews-red`: yang terakhir memberi warna
+  // ke keempat sisi sehingga garis bawah sel ikut merah dan muncul sebagai garis horizontal.
   const weekEdge = (index: number) =>
     index + 1 === GANTT_CURRENT_WEEK
-      ? "border-r-2 border-ews-red"
+      ? "border-r-[3px] border-r-ews-red"
       : "border-r border-line";
 
   return (
@@ -127,15 +129,17 @@ export function GanttMatrix({
                   key={monday.toISOString()}
                   scope="col"
                   className={cn(
-                    "min-w-11 border-b border-line px-1 py-2 text-center font-medium text-ink-muted",
+                    "min-w-11 border-b border-line px-1 py-1.5 text-center leading-tight font-medium text-ink-muted",
                     weekEdge(index),
-                    index + 1 === GANTT_CURRENT_WEEK && "bg-canal-soft",
                   )}
                 >
-                  <span className="block">W{index + 1}</span>
-                  <span className="block text-xs font-normal tabular-nums">
-                    {formatShortDate(monday)}
+                  <span className="block leading-tight">W{index + 1}</span>
+                  <span className="block text-xs leading-tight font-normal tabular-nums">
+                    {formatGanttWeek(monday)}
                   </span>
+                  {index + 1 === GANTT_CURRENT_WEEK ? (
+                    <span className="sr-only">, minggu berjalan</span>
+                  ) : null}
                 </th>
               ))}
             </tr>
@@ -146,21 +150,23 @@ export function GanttMatrix({
                 <th
                   scope="row"
                   className={cn(
-                    "sticky left-0 z-10 border-r border-b border-line bg-panel py-2 pr-3 text-left align-top",
+                    "sticky left-0 z-10 border-r border-b border-line bg-panel py-1 pr-3 text-left align-middle leading-tight",
                     INDENT[row.depth],
                     row.depth === 0 ? "font-semibold" : "font-normal",
                   )}
                 >
-                  <span className="block text-ink">{row.name}</span>
-                  <span className="block text-xs text-ink-muted">
+                  <span className="block leading-tight text-ink">
+                    {row.name}
+                  </span>
+                  <span className="block text-xs leading-tight text-ink-muted">
                     {row.status}
                   </span>
                 </th>
-                <td className="hidden border-b border-line px-3 py-2 text-right tabular-nums md:table-cell">
-                  {formatDate(new Date(row.planStart))}
+                <td className="hidden border-b border-line px-3 py-1 text-right tabular-nums md:table-cell">
+                  {formatGanttDate(new Date(row.planStart))}
                 </td>
-                <td className="hidden border-r border-b border-line px-3 py-2 text-right tabular-nums md:table-cell">
-                  {formatDate(new Date(row.planEnd))}
+                <td className="hidden border-r border-b border-line px-3 py-1 text-right tabular-nums md:table-cell">
+                  {formatGanttDate(new Date(row.planEnd))}
                 </td>
                 {row.cells.map((cell, index) => {
                   const symbolLabel =
@@ -174,9 +180,8 @@ export function GanttMatrix({
                       key={index}
                       aria-label={`${row.name}, W${index + 1}: ${CELL_LABEL[cell.kind]}${symbolLabel}`}
                       className={cn(
-                        "h-10 border-b border-line p-0 text-center",
+                        "h-8 border-b border-line p-0 text-center",
                         weekEdge(index),
-                        index + 1 === GANTT_CURRENT_WEEK && "bg-canal-soft/60",
                       )}
                     >
                       <span

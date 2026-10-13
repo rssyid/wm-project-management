@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   formatDate,
   formatDecimal,
+  formatGanttDate,
+  formatGanttWeek,
   formatPercent,
   formatRupiah,
   formatShortDate,
@@ -22,6 +24,32 @@ describe("formatDate", () => {
 describe("formatShortDate", () => {
   it("drops the year and still uses WIB", () => {
     expect(formatShortDate(new Date("2026-08-02T17:00:00Z"))).toBe("3 Agu");
+  });
+});
+
+describe("formatGanttDate", () => {
+  it("D-29: formats as dd/mm/yy", () => {
+    expect(formatGanttDate(new Date("2026-10-13T00:00:00+07:00"))).toBe(
+      "13/10/26",
+    );
+    expect(formatGanttDate(new Date("2026-08-03T00:00:00+07:00"))).toBe(
+      "03/08/26",
+    );
+  });
+
+  it("D-29: uses Asia/Jakarta, so 17:00 UTC is already the next day", () => {
+    expect(formatGanttDate(new Date("2026-10-10T17:00:00Z"))).toBe("11/10/26");
+  });
+});
+
+describe("formatGanttWeek", () => {
+  it("D-29: formats as dd/mm without the year", () => {
+    expect(formatGanttWeek(new Date("2026-10-12T00:00:00+07:00"))).toBe(
+      "12/10",
+    );
+    expect(formatGanttWeek(new Date("2026-08-03T00:00:00+07:00"))).toBe(
+      "03/08",
+    );
   });
 });
 

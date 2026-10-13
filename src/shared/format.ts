@@ -16,6 +16,21 @@ const dateShort = new Intl.DateTimeFormat("id-ID", {
   timeZone: APP_TIME_ZONE,
 });
 
+// D-29: Gantt memakai tanggal numerik karena kolom minggunya sempit dan label bulan
+// panjang tidak muat. Helper ini hanya dipakai Gantt; tabel lain tetap format panjang.
+const dateNumeric = new Intl.DateTimeFormat("id-ID", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "2-digit",
+  timeZone: APP_TIME_ZONE,
+});
+
+const dateNumericNoYear = new Intl.DateTimeFormat("id-ID", {
+  day: "2-digit",
+  month: "2-digit",
+  timeZone: APP_TIME_ZONE,
+});
+
 const rupiah = new Intl.NumberFormat("id-ID", {
   minimumFractionDigits: 0,
   maximumFractionDigits: 2,
@@ -34,6 +49,16 @@ export function formatDate(value: Date): string {
 /** `3 Agu` — Gantt week headers where the year is shown elsewhere. */
 export function formatShortDate(value: Date): string {
   return dateShort.format(value);
+}
+
+/** D-29: `13/10/26` — Gantt Plan mulai dan Plan selesai. */
+export function formatGanttDate(value: Date): string {
+  return dateNumeric.format(value);
+}
+
+/** D-29: `12/10` — Gantt kolom minggu; tahun sudah tampil di Plan mulai. */
+export function formatGanttWeek(value: Date): string {
+  return dateNumericNoYear.format(value);
 }
 
 /** `Rp1.250.000.000`. Money arrives as a Decimal string (rule 20), so strings are accepted as-is. */
