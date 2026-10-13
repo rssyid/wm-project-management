@@ -10,7 +10,7 @@ Semua item belum dikerjakan. Centang hanya dengan bukti (lihat perintah `/verify
 - [x] Fondasi UI sesuai rule 35-design: shell (Sidebar shadcn + top bar + breadcrumb, sheet di mobile), `PageHeader`, `DataTable`, `FormSection`, `StatusBadge`, `EmptyState`. Komponen shadcn ditambah hanya yang dipakai.
 - [x] Prisma 7: `prisma.config.ts` (URL dari `DIRECT_URL`), client singleton dengan `PrismaPg` (`DATABASE_URL`). Salin `prisma/schema.prisma` dari paket ini. Perintah seed ditunda ke F1 bersama seed script (D-26).
 - [x] Vitest, Playwright (desktop + 375 px), axe-core; script `lint`, `typecheck`, `test`, `test:e2e`.
-- [ ] Repo GitHub + workflow CI (lint, typecheck, test, build). Workflow sudah ada (`.github/workflows/ci.yml`); belum didorong ke GitHub — `git push` menunggu persetujuan.
+- [x] Repo GitHub + workflow CI (lint, typecheck, test, build). Workflow `.github/workflows/ci.yml` sudah dijalankan GitHub Actions: run `38365588543` hijau, job `verify` 41 dtk dan `e2e` 1 mnt 9 dtk.
 - [x] Neon: project region Asia, branch `dev`/`preview`/`main`, autoscaling maks. 0,25 CU. Menunggu pengguna.
 - [x] R2: bucket `dev`, `prod`, `backup`; kredensial terpisah untuk backup. Menunggu pengguna.
 - [x] Vercel: project terhubung repo, region fungsi Asia (sama dengan Neon), env variable. Menunggu pengguna.
@@ -35,7 +35,8 @@ Semua item belum dikerjakan. Centang hanya dengan bukti (lihat perintah `/verify
   - `/slop-check`: 4 temuan, semua diperbaiki — `SuperAdminOnly` kode mati (05 #5), `APP_TIME_ZONE` ekspor tak perlu (05 #1), `pnpm format` tidak pernah dijalankan sehingga 40 file tidak rapi dan tidak ada penjaga (05 #9), Prettier merapikan `.kilo/` yang tidak disentuh (05 #9). `FormSection` sengaja dipertahankan karena diminta `task.md` item 4 meski belum ada yang memakainya.
   - Deviasi lintas dokumen (laporan, bukan perubahan kode): `docs/05-ui.md` §5 "Dashboard: kartu jumlah per status" bertentangan dengan rule 35 §5 dan §7; sudah diselaraskan menjadi baris angka KPI. `docs/05-ui.md` §8 (tooltip Gantt, tombol "Ke minggu ini", lipatan baris) dan §5 (Kurva S, daftar pekerjaan tanpa log minggu ini) belum di prototipe — sengaja, dikerjakan F4–F5.
   - Audit 14 Oktober 2026 (`bddf88a`): memperluas axe dari 2 ke 7 route menemukan dua cacat nyata — wadah Gantt tidak bisa difokus (WCAG 2.1.1, pengguna keyboard tidak bisa menggeser kolom minggu di 375 px) dan label tab tak aktif `text-foreground/60` hanya 4,14:1. Keduanya diperbaiki. Ditambah 6 unit test invarian data Gantt karena decoder `row()` menelan error (simbol hilang diam-diam bila panjang string beda, typo karakter jadi sel kosong).
-  - Sisa: tinjau screenshot oleh pemilik proyek (agen tidak dapat melihat gambar), `git push` 16 commit ke GitHub lalu pastikan CI hijau di sana.
+  - Sisa: tinjau screenshot oleh pemilik proyek (agen tidak dapat melihat gambar), lalu item prototipe dicentang.
+  - Peringatan CI (bukan kegagalan): `pnpm/action-setup@v4` menargetkan Node.js 20 yang sudah deprecated di runner GitHub dan dipaksa jalan di Node.js 24; `ubuntu-latest` akan migrasi ke Ubuntu 26 pada 19 Oktober 2026. Keduanya untuk diperiksa saat F7.
 
 ## F1 — Fondasi (AC-01–06, AC-60–62)
 
