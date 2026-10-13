@@ -21,10 +21,17 @@ Next.js 16 (App Router, runtime Node.js, TypeScript strict) · Better Auth (emai
 ## Perintah
 
 - `pnpm dev` · `pnpm build` · `pnpm start`
-- `pnpm lint` · `pnpm typecheck` · `pnpm test` (Vitest) · `pnpm test:e2e` (Playwright)
-- `pnpm prisma migrate dev` · `pnpm prisma db seed` · `pnpm prisma studio`
+- `pnpm lint` · `pnpm typecheck` · `pnpm test` (Vitest) · `pnpm test:e2e` (Playwright) · `pnpm format`
+- `pnpm prisma generate` · `pnpm prisma validate` · `pnpm prisma migrate dev` · `pnpm prisma studio`
+- `pnpm prisma db seed` belum aktif: perintah seed di `prisma.config.ts` dibuat bersama seed script di F1.
 
-(Script dibuat di fase F0; perbarui bagian ini bila namanya berubah.)
+Catatansetup:
+
+- `pnpm typecheck` menjalankan `next typegen` lebih dulu; `LayoutProps` dan `PageProps` adalah tipe global hasil Next 16.
+- `pnpm test:e2e` membangun app (`next build`) lalu menjalankannya di port 3100 untuk dua viewport: 1440×900 dan 375×812.
+- Format tanggal memakai `Intl` dengan `Asia/Jakarta`, bukan `@date-fns/tz`; konstruktor `TZDate` memanggil `new Date()` dan ditolak saat prerender.
+
+(Perbarui bagian ini bila nama script berubah.)
 
 ## Aturan kerja
 

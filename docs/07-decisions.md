@@ -49,3 +49,15 @@ Ringkasan semua keputusan planning (10 Oktober 2026). Isinya sudah dituangkan ke
 | Q-01 | Rule 05-quality dan perintah `/slop-check`: aturan anti AI slop untuk kode, test, teks UI, file, dan laporan; wajib bersih sebelum fase ditutup. |
 | T-01 | Agen pindah dari Google Antigravity ke Claude Code; proyek dimulai ulang dari nol (11 Oktober 2026). |
 | T-02 | Agen pindah dari Claude Code ke Kilo Desktop; rules di `.kilo/rules/` (dimuat lewat `kilo.jsonc`), prosedur fase menjadi slash command di `.kilo/commands/`; isi aturan tidak berubah (13 Oktober 2026). |
+
+## F0 Persiapan (13 Oktober 2026)
+
+| Kode | Keputusan |
+| --- | --- |
+| D-20 | Daftar proyek di 375 px adalah daftar ringkas (nama, kode, status, progres), bukan kartu. `docs/05-ui.md` §5 diubah dari "Mobile: kartu". |
+| D-21 | Sebelum Better Auth (F1), peran prototipe disimulasikan lewat pemilih peran di top bar yang menulis cookie `wm_prototype_role`; MV tidak melihat tombol aksi. Semua dihapus bersama data contoh sebelum F2. |
+| D-22 | Label UI `ProjectStatus` disetuskan di `src/shared/project-status.ts`: Draf, Survei, RAB siap, Menunggu AFCE/AR, AFCE/AR disetujui, Pengadaan, Pelaksanaan, Menunggu BAST, Selesai, Ditahan, Dibatalkan. |
+| D-23 | `--ews-yellow` digelapkan dari `#8A6D0B` menjadi `#7A5F08`. Nilai lama hanya 4,41:1 di atas `#FBF3D5` dan gagal WCAG AA yang juga diminta rule 35. |
+| D-24 | `--ews-green` digelapkan dari `#2E7D4F` menjadi `#2B7848` dan diberi latar sendiri `--ews-green-soft: #E8F2EC`. Pasangan lama hanya 4,3:1 dan memakai latar kebiruan (`--canal-soft`), padahal rule 35 §6 meminta latar lembut dari keluarga warna yang sama. |
+| D-25 | Format tanggal memakai `Intl.DateTimeFormat` dengan `timeZone: Asia/Jakarta`, bukan `@date-fns/tz`. Konstruktor `TZDate` memanggil `new Date()` dan ditolak `cacheComponents` Next 16 saat prerender. Month date-fns tetap dipakai untuk aritmetika (`addWeeks`). |
+| D-26 | `prisma.config.ts` membaca `DIRECT_URL` lewat `process.env` dengan fallback kosong, bukan helper `env()`, agar `prisma generate` jalan di CI tanpa kredensial database. |
