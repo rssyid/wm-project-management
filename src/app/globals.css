@@ -1,1 +1,137 @@
 @import "tailwindcss";
+
+/* Light mode only (rule 35 §7): no .dark class is ever set, so shadcn `dark:` classes never apply. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Rule 35 §1: the only place hex colors are allowed. Light mode only. */
+:root {
+  --ink: #1c2422;
+  --ink-muted: #5a6662;
+  --canal: #1e4a6b;
+  --canal-soft: #e6eef4;
+  --surface: #f5f6f4;
+  --panel: #ffffff;
+  --line: #dce1de;
+  --ews-green: #2e7d4f;
+  --ews-yellow: #8a6d0b;
+  --ews-yellow-soft: #fbf3d5;
+  --ews-red: #b3261e;
+  --ews-red-soft: #fbe9e7;
+  --gantt-base: #c8cdcb;
+  --gantt-rev1: #f2d16b;
+  --gantt-rev2: #f0a04b;
+
+  /* shadcn semantic variables mapped onto the tokens above. */
+  --background: var(--surface);
+  --foreground: var(--ink);
+  --card: var(--panel);
+  --card-foreground: var(--ink);
+  --popover: var(--panel);
+  --popover-foreground: var(--ink);
+  --primary: var(--canal);
+  --primary-foreground: var(--panel);
+  --secondary: var(--surface);
+  --secondary-foreground: var(--ink);
+  --muted: var(--surface);
+  --muted-foreground: var(--ink-muted);
+  --accent: var(--canal-soft);
+  --accent-foreground: var(--canal);
+  --destructive: var(--ews-red);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--canal);
+  --sidebar: var(--panel);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--canal);
+  --sidebar-primary-foreground: var(--panel);
+  --sidebar-accent: var(--canal-soft);
+  --sidebar-accent-foreground: var(--canal);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--canal);
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-canal: var(--canal);
+  --color-canal-soft: var(--canal-soft);
+  --color-surface: var(--surface);
+  --color-panel: var(--panel);
+  --color-line: var(--line);
+  --color-ews-green: var(--ews-green);
+  --color-ews-yellow: var(--ews-yellow);
+  --color-ews-yellow-soft: var(--ews-yellow-soft);
+  --color-ews-red: var(--ews-red);
+  --color-ews-red-soft: var(--ews-red-soft);
+  --color-gantt-base: var(--gantt-base);
+  --color-gantt-rev1: var(--gantt-rev1);
+  --color-gantt-rev2: var(--gantt-rev2);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+
+  /* Rule 35 §2 scale: 12 / 13 / 14 / 16 / 20 / 24 px. Tailwind already covers all but 13. */
+  --text-dense: 0.8125rem;
+  --text-dense--line-height: 1.25rem;
+
+  /* Rule 35 §3: 4 px for controls and badges, 8 px for panels and dialogs. */
+  --radius-sm: 4px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 8px;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
