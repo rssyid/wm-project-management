@@ -1,0 +1,243 @@
+{
+  "_note": "Data awal master non-lokasi (D-14). Semua bisa diubah di master setelah go-live. Material seed ditandai isComplete=false sampai dilengkapi.",
+  "units": [
+    {
+      "code": "m",
+      "name": "meter"
+    },
+    {
+      "code": "m2",
+      "name": "meter persegi (m²)"
+    },
+    {
+      "code": "m3",
+      "name": "meter kubik (m³)"
+    },
+    {
+      "code": "km",
+      "name": "kilometer"
+    },
+    {
+      "code": "kg",
+      "name": "kilogram"
+    },
+    {
+      "code": "ton",
+      "name": "ton"
+    },
+    {
+      "code": "liter",
+      "name": "liter"
+    },
+    {
+      "code": "sak",
+      "name": "sak"
+    },
+    {
+      "code": "batang",
+      "name": "batang"
+    },
+    {
+      "code": "lembar",
+      "name": "lembar"
+    },
+    {
+      "code": "buah",
+      "name": "buah"
+    },
+    {
+      "code": "unit",
+      "name": "unit"
+    },
+    {
+      "code": "titik",
+      "name": "titik"
+    },
+    {
+      "code": "hari",
+      "name": "hari"
+    },
+    {
+      "code": "jam",
+      "name": "jam"
+    },
+    {
+      "code": "ls",
+      "name": "lump sum"
+    }
+  ],
+  "projectCategories": [
+    {
+      "code": "TANGGUL",
+      "name": "Tanggul",
+      "order": 1
+    },
+    {
+      "code": "BANGUNAN_AIR",
+      "name": "Bangunan Air (pintu air, gorong-gorong, spillway)",
+      "order": 2
+    },
+    {
+      "code": "DESILTING",
+      "name": "Desilting",
+      "order": 3
+    },
+    {
+      "code": "PARIT_KANAL_BARU",
+      "name": "Pembuatan Parit/Kanal Baru",
+      "order": 4
+    },
+    {
+      "code": "NORMALISASI_SUNGAI",
+      "name": "Normalisasi Sungai",
+      "order": 5
+    },
+    {
+      "code": "LAINNYA",
+      "name": "Lainnya",
+      "order": 6
+    }
+  ],
+  "materials": [
+    {
+      "name": "Semen",
+      "defaultUnitCode": "sak"
+    },
+    {
+      "name": "Pasir",
+      "defaultUnitCode": "m3"
+    },
+    {
+      "name": "Batu split",
+      "defaultUnitCode": "m3"
+    },
+    {
+      "name": "Batu kali",
+      "defaultUnitCode": "m3"
+    },
+    {
+      "name": "Besi beton",
+      "defaultUnitCode": "batang"
+    },
+    {
+      "name": "Kawat bendrat",
+      "defaultUnitCode": "kg"
+    },
+    {
+      "name": "Kayu",
+      "defaultUnitCode": "m3"
+    },
+    {
+      "name": "Papan",
+      "defaultUnitCode": "lembar"
+    },
+    {
+      "name": "Pipa HDPE",
+      "defaultUnitCode": "batang"
+    },
+    {
+      "name": "Buis beton",
+      "defaultUnitCode": "buah"
+    },
+    {
+      "name": "Karung",
+      "defaultUnitCode": "buah"
+    },
+    {
+      "name": "Geotekstil",
+      "defaultUnitCode": "m2"
+    },
+    {
+      "name": "Sheet pile",
+      "defaultUnitCode": "batang"
+    }
+  ],
+  "heavyEquipmentTypes": [
+    {
+      "name": "Excavator standar"
+    },
+    {
+      "name": "Excavator long arm"
+    },
+    {
+      "name": "Excavator amfibi"
+    },
+    {
+      "name": "Bulldozer"
+    },
+    {
+      "name": "Dump truck"
+    },
+    {
+      "name": "Vibro roller"
+    },
+    {
+      "name": "Ponton"
+    }
+  ],
+  "approvalPositions": [
+    {
+      "code": "EM",
+      "name": "Estate Manager",
+      "rank": 1
+    },
+    {
+      "code": "GEM",
+      "name": "Group Estate Manager",
+      "rank": 2
+    },
+    {
+      "code": "RH",
+      "name": "Regional Head",
+      "rank": 3
+    },
+    {
+      "code": "HP",
+      "name": "Head of Plantation",
+      "rank": 4
+    },
+    {
+      "code": "MCA",
+      "name": "Merchant Cash Advance",
+      "rank": 5
+    },
+    {
+      "code": "CFO",
+      "name": "Chief Financial Officer",
+      "rank": 6
+    },
+    {
+      "code": "COO",
+      "name": "Chief Operating Officer",
+      "rank": 7
+    },
+    {
+      "code": "CEO",
+      "name": "Chief Executive Officer",
+      "rank": 8
+    },
+    {
+      "code": "CHAIRMAN",
+      "name": "Chairman",
+      "rank": 9
+    }
+  ],
+  "approvalMatrixTiers": [],
+  "systemSetting": {
+    "id": 1,
+    "workingWeekdays": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "ewsYellowFrom": "5.00",
+    "ewsRedAbove": "10.00"
+  },
+  "holidays": [],
+  "firstSuperAdmin": {
+    "_note": "Buat lewat skrip seed dengan email dan password sementara dari environment variable SEED_ADMIN_EMAIL dan SEED_ADMIN_PASSWORD; mustChangePassword=true."
+  }
+}

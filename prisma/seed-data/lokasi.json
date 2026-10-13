@@ -1,0 +1,914 @@
+{
+  "_note": "Data awal master lokasi. Sumber: dump SQL Company dan Estate database lama, dinormalisasi 10 Okt 2026. Kunci impor: Region.code, (regionCode,name) Wilayah, Company.code, (companyCode,code) Estate. Alias Company dikosongkan.",
+  "regions": [
+    {
+      "code": "R1",
+      "name": "Region 1",
+      "ops": "SUMATERA",
+      "order": 1
+    },
+    {
+      "code": "R2",
+      "name": "Region 2",
+      "ops": "SUMATERA",
+      "order": 2
+    },
+    {
+      "code": "R1-NT",
+      "name": "Region 1 Non THIP",
+      "ops": "SUMATERA",
+      "order": 3
+    },
+    {
+      "code": "R2-NT",
+      "name": "Region 2 Non THIP",
+      "ops": "SUMATERA",
+      "order": 4
+    },
+    {
+      "code": "KB-A",
+      "name": "Kalbar A",
+      "ops": "KALBAR",
+      "order": 5
+    },
+    {
+      "code": "KB-B",
+      "name": "Kalbar B",
+      "ops": "KALBAR",
+      "order": 6
+    },
+    {
+      "code": "KALTIM",
+      "name": "Kaltim",
+      "ops": "WILTIM",
+      "order": 7
+    },
+    {
+      "code": "PAPUA",
+      "name": "Papua",
+      "ops": "WILTIM",
+      "order": 8
+    }
+  ],
+  "wilayah": [
+    {
+      "regionCode": "R1",
+      "name": "THIP 1",
+      "order": 1
+    },
+    {
+      "regionCode": "R1",
+      "name": "THIP 2",
+      "order": 2
+    },
+    {
+      "regionCode": "R2",
+      "name": "THIP 3",
+      "order": 3
+    },
+    {
+      "regionCode": "R2",
+      "name": "THIP 4",
+      "order": 4
+    },
+    {
+      "regionCode": "R1-NT",
+      "name": "Sumatera 1",
+      "order": 5
+    },
+    {
+      "regionCode": "R1-NT",
+      "name": "Sumatera 2",
+      "order": 6
+    },
+    {
+      "regionCode": "R1-NT",
+      "name": "Sumatera 5",
+      "order": 7
+    },
+    {
+      "regionCode": "R2-NT",
+      "name": "Sumatera 3",
+      "order": 8
+    },
+    {
+      "regionCode": "R2-NT",
+      "name": "Sumatera 4",
+      "order": 9
+    },
+    {
+      "regionCode": "KB-A",
+      "name": "Kalbar 1",
+      "order": 10
+    },
+    {
+      "regionCode": "KB-A",
+      "name": "Kalbar 2",
+      "order": 11
+    },
+    {
+      "regionCode": "KB-A",
+      "name": "Kalbar 3",
+      "order": 12
+    },
+    {
+      "regionCode": "KB-B",
+      "name": "Kalbar 4",
+      "order": 13
+    },
+    {
+      "regionCode": "KB-B",
+      "name": "Kalbar 5",
+      "order": 14
+    },
+    {
+      "regionCode": "KB-B",
+      "name": "Kalbar 6",
+      "order": 15
+    },
+    {
+      "regionCode": "KALTIM",
+      "name": "Kaltim",
+      "order": 16
+    },
+    {
+      "regionCode": "KALTIM",
+      "name": "Sulawesi",
+      "order": 17
+    },
+    {
+      "regionCode": "PAPUA",
+      "name": "Papua",
+      "order": 18
+    }
+  ],
+  "companies": [
+    {
+      "code": "THIP",
+      "name": "TH Indo Plantation",
+      "order": 1
+    },
+    {
+      "code": "JJP",
+      "name": "Jatim Jaya Perkasa",
+      "order": 2
+    },
+    {
+      "code": "CRS",
+      "name": "Citra Riau Sarana",
+      "order": 3
+    },
+    {
+      "code": "PANP-P",
+      "name": "Perkebunan Anak Negeri Pasaman",
+      "order": 4
+    },
+    {
+      "code": "KAMU",
+      "name": "Karya Agung Megah Utama",
+      "order": 5
+    },
+    {
+      "code": "BSU",
+      "name": "Berkat Sawit Utama",
+      "order": 6
+    },
+    {
+      "code": "IKU",
+      "name": "Indo Kebun Unggul",
+      "order": 7
+    },
+    {
+      "code": "SIP",
+      "name": "Swadaya Indopalma",
+      "order": 8
+    },
+    {
+      "code": "PTW",
+      "name": "Patiware",
+      "order": 9
+    },
+    {
+      "code": "SUM-S",
+      "name": "Sumatera Unggul Makmur - Sambas",
+      "order": 10
+    },
+    {
+      "code": "WKN",
+      "name": "Wawasan Kebun Nusantara",
+      "order": 11
+    },
+    {
+      "code": "IBP",
+      "name": "Intitama Berlian Perkebunan",
+      "order": 12
+    },
+    {
+      "code": "PANP-S",
+      "name": "Perkebunan Anak Negeri Pasaman - Sambas",
+      "order": 13
+    },
+    {
+      "code": "PANP-L",
+      "name": "Perkebunan Anak Negeri Pasaman - Landak",
+      "order": 14
+    },
+    {
+      "code": "PLD-S",
+      "name": "Putra Lirik Domas - Sambas",
+      "order": 15
+    },
+    {
+      "code": "SAM",
+      "name": "Sentosa Asih Makmur",
+      "order": 16
+    },
+    {
+      "code": "CMA",
+      "name": "Citra Mahkota",
+      "order": 17
+    },
+    {
+      "code": "NJP",
+      "name": "Nusa Jaya Perkasa",
+      "order": 18
+    },
+    {
+      "code": "PLD-K",
+      "name": "Putra Lirik Domas - Kbraya",
+      "order": 19
+    },
+    {
+      "code": "SUM-K",
+      "name": "Sumatera Unggul Makmur - Kbraya",
+      "order": 20
+    },
+    {
+      "code": "BAS",
+      "name": "Bumi Alam Sentosa",
+      "order": 21
+    },
+    {
+      "code": "GAN",
+      "name": "Graha Agro Nusantara",
+      "order": 22
+    },
+    {
+      "code": "AJP",
+      "name": "Alam Jaya Persada",
+      "order": 23
+    },
+    {
+      "code": "TSB",
+      "name": "Tritunggal Sentra Buana",
+      "order": 24
+    },
+    {
+      "code": "WKSM",
+      "name": "Wahana Karya Sejahtera Mandiri",
+      "order": 25
+    },
+    {
+      "code": "ACP",
+      "name": "Agriprima Cipta Persada",
+      "order": 26
+    },
+    {
+      "code": "APM",
+      "name": "Agrinusa Persada Mulia",
+      "order": 27
+    }
+  ],
+  "estates": [
+    {
+      "companyCode": "THIP",
+      "code": "MER",
+      "name": "Meranti",
+      "wilayahName": "THIP 1",
+      "regionCode": "R1",
+      "estateNew": "THP1",
+      "legacyCode": "MER",
+      "order": 1
+    },
+    {
+      "companyCode": "THIP",
+      "code": "RAM",
+      "name": "Ramin",
+      "wilayahName": "THIP 1",
+      "regionCode": "R1",
+      "estateNew": "THP2",
+      "legacyCode": "RAM",
+      "order": 2
+    },
+    {
+      "companyCode": "THIP",
+      "code": "KEP",
+      "name": "Kempas",
+      "wilayahName": "THIP 1",
+      "regionCode": "R1",
+      "estateNew": "THP3",
+      "legacyCode": "KEP",
+      "order": 3
+    },
+    {
+      "companyCode": "THIP",
+      "code": "EBO",
+      "name": "Eboni",
+      "wilayahName": "THIP 1",
+      "regionCode": "R1",
+      "estateNew": "THP4",
+      "legacyCode": "EBO",
+      "order": 4
+    },
+    {
+      "companyCode": "THIP",
+      "code": "TEB",
+      "name": "Tembusu",
+      "wilayahName": "THIP 1",
+      "regionCode": "R1",
+      "estateNew": "THP5",
+      "legacyCode": "TEB",
+      "order": 5
+    },
+    {
+      "companyCode": "THIP",
+      "code": "SUN",
+      "name": "Sungkai",
+      "wilayahName": "THIP 2",
+      "regionCode": "R1",
+      "estateNew": "THP6",
+      "legacyCode": "SUN",
+      "order": 6
+    },
+    {
+      "companyCode": "THIP",
+      "code": "NAS",
+      "name": "Nagasari",
+      "wilayahName": "THIP 2",
+      "regionCode": "R1",
+      "estateNew": "THP7",
+      "legacyCode": "NAS",
+      "order": 7
+    },
+    {
+      "companyCode": "THIP",
+      "code": "MHO",
+      "name": "Mahoni",
+      "wilayahName": "THIP 2",
+      "regionCode": "R1",
+      "estateNew": "THP8",
+      "legacyCode": "MHO",
+      "order": 8
+    },
+    {
+      "companyCode": "THIP",
+      "code": "SEN",
+      "name": "Sentigi",
+      "wilayahName": "THIP 2",
+      "regionCode": "R1",
+      "estateNew": "THP9",
+      "legacyCode": "SEN",
+      "order": 9
+    },
+    {
+      "companyCode": "THIP",
+      "code": "PUL",
+      "name": "Pulai",
+      "wilayahName": "THIP 2",
+      "regionCode": "R1",
+      "estateNew": "THP10",
+      "legacyCode": "PUL",
+      "order": 10
+    },
+    {
+      "companyCode": "THIP",
+      "code": "CEN",
+      "name": "Cendana",
+      "wilayahName": "THIP 2",
+      "regionCode": "R1",
+      "estateNew": "THP11",
+      "legacyCode": "CEN",
+      "order": 11
+    },
+    {
+      "companyCode": "THIP",
+      "code": "SEG",
+      "name": "Sengkawang",
+      "wilayahName": "THIP 3",
+      "regionCode": "R2",
+      "estateNew": "THP12",
+      "legacyCode": "SEG",
+      "order": 12
+    },
+    {
+      "companyCode": "THIP",
+      "code": "NYA",
+      "name": "Nyato",
+      "wilayahName": "THIP 3",
+      "regionCode": "R2",
+      "estateNew": "THP13",
+      "legacyCode": "NYA",
+      "order": 13
+    },
+    {
+      "companyCode": "THIP",
+      "code": "JAT",
+      "name": "Jati",
+      "wilayahName": "THIP 3",
+      "regionCode": "R2",
+      "estateNew": "THP14",
+      "legacyCode": "JAT",
+      "order": 14
+    },
+    {
+      "companyCode": "THIP",
+      "code": "BEL",
+      "name": "Belian",
+      "wilayahName": "THIP 3",
+      "regionCode": "R2",
+      "estateNew": "THP15",
+      "legacyCode": "BEL",
+      "order": 15
+    },
+    {
+      "companyCode": "THIP",
+      "code": "KEM",
+      "name": "Kemuning",
+      "wilayahName": "THIP 3",
+      "regionCode": "R2",
+      "estateNew": "THP16",
+      "legacyCode": "KEM",
+      "order": 16
+    },
+    {
+      "companyCode": "THIP",
+      "code": "TAY",
+      "name": "Tayuman",
+      "wilayahName": "THIP 4",
+      "regionCode": "R2",
+      "estateNew": "THP17",
+      "legacyCode": "TAY",
+      "order": 17
+    },
+    {
+      "companyCode": "THIP",
+      "code": "BIT",
+      "name": "Bintangur",
+      "wilayahName": "THIP 4",
+      "regionCode": "R2",
+      "estateNew": "THP18",
+      "legacyCode": "BIT",
+      "order": 18
+    },
+    {
+      "companyCode": "THIP",
+      "code": "MAG",
+      "name": "Mahang",
+      "wilayahName": "THIP 4",
+      "regionCode": "R2",
+      "estateNew": "THP19",
+      "legacyCode": "MAG",
+      "order": 19
+    },
+    {
+      "companyCode": "THIP",
+      "code": "AGT",
+      "name": "Agatis",
+      "wilayahName": "THIP 4",
+      "regionCode": "R2",
+      "estateNew": "THP20",
+      "legacyCode": "AGT",
+      "order": 20
+    },
+    {
+      "companyCode": "JJP",
+      "code": "JJP1",
+      "name": "Sungai Bangko",
+      "wilayahName": "Sumatera 1",
+      "regionCode": "R1-NT",
+      "estateNew": "JJP1",
+      "legacyCode": "KSB",
+      "order": 21
+    },
+    {
+      "companyCode": "JJP",
+      "code": "JJP2",
+      "name": "Sungai Rokan",
+      "wilayahName": "Sumatera 1",
+      "regionCode": "R1-NT",
+      "estateNew": "JJP2",
+      "legacyCode": "KSR",
+      "order": 22
+    },
+    {
+      "companyCode": "JJP",
+      "code": "JJP3",
+      "name": "Simpang Damar",
+      "wilayahName": "Sumatera 1",
+      "regionCode": "R1-NT",
+      "estateNew": "JJP3",
+      "legacyCode": "KSD",
+      "order": 23
+    },
+    {
+      "companyCode": "CRS",
+      "code": "CRS",
+      "name": "Teso",
+      "wilayahName": "Sumatera 2",
+      "regionCode": "R1-NT",
+      "estateNew": "CRS",
+      "legacyCode": "KSO",
+      "order": 24
+    },
+    {
+      "companyCode": "CRS",
+      "code": "CRSP",
+      "name": "Plasma Teso",
+      "wilayahName": "Sumatera 2",
+      "regionCode": "R1-NT",
+      "estateNew": "CRSP",
+      "legacyCode": "KPT",
+      "order": 25
+    },
+    {
+      "companyCode": "PANP-P",
+      "code": "PNP3",
+      "name": "Kinali",
+      "wilayahName": "Sumatera 5",
+      "regionCode": "R1-NT",
+      "estateNew": "PNP3",
+      "legacyCode": "PNP3",
+      "order": 26
+    },
+    {
+      "companyCode": "KAMU",
+      "code": "KMU",
+      "name": "Kinjai Pisik",
+      "wilayahName": "Sumatera 5",
+      "regionCode": "R1-NT",
+      "estateNew": "KMU",
+      "legacyCode": "KMU",
+      "order": 27
+    },
+    {
+      "companyCode": "BSU",
+      "code": "BSU1",
+      "name": "Dami Persada",
+      "wilayahName": "Sumatera 3",
+      "regionCode": "R2-NT",
+      "estateNew": "BSU1",
+      "legacyCode": "KDP",
+      "order": 28
+    },
+    {
+      "companyCode": "BSU",
+      "code": "BSU2",
+      "name": "Pisifera Persada",
+      "wilayahName": "Sumatera 3",
+      "regionCode": "R2-NT",
+      "estateNew": "BSU2",
+      "legacyCode": "KFP",
+      "order": 29
+    },
+    {
+      "companyCode": "BSU",
+      "code": "BSU3",
+      "name": "Tenera Persada",
+      "wilayahName": "Sumatera 3",
+      "regionCode": "R2-NT",
+      "estateNew": "BSU3",
+      "legacyCode": "KTP",
+      "order": 30
+    },
+    {
+      "companyCode": "BSU",
+      "code": "BSU4",
+      "name": "Progeni Persada",
+      "wilayahName": "Sumatera 3",
+      "regionCode": "R2-NT",
+      "estateNew": "BSU4",
+      "legacyCode": "KPP",
+      "order": 31
+    },
+    {
+      "companyCode": "BSU",
+      "code": "BSUP",
+      "name": "Plasma Asiatic",
+      "wilayahName": "Sumatera 3",
+      "regionCode": "R2-NT",
+      "estateNew": "BSUP",
+      "legacyCode": "KPA",
+      "order": 32
+    },
+    {
+      "companyCode": "IKU",
+      "code": "IKU",
+      "name": "Muara Bulian",
+      "wilayahName": "Sumatera 3",
+      "regionCode": "R2-NT",
+      "estateNew": "IKU",
+      "legacyCode": "KMU",
+      "order": 33
+    },
+    {
+      "companyCode": "SIP",
+      "code": "SIP1",
+      "name": "Sungai Rengit",
+      "wilayahName": "Sumatera 4",
+      "regionCode": "R2-NT",
+      "estateNew": "SIP1",
+      "legacyCode": "SIP1",
+      "order": 34
+    },
+    {
+      "companyCode": "SIP",
+      "code": "SIP2",
+      "name": "Sungai Rengit",
+      "wilayahName": "Sumatera 4",
+      "regionCode": "R2-NT",
+      "estateNew": "SIP2",
+      "legacyCode": "SIP2",
+      "order": 35
+    },
+    {
+      "companyCode": "SIP",
+      "code": "SIP3",
+      "name": "Plasma Rengit",
+      "wilayahName": "Sumatera 4",
+      "regionCode": "R2-NT",
+      "estateNew": "SIP3",
+      "legacyCode": "SIP3",
+      "order": 36
+    },
+    {
+      "companyCode": "PTW",
+      "code": "PTW1",
+      "name": "Sungai Adong",
+      "wilayahName": "Kalbar 1",
+      "regionCode": "KB-A",
+      "estateNew": "PTW1",
+      "legacyCode": "KSA",
+      "order": 37
+    },
+    {
+      "companyCode": "PTW",
+      "code": "PTW2",
+      "name": "Sungai Talo",
+      "wilayahName": "Kalbar 1",
+      "regionCode": "KB-A",
+      "estateNew": "PTW2",
+      "legacyCode": "KST",
+      "order": 38
+    },
+    {
+      "companyCode": "SUM-S",
+      "code": "SUM1",
+      "name": "Sungai Tangkit",
+      "wilayahName": "Kalbar 1",
+      "regionCode": "KB-A",
+      "estateNew": "SUM1",
+      "legacyCode": "KTA",
+      "order": 39
+    },
+    {
+      "companyCode": "WKN",
+      "code": "WKN1",
+      "name": "Sungai Seluang",
+      "wilayahName": "Kalbar 2",
+      "regionCode": "KB-A",
+      "estateNew": "WKN1",
+      "legacyCode": "KSS",
+      "order": 40
+    },
+    {
+      "companyCode": "WKN",
+      "code": "WKN2",
+      "name": "Sungai Sentangau",
+      "wilayahName": "Kalbar 2",
+      "regionCode": "KB-A",
+      "estateNew": "WKN2",
+      "legacyCode": "KSG",
+      "order": 41
+    },
+    {
+      "companyCode": "IBP",
+      "code": "IBP",
+      "name": "Sungai Kandasan",
+      "wilayahName": "Kalbar 2",
+      "regionCode": "KB-A",
+      "estateNew": "IBP",
+      "legacyCode": "KSK",
+      "order": 42
+    },
+    {
+      "companyCode": "PANP-S",
+      "code": "PNP1",
+      "name": "Perigi Maram",
+      "wilayahName": "Kalbar 3",
+      "regionCode": "KB-A",
+      "estateNew": "PNP1",
+      "legacyCode": "KPE",
+      "order": 43
+    },
+    {
+      "companyCode": "PANP-L",
+      "code": "PNP2",
+      "name": "Landak",
+      "wilayahName": "Kalbar 3",
+      "regionCode": "KB-A",
+      "estateNew": "PNP2",
+      "legacyCode": "KYA",
+      "order": 44
+    },
+    {
+      "companyCode": "PLD-S",
+      "code": "PLD1",
+      "name": "Sungai Sidi",
+      "wilayahName": "Kalbar 3",
+      "regionCode": "KB-A",
+      "estateNew": "PLD1",
+      "legacyCode": "KSI",
+      "order": 45
+    },
+    {
+      "companyCode": "SAM",
+      "code": "SAM",
+      "name": "Sungai Nante",
+      "wilayahName": "Kalbar 3",
+      "regionCode": "KB-A",
+      "estateNew": "SAM",
+      "legacyCode": "KSN",
+      "order": 46
+    },
+    {
+      "companyCode": "CMA",
+      "code": "CMA1",
+      "name": "Ella",
+      "wilayahName": "Kalbar 4",
+      "regionCode": "KB-B",
+      "estateNew": "CMA1",
+      "legacyCode": "KLA",
+      "order": 47
+    },
+    {
+      "companyCode": "CMA",
+      "code": "CMA2",
+      "name": "Menukung",
+      "wilayahName": "Kalbar 4",
+      "regionCode": "KB-B",
+      "estateNew": "CMA2",
+      "legacyCode": "KME",
+      "order": 48
+    },
+    {
+      "companyCode": "NJP",
+      "code": "NJP",
+      "name": "Ambangah",
+      "wilayahName": "Kalbar 5",
+      "regionCode": "KB-B",
+      "estateNew": "NJP",
+      "legacyCode": "KAB",
+      "order": 49
+    },
+    {
+      "companyCode": "PLD-K",
+      "code": "PLD2",
+      "name": "Rasau Jaya",
+      "wilayahName": "Kalbar 5",
+      "regionCode": "KB-B",
+      "estateNew": "PLD2",
+      "legacyCode": "KRJ",
+      "order": 50
+    },
+    {
+      "companyCode": "SUM-K",
+      "code": "SUM2",
+      "name": "Sungai Nipah",
+      "wilayahName": "Kalbar 5",
+      "regionCode": "KB-B",
+      "estateNew": "SUM2",
+      "legacyCode": "KNP",
+      "order": 51
+    },
+    {
+      "companyCode": "BAS",
+      "code": "BAS",
+      "name": "Sungai Rasau",
+      "wilayahName": "Kalbar 5",
+      "regionCode": "KB-B",
+      "estateNew": "BAS",
+      "legacyCode": "KSU",
+      "order": 52
+    },
+    {
+      "companyCode": "GAN",
+      "code": "GAN1",
+      "name": "Sedayu",
+      "wilayahName": "Kalbar 6",
+      "regionCode": "KB-B",
+      "estateNew": "GAN1",
+      "legacyCode": "KSY",
+      "order": 53
+    },
+    {
+      "companyCode": "GAN",
+      "code": "GAN2",
+      "name": "Terindak",
+      "wilayahName": "Kalbar 6",
+      "regionCode": "KB-B",
+      "estateNew": "GAN2",
+      "legacyCode": "KTR",
+      "order": 54
+    },
+    {
+      "companyCode": "GAN",
+      "code": "GAN3",
+      "name": "Sungai Benuaq",
+      "wilayahName": "Kalbar 6",
+      "regionCode": "KB-B",
+      "estateNew": "GAN3",
+      "legacyCode": "KBQ",
+      "order": 55
+    },
+    {
+      "companyCode": "AJP",
+      "code": "AJP",
+      "name": "Sungai Sanipah",
+      "wilayahName": "Kaltim",
+      "regionCode": "KALTIM",
+      "estateNew": "AJP",
+      "legacyCode": "KSP",
+      "order": 56
+    },
+    {
+      "companyCode": "TSB",
+      "code": "TSB1",
+      "name": "Kutai Utara",
+      "wilayahName": "Kaltim",
+      "regionCode": "KALTIM",
+      "estateNew": "TSB1",
+      "legacyCode": "KKU",
+      "order": 57
+    },
+    {
+      "companyCode": "TSB",
+      "code": "TSB2",
+      "name": "Kutai Selatan",
+      "wilayahName": "Kaltim",
+      "regionCode": "KALTIM",
+      "estateNew": "TSB2",
+      "legacyCode": "KKS",
+      "order": 58
+    },
+    {
+      "companyCode": "WKSM",
+      "code": "WKSM",
+      "name": "Wahana",
+      "wilayahName": "Sulawesi",
+      "regionCode": "KALTIM",
+      "estateNew": "WKSM",
+      "legacyCode": "KWA",
+      "order": 59
+    },
+    {
+      "companyCode": "ACP",
+      "code": "ACP1",
+      "name": "Muting",
+      "wilayahName": "Papua",
+      "regionCode": "PAPUA",
+      "estateNew": "ACP1",
+      "legacyCode": "KMI",
+      "order": 60
+    },
+    {
+      "companyCode": "ACP",
+      "code": "ACP2",
+      "name": "Ababena",
+      "wilayahName": "Papua",
+      "regionCode": "PAPUA",
+      "estateNew": "ACP2",
+      "legacyCode": "KNA",
+      "order": 61
+    },
+    {
+      "companyCode": "APM",
+      "code": "APM1",
+      "name": "Bupul",
+      "wilayahName": "Papua",
+      "regionCode": "PAPUA",
+      "estateNew": "APM1",
+      "legacyCode": "KBU",
+      "order": 62
+    },
+    {
+      "companyCode": "APM",
+      "code": "APM2",
+      "name": "Sembelsa",
+      "wilayahName": "Papua",
+      "regionCode": "PAPUA",
+      "estateNew": "APM2",
+      "legacyCode": "KBA",
+      "order": 63
+    }
+  ]
+}

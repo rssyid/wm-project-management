@@ -1,0 +1,14 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  // Aturan proyek dimuat di setiap sesi. AGENTS.md dimuat otomatis dari root.
+  "instructions": [".kilo/rules/*.md"],
+  // Minta persetujuan untuk perintah yang menyentuh produksi atau mendorong kode.
+  "permission": {
+    "bash": {
+      "vercel *": "ask",
+      "pnpm prisma migrate deploy*": "ask",
+      "pnpm prisma db seed*": "ask",
+      "git push*": "ask"
+    }
+  }
+}

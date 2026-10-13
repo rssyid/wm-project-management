@@ -1,0 +1,1054 @@
+// =============================================================================
+// WM Project Management — Prisma schema (Prisma ORM 7, PostgreSQL di Neon)
+// Sumber kebenaran struktur data. Aturan lintas-baris dijaga domain service;
+// CHECK, partial unique index dan trigger immutable ada di prisma/sql/constraints.sql.
+// Konvensi: id cuid, uang Decimal(18,2), kuantitas Decimal(18,3), persen Decimal(5,2),
+// tanggal bisnis @db.Date, timestamp UTC. Semua FK Restrict kecuali disebut lain.
+// Catatan Prisma 7: URL database dikonfigurasi di prisma.config.ts, dan Prisma Client
+// dibuat dengan driver adapter @prisma/adapter-pg. Verifikasi sintaks saat scaffold (F0).
+// Model User/Session/Account/Verification mengikuti Better Auth; bandingkan dengan output
+// `npx auth@latest generate` lalu pertahankan field tambahan (role, isActive, mustChangePassword).
+// =============================================================================
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ----------------------------------------------------------------------------- ENUM
+
+enum Role {
+  SUPER_ADMIN
+  WM_HO_SPECIALIST
+  MANAGEMENT_VIEWER
+}
+
+enum Ops {
+  SUMATERA
+  KALBAR
+  WILTIM
+}
+
+enum ProjectStatus {
+  DRAFT
+  SURVEY
+  RAB_READY
+  WAITING_AFCE_AR
+  AFCE_AR_APPROVED
+  PROCUREMENT
+  EXECUTION
+  WAITING_BAST
+  COMPLETED
+  ON_HOLD
+  CANCELLED
+}
+
+enum ApprovalDocStatus {
+  DRAFT
+  DIAJUKAN
+  APPROVED
+  DITOLAK
+}
+
+enum ApprovalResult {
+  APPROVED
+  DITOLAK
+}
+
+enum BudgetEntryType {
+  INITIAL
+  AR_SUPPLEMENT
+}
+
+enum WorkItemType {
+  TENDER_CONTRACT
+  SWAKELOLA
+  PURCHASE
+}
+
+enum TenderAttemptStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum SpkStatus {
+  DRAFT
+  RELEASED
+  BATAL
+}
+
+enum PhysicalStatus {
+  BELUM_MULAI
+  BERJALAN
+  JEDA_SPK_BATAL
+  SELESAI
+}
+
+enum WorkPackageStatus {
+  DRAFT
+  PR_SUBMITTED
+  PO_ISSUED
+  PRODUKSI
+  PARTIALLY_DELIVERED
+  DELIVERED
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  BELUM_LUNAS
+  LUNAS
+}
+
+enum BastStatus {
+  DIAJUKAN
+  TERVERIFIKASI
+  DIBATALKAN
+}
+
+enum VendorType {
+  EKSTERNAL
+  INTERNAL
+}
+
+enum ScheduleProcessType {
+  TENDER_ATTEMPT
+  PHYSICAL
+  WORK_PACKAGE
+}
+
+enum FileKind {
+  PROGRESS_PHOTO
+  APPROVAL_EVIDENCE
+  BAST
+  DOCUMENT
+  SPATIAL_DATA
+}
+
+enum FileStatus {
+  PENDING
+  READY
+}
+
+// ----------------------------------------------------------------------------- AUTH (Better Auth)
+
+model User {
+  id                 String   @id
+  name               String
+  email              String   @unique
+  emailVerified      Boolean  @default(false)
+  image              String?
+  role               Role     @default(MANAGEMENT_VIEWER)
+  isActive           Boolean  @default(true)
+  mustChangePassword Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  sessions Session[]
+  accounts Account[]
+
+  projectsAsPic     Project[]              @relation("ProjectPic")
+  projectsCreated   Project[]              @relation("ProjectCreatedBy")
+  projectsCancelled Project[]              @relation("ProjectCancelledBy")
+  projectsDeleted   Project[]              @relation("ProjectDeletedBy")
+  statusChanges     ProjectStatusHistory[]
+  budgetEntries     BudgetEntry[]
+  approvalRecords   ApprovalRecord[]
+  uspks             Uspk[]
+  progressLogs      ProgressLog[]
+  purchaseRequests  PurchaseRequest[]
+  purchaseOrders    PurchaseOrder[]
+  packageDeliveries PackageDelivery[]
+  baselinesLocked   ScheduleBaseline[]
+  scheduleRevisions ScheduleRevision[]
+  bastSubmitted     BastDocument[]         @relation("BastSubmittedBy")
+  bastVerified      BastDocument[]         @relation("BastVerifiedBy")
+  bastCancelled     BastDocument[]         @relation("BastCancelledBy")
+  filesUploaded     FileObject[]
+  auditLogs         AuditLog[]
+  tombstones        ProjectTombstone[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  ipAddress String?
+  userAgent String?
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+// ----------------------------------------------------------------------------- MASTER: LOKASI
+
+model Region {
+  id        String    @id @default(cuid())
+  code      String    @unique
+  name      String
+  ops       Ops
+  order     Int       @default(0)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  wilayah   Wilayah[]
+}
+
+model Wilayah {
+  id        String   @id @default(cuid())
+  regionId  String
+  name      String
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  region    Region   @relation(fields: [regionId], references: [id], onDelete: Restrict)
+  estates   Estate[]
+
+  @@unique([regionId, name])
+}
+
+/// Unit operasional (U-33); satu PT legal bisa tercatat sebagai beberapa Company.
+model Company {
+  id           String               @id @default(cuid())
+  code         String               @unique
+  name         String
+  alias        String?
+  order        Int                  @default(0)
+  isActive     Boolean              @default(true)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  estates      Estate[]
+  projects     Project[]
+  codeCounters ProjectCodeCounter[]
+}
+
+/// Region dan ops Estate diturunkan lewat Wilayah. code dipakai apa adanya dari sumber (U-29).
+model Estate {
+  id             String          @id @default(cuid())
+  companyId      String
+  wilayahId      String
+  code           String
+  name           String
+  estateNew      String?
+  legacyCode     String?
+  order          Int             @default(0)
+  isActive       Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  company        Company         @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  wilayah        Wilayah         @relation(fields: [wilayahId], references: [id], onDelete: Restrict)
+  blocks         Block[]
+  projectEstates ProjectEstate[]
+
+  @@unique([companyId, code])
+  @@index([wilayahId])
+}
+
+model Block {
+  id             String          @id @default(cuid())
+  estateId       String
+  blockCode      String
+  name           String
+  plantingYear   Int?
+  areaHectares   Decimal?        @db.Decimal(10, 2)
+  isActive       Boolean         @default(true)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  estate         Estate          @relation(fields: [estateId], references: [id], onDelete: Restrict)
+  projectEstates ProjectEstate[]
+
+  @@unique([estateId, blockCode])
+}
+
+// ----------------------------------------------------------------------------- MASTER: LAIN
+
+/// isComplete otomatis true saat address, phone, email, contactName dan npwp terisi (D-03).
+model Vendor {
+  id             String                @id @default(cuid())
+  name           String
+  type           VendorType            @default(EKSTERNAL)
+  address        String?
+  phone          String?
+  email          String?
+  contactName    String?
+  npwp           String?
+  isComplete     Boolean               @default(false)
+  isActive       Boolean               @default(true)
+  version        Int                   @default(1)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  tenderWins     TenderAttempt[]
+  spks           Spk[]
+  workPackages   WorkPackage[]
+  purchaseOrders PurchaseOrder[]
+  equipmentUsage HeavyEquipmentUsage[]
+
+  @@index([name])
+}
+
+model Unit {
+  id           String            @id @default(cuid())
+  code         String            @unique
+  name         String
+  isActive     Boolean           @default(true)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  materials    Material[]
+  workItems    WorkItem[]
+  packageItems WorkPackageItem[]
+}
+
+model ProjectCategory {
+  id        String    @id @default(cuid())
+  code      String    @unique
+  name      String
+  order     Int       @default(0)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  projects  Project[]
+}
+
+/// Boleh dibuat cepat dari nama + satuan saat input Paket Kerja (D-13).
+model Material {
+  id            String            @id @default(cuid())
+  code          String?           @unique
+  name          String
+  defaultUnitId String
+  isComplete    Boolean           @default(false)
+  isActive      Boolean           @default(true)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  defaultUnit   Unit              @relation(fields: [defaultUnitId], references: [id], onDelete: Restrict)
+  packageItems  WorkPackageItem[]
+
+  @@index([name])
+}
+
+model HeavyEquipmentType {
+  id        String                @id @default(cuid())
+  name      String                @unique
+  isActive  Boolean               @default(true)
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+  usages    HeavyEquipmentUsage[]
+}
+
+model Holiday {
+  id        String   @id @default(cuid())
+  date      DateTime @unique @db.Date
+  name      String
+  createdAt DateTime @default(now())
+}
+
+/// Satu baris (id = 1). workingWeekdays memakai ISO weekday: 1 = Senin … 7 = Minggu (default Senin–Sabtu, D-02).
+model SystemSetting {
+  id              Int      @id @default(1)
+  workingWeekdays Int[]    @default([1, 2, 3, 4, 5, 6])
+  ewsYellowFrom   Decimal  @default(5) @db.Decimal(5, 2)
+  ewsRedAbove     Decimal  @default(10) @db.Decimal(5, 2)
+  version         Int      @default(1)
+  updatedAt       DateTime @updatedAt
+}
+
+// ----------------------------------------------------------------------------- MATRIKS APPROVAL
+
+/// Master jabatan approver (dikelola Specialist dan Super Admin). rank 1 = terendah.
+model ApprovalPosition {
+  id         String                    @id @default(cuid())
+  code       String                    @unique
+  name       String
+  rank       Int                       @unique
+  isActive   Boolean                   @default(true)
+  createdAt  DateTime                  @default(now())
+  updatedAt  DateTime                  @updatedAt
+  tierLevels ApprovalMatrixTierLevel[]
+  snapshots  ApprovalLevelSnapshot[]
+}
+
+/// Satu tier = satu rentang nominal. minAmount inklusif, maxAmount eksklusif, null = tanpa batas atas (D-09).
+/// Rentang tier aktif per jenis dokumen tidak boleh tumpang tindih atau berlubang (dijaga service). Dikelola Super Admin.
+model ApprovalMatrixTier {
+  id              String                    @id @default(cuid())
+  name            String
+  forAfce         Boolean                   @default(true)
+  forArSupplement Boolean                   @default(true)
+  minAmount       Decimal                   @db.Decimal(18, 2)
+  maxAmount       Decimal?                  @db.Decimal(18, 2)
+  isActive        Boolean                   @default(true)
+  version         Int                       @default(1)
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+  levels          ApprovalMatrixTierLevel[]
+  afceAttempts    AfceAttempt[]
+  arSupplements   ArSupplement[]
+}
+
+model ApprovalMatrixTierLevel {
+  id         String             @id @default(cuid())
+  tierId     String
+  levelNo    Int
+  positionId String
+  tier       ApprovalMatrixTier @relation(fields: [tierId], references: [id], onDelete: Cascade)
+  position   ApprovalPosition   @relation(fields: [positionId], references: [id], onDelete: Restrict)
+
+  @@unique([tierId, levelNo])
+  @@unique([tierId, positionId])
+}
+
+// ----------------------------------------------------------------------------- PROYEK
+
+/// Status hanya diubah oleh transition service. Data dasar (PIC, target, plannedBudget) wajib sebelum Mulai Survei.
+model Project {
+  id              String         @id @default(cuid())
+  code            String         @unique
+  name            String
+  description     String?
+  companyId       String
+  categoryId      String
+  picUserId       String?
+  targetStartDate DateTime?      @db.Date
+  targetEndDate   DateTime?      @db.Date
+  plannedBudget   Decimal?       @db.Decimal(18, 2)
+  status          ProjectStatus  @default(DRAFT)
+  previousStatus  ProjectStatus?
+  onHoldReason    String?
+  cancelledAt     DateTime?
+  cancelledById   String?
+  cancelReason    String?
+  completedAt     DateTime?
+  deletedAt       DateTime?
+  deletedById     String?
+  deleteReason    String?
+  createdById     String
+  version         Int            @default(1)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  company     Company         @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  category    ProjectCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  pic         User?           @relation("ProjectPic", fields: [picUserId], references: [id], onDelete: Restrict)
+  createdBy   User            @relation("ProjectCreatedBy", fields: [createdById], references: [id], onDelete: Restrict)
+  cancelledBy User?           @relation("ProjectCancelledBy", fields: [cancelledById], references: [id], onDelete: Restrict)
+  deletedBy   User?           @relation("ProjectDeletedBy", fields: [deletedById], references: [id], onDelete: Restrict)
+
+  estates       ProjectEstate[]
+  survey        Survey?
+  statusHistory ProjectStatusHistory[]
+  budgetEntries BudgetEntry[]
+  afceAttempts  AfceAttempt[]
+  arSupplements ArSupplement[]
+  workItems     WorkItem[]
+  workPackages  WorkPackage[]
+  bastDocuments BastDocument[]
+  files         FileObject[]
+
+  @@index([status])
+  @@index([companyId])
+  @@index([categoryId])
+  @@index([deletedAt])
+}
+
+/// Lokasi proyek: satu atau lebih Estate milik Company proyek (D-15), tepat satu utama.
+/// Block opsional per Estate; kosong = lintas blok (D-16).
+model ProjectEstate {
+  projectId String
+  estateId  String
+  blockId   String?
+  isPrimary Boolean @default(false)
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  estate    Estate  @relation(fields: [estateId], references: [id], onDelete: Restrict)
+  block     Block?  @relation(fields: [blockId], references: [id], onDelete: Restrict)
+
+  @@id([projectId, estateId])
+  @@index([estateId])
+}
+
+/// Counter kode proyek WM-{Company.code}-{YYYY}-{SEQ4}; dikunci FOR UPDATE saat membuat proyek.
+model ProjectCodeCounter {
+  companyId String
+  year      Int
+  lastSeq   Int     @default(0)
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+
+  @@id([companyId, year])
+}
+
+/// immutable. actorId kosong = transisi otomatis.
+model ProjectStatusHistory {
+  id         String         @id @default(cuid())
+  projectId  String
+  fromStatus ProjectStatus?
+  toStatus   ProjectStatus
+  reason     String?
+  actorId    String?
+  at         DateTime       @default(now())
+  project    Project        @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  actor      User?          @relation(fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([projectId, at])
+}
+
+/// immutable. INITIAL dibuat otomatis sebesar basisAmount AFCE yang Approved (D-17).
+model BudgetEntry {
+  id             String          @id @default(cuid())
+  projectId      String
+  type           BudgetEntryType
+  amount         Decimal         @db.Decimal(18, 2)
+  arSupplementId String?         @unique
+  effectiveDate  DateTime        @db.Date
+  createdById    String
+  createdAt      DateTime        @default(now())
+  project        Project         @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  arSupplement   ArSupplement?   @relation(fields: [arSupplementId], references: [id], onDelete: Restrict)
+  createdBy      User            @relation(fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@index([projectId])
+}
+
+/// Terkunci setelah AFCE pertama diajukan (A-01). Data spasial lewat FileObject kind SPATIAL_DATA.
+model Survey {
+  id                String   @id @default(cuid())
+  projectId         String   @unique
+  surveyDate        DateTime @db.Date
+  surveyorNames     String
+  existingCondition String
+  recommendation    String?
+  latitude          Decimal? @db.Decimal(9, 6)
+  longitude         Decimal? @db.Decimal(9, 6)
+  notes             String?
+  version           Int      @default(1)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  project           Project  @relation(fields: [projectId], references: [id], onDelete: Restrict)
+}
+
+// ----------------------------------------------------------------------------- AFCE / AR
+
+/// basisAmount = total BoqItem; dihitung ulang selama DRAFT, dikunci saat diajukan.
+model AfceAttempt {
+  id                String                  @id @default(cuid())
+  projectId         String
+  attemptNo         Int
+  status            ApprovalDocStatus       @default(DRAFT)
+  rabReady          Boolean                 @default(false)
+  afceNumber        String?
+  documentDate      DateTime?               @db.Date
+  basisAmount       Decimal                 @default(0) @db.Decimal(18, 2)
+  matrixTierId      String?
+  submittedDate     DateTime?               @db.Date
+  approvalEmailDate DateTime?               @db.Date
+  decidedDate       DateTime?               @db.Date
+  notes             String?
+  version           Int                     @default(1)
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  project           Project                 @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  matrixTier        ApprovalMatrixTier?     @relation(fields: [matrixTierId], references: [id], onDelete: Restrict)
+  boqItems          BoqItem[]
+  levels            ApprovalLevelSnapshot[]
+
+  @@unique([projectId, attemptNo])
+}
+
+/// Satu baris per bangunan atau kegiatan/paket kerja dengan harga total (tanpa volume/harga satuan).
+model BoqItem {
+  id            String      @id @default(cuid())
+  afceAttemptId String
+  lineNo        Int
+  buildingName  String?
+  activityName  String
+  amount        Decimal     @db.Decimal(18, 2)
+  notes         String?
+  afceAttempt   AfceAttempt @relation(fields: [afceAttemptId], references: [id], onDelete: Restrict)
+
+  @@unique([afceAttemptId, lineNo])
+}
+
+/// Penambah anggaran; tidak mengubah status proyek. Tier dipilih dari nominal tambahan (D-08).
+model ArSupplement {
+  id                String                  @id @default(cuid())
+  projectId         String
+  number            String?
+  amount            Decimal                 @db.Decimal(18, 2)
+  reason            String
+  date              DateTime                @db.Date
+  status            ApprovalDocStatus       @default(DRAFT)
+  matrixTierId      String?
+  submittedDate     DateTime?               @db.Date
+  approvalEmailDate DateTime?               @db.Date
+  decidedDate       DateTime?               @db.Date
+  version           Int                     @default(1)
+  createdAt         DateTime                @default(now())
+  updatedAt         DateTime                @updatedAt
+  project           Project                 @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  matrixTier        ApprovalMatrixTier?     @relation(fields: [matrixTierId], references: [id], onDelete: Restrict)
+  levels            ApprovalLevelSnapshot[]
+  budgetEntry       BudgetEntry?
+
+  @@index([projectId])
+}
+
+/// Tepat satu pemilik (afceAttemptId atau arSupplementId) — CHECK di constraints.sql.
+/// Bisa diubah hanya selama dokumen DRAFT; perubahan diaudit (D-10).
+model ApprovalLevelSnapshot {
+  id                   String           @id @default(cuid())
+  afceAttemptId        String?
+  arSupplementId       String?
+  levelNo              Int
+  positionId           String
+  positionNameSnapshot String
+  afceAttempt          AfceAttempt?     @relation(fields: [afceAttemptId], references: [id], onDelete: Restrict)
+  arSupplement         ArSupplement?    @relation(fields: [arSupplementId], references: [id], onDelete: Restrict)
+  position             ApprovalPosition @relation(fields: [positionId], references: [id], onDelete: Restrict)
+  record               ApprovalRecord?
+
+  @@unique([afceAttemptId, levelNo])
+  @@unique([arSupplementId, levelNo])
+}
+
+/// immutable. Keputusan dari SAP, dicatat user. Durasi level dihitung saat dibaca (hari kalender):
+/// level 1 dari approvalEmailDate dokumen, level berikutnya dari decisionDate level sebelumnya.
+model ApprovalRecord {
+  id              String                @id @default(cuid())
+  levelSnapshotId String                @unique
+  result          ApprovalResult
+  approverName    String
+  decisionDate    DateTime              @db.Date
+  notes           String?
+  recordedById    String
+  recordedAt      DateTime              @default(now())
+  levelSnapshot   ApprovalLevelSnapshot @relation(fields: [levelSnapshotId], references: [id], onDelete: Restrict)
+  recordedBy      User                  @relation(fields: [recordedById], references: [id], onDelete: Restrict)
+}
+
+// ----------------------------------------------------------------------------- PEKERJAAN, TENDER, SPK, FISIK
+
+/// physical + material = 100. PURCHASE: 0/100. TENDER/SWAKELOLA tanpa paket: 100/0;
+/// paket pertama mengubah default ke 70/30 (bisa diubah). Total projectWeightPct aktif per proyek = 100 (service).
+model WorkItem {
+  id                String           @id @default(cuid())
+  projectId         String
+  name              String
+  type              WorkItemType
+  projectWeightPct  Decimal          @db.Decimal(5, 2)
+  physicalWeightPct Decimal          @default(100) @db.Decimal(5, 2)
+  materialWeightPct Decimal          @default(0) @db.Decimal(5, 2)
+  targetVolume      Decimal?         @db.Decimal(18, 3)
+  unitId            String?
+  order             Int              @default(0)
+  cancelledAt       DateTime?
+  cancelReason      String?
+  version           Int              @default(1)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  project           Project          @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  unit              Unit?            @relation(fields: [unitId], references: [id], onDelete: Restrict)
+  tenderAttempts    TenderAttempt[]
+  spks              Spk[]
+  physicalProcess   PhysicalProcess?
+  workPackages      WorkPackage[]
+
+  @@index([projectId])
+}
+
+model Uspk {
+  id              String        @id @default(cuid())
+  tenderAttemptId String        @unique
+  number          String
+  date            DateTime      @db.Date
+  createdById     String
+  createdAt       DateTime      @default(now())
+  tenderAttempt   TenderAttempt @relation(fields: [tenderAttemptId], references: [id], onDelete: Restrict)
+  createdBy       User          @relation(fields: [createdById], references: [id], onDelete: Restrict)
+}
+
+/// Satu attempt aktif (PLANNED/IN_PROGRESS) per Pekerjaan — partial unique di constraints.sql.
+/// actualEnd = tanggal SPK release pertama.
+model TenderAttempt {
+  id                 String              @id @default(cuid())
+  workItemId         String
+  attemptNo          Int
+  status             TenderAttemptStatus @default(PLANNED)
+  actualStart        DateTime?           @db.Date
+  actualEnd          DateTime?           @db.Date
+  winnerVendorId     String?
+  winnerNameSnapshot String?
+  cancelledDate      DateTime?           @db.Date
+  cancelReason       String?
+  version            Int                 @default(1)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  workItem           WorkItem            @relation(fields: [workItemId], references: [id], onDelete: Restrict)
+  winnerVendor       Vendor?             @relation(fields: [winnerVendorId], references: [id], onDelete: Restrict)
+  uspk               Uspk?
+  spks               Spk[]
+  baseline           ScheduleBaseline?   @relation("BaselineTenderAttempt")
+  physicalBaselines  ScheduleBaseline[]  @relation("BaselineSourceAttempt")
+
+  @@unique([workItemId, attemptNo])
+}
+
+/// Boleh lebih dari satu SPK RELEASED per Pekerjaan (U-08/U-27). Swakelola: tenderAttemptId null, vendor INTERNAL.
+model Spk {
+  id              String          @id @default(cuid())
+  workItemId      String
+  tenderAttemptId String?
+  vendorId        String
+  number          String
+  date            DateTime        @db.Date
+  value           Decimal?        @db.Decimal(18, 2)
+  status          SpkStatus       @default(DRAFT)
+  releasedDate    DateTime?       @db.Date
+  cancelledDate   DateTime?       @db.Date
+  cancelReason    String?
+  version         Int             @default(1)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  workItem        WorkItem        @relation(fields: [workItemId], references: [id], onDelete: Restrict)
+  tenderAttempt   TenderAttempt?  @relation(fields: [tenderAttemptId], references: [id], onDelete: Restrict)
+  vendor          Vendor          @relation(fields: [vendorId], references: [id], onDelete: Restrict)
+  pausesTriggered PhysicalPause[]
+
+  @@index([workItemId, status])
+}
+
+model PhysicalProcess {
+  id           String             @id @default(cuid())
+  workItemId   String             @unique
+  status       PhysicalStatus     @default(BELUM_MULAI)
+  actualStart  DateTime?          @db.Date
+  actualEnd    DateTime?          @db.Date
+  version      Int                @default(1)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  workItem     WorkItem           @relation(fields: [workItemId], references: [id], onDelete: Restrict)
+  pauses       PhysicalPause[]
+  progressLogs ProgressLog[]
+  baselines    ScheduleBaseline[] @relation("BaselinePhysical")
+}
+
+/// Dibuka saat SPK aktif terakhir batal ketika fisik berjalan; endDate diisi sekali saat fisik dimulai ulang.
+model PhysicalPause {
+  id                String          @id @default(cuid())
+  physicalProcessId String
+  startDate         DateTime        @db.Date
+  endDate           DateTime?       @db.Date
+  triggerSpkId      String
+  physicalProcess   PhysicalProcess @relation(fields: [physicalProcessId], references: [id], onDelete: Restrict)
+  triggerSpk        Spk             @relation(fields: [triggerSpkId], references: [id], onDelete: Restrict)
+
+  @@index([physicalProcessId])
+}
+
+/// immutable kecuali supersededById (null → id log pengganti, sekali). Satu log aktif per minggu (partial unique).
+model ProgressLog {
+  id                String                @id @default(cuid())
+  physicalProcessId String
+  weekStart         DateTime              @db.Date
+  cumulativePct     Decimal               @db.Decimal(5, 2)
+  volume            Decimal?              @db.Decimal(18, 3)
+  notes             String?
+  decreaseReason    String?
+  supersededById    String?               @unique
+  recordedById      String
+  recordedAt        DateTime              @default(now())
+  physicalProcess   PhysicalProcess       @relation(fields: [physicalProcessId], references: [id], onDelete: Restrict)
+  supersededBy      ProgressLog?          @relation("ProgressLogSupersede", fields: [supersededById], references: [id], onDelete: Restrict)
+  supersedes        ProgressLog?          @relation("ProgressLogSupersede")
+  recordedBy        User                  @relation(fields: [recordedById], references: [id], onDelete: Restrict)
+  equipmentUsage    HeavyEquipmentUsage[]
+
+  @@index([physicalProcessId, weekStart])
+}
+
+/// Informasi saja; tidak memengaruhi progres.
+model HeavyEquipmentUsage {
+  id                   String             @id @default(cuid())
+  progressLogId        String
+  heavyEquipmentTypeId String
+  unitCount            Int
+  workingHours         Decimal            @db.Decimal(10, 1)
+  vendorId             String?
+  notes                String?
+  progressLog          ProgressLog        @relation(fields: [progressLogId], references: [id], onDelete: Restrict)
+  heavyEquipmentType   HeavyEquipmentType @relation(fields: [heavyEquipmentTypeId], references: [id], onDelete: Restrict)
+  vendor               Vendor?            @relation(fields: [vendorId], references: [id], onDelete: Restrict)
+
+  @@index([progressLogId])
+}
+
+// ----------------------------------------------------------------------------- PAKET KERJA
+
+/// Total weightPct paket aktif per Pekerjaan = materialWeightPct Pekerjaan (service). Pembayaran per paket.
+model WorkPackage {
+  id                  String            @id @default(cuid())
+  projectId           String
+  workItemId          String
+  name                String
+  status              WorkPackageStatus @default(DRAFT)
+  weightPct           Decimal           @db.Decimal(5, 2)
+  vendorId            String?
+  productionStartDate DateTime?         @db.Date
+  completedDate       DateTime?         @db.Date
+  cancelledDate       DateTime?         @db.Date
+  cancelReason        String?
+  paymentStatus       PaymentStatus     @default(BELUM_LUNAS)
+  invoiceAmount       Decimal?          @db.Decimal(18, 2)
+  paidDate            DateTime?         @db.Date
+  paymentNotes        String?
+  version             Int               @default(1)
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  project             Project           @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  workItem            WorkItem          @relation(fields: [workItemId], references: [id], onDelete: Restrict)
+  vendor              Vendor?           @relation(fields: [vendorId], references: [id], onDelete: Restrict)
+  purchaseRequest     PurchaseRequest?
+  purchaseOrder       PurchaseOrder?
+  items               WorkPackageItem[]
+  deliveries          PackageDelivery[]
+  baseline            ScheduleBaseline? @relation("BaselineWorkPackage")
+
+  @@index([projectId])
+  @@index([workItemId])
+}
+
+model PurchaseRequest {
+  id            String      @id @default(cuid())
+  workPackageId String      @unique
+  number        String
+  date          DateTime    @db.Date
+  createdById   String
+  createdAt     DateTime    @default(now())
+  workPackage   WorkPackage @relation(fields: [workPackageId], references: [id], onDelete: Restrict)
+  createdBy     User        @relation(fields: [createdById], references: [id], onDelete: Restrict)
+}
+
+model PurchaseOrder {
+  id            String      @id @default(cuid())
+  workPackageId String      @unique
+  number        String
+  date          DateTime    @db.Date
+  vendorId      String?
+  createdById   String
+  createdAt     DateTime    @default(now())
+  workPackage   WorkPackage @relation(fields: [workPackageId], references: [id], onDelete: Restrict)
+  vendor        Vendor?     @relation(fields: [vendorId], references: [id], onDelete: Restrict)
+  createdBy     User        @relation(fields: [createdById], references: [id], onDelete: Restrict)
+}
+
+/// Item hanya bisa diubah sebelum kiriman pertama (A-05).
+model WorkPackageItem {
+  id            String                @id @default(cuid())
+  workPackageId String
+  materialId    String
+  unitId        String
+  plannedQty    Decimal               @db.Decimal(18, 3)
+  order         Int                   @default(0)
+  workPackage   WorkPackage           @relation(fields: [workPackageId], references: [id], onDelete: Restrict)
+  material      Material              @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  unit          Unit                  @relation(fields: [unitId], references: [id], onDelete: Restrict)
+  deliveryItems PackageDeliveryItem[]
+
+  @@index([workPackageId])
+}
+
+/// immutable. isCorrection = kiriman koreksi (qty negatif, alasan wajib).
+model PackageDelivery {
+  id               String                @id @default(cuid())
+  workPackageId    String
+  deliveryDate     DateTime              @db.Date
+  doNumber         String?
+  notes            String?
+  isCorrection     Boolean               @default(false)
+  correctionReason String?
+  recordedById     String
+  recordedAt       DateTime              @default(now())
+  workPackage      WorkPackage           @relation(fields: [workPackageId], references: [id], onDelete: Restrict)
+  recordedBy       User                  @relation(fields: [recordedById], references: [id], onDelete: Restrict)
+  items            PackageDeliveryItem[]
+
+  @@index([workPackageId, deliveryDate])
+}
+
+/// immutable.
+model PackageDeliveryItem {
+  id                String          @id @default(cuid())
+  deliveryId        String
+  workPackageItemId String
+  qty               Decimal         @db.Decimal(18, 3)
+  delivery          PackageDelivery @relation(fields: [deliveryId], references: [id], onDelete: Restrict)
+  workPackageItem   WorkPackageItem @relation(fields: [workPackageItemId], references: [id], onDelete: Restrict)
+
+  @@unique([deliveryId, workPackageItemId])
+}
+
+// ----------------------------------------------------------------------------- JADWAL
+
+/// Satu baseline per proses. Bisa diubah selama lockedAt null; setelah dikunci hanya lewat revisi.
+/// Fisik tender: satu baseline per (physicalProcessId, sourceTenderAttemptId) (U-07).
+/// Pemilik sesuai processType — CHECK di constraints.sql.
+model ScheduleBaseline {
+  id                    String              @id @default(cuid())
+  processType           ScheduleProcessType
+  tenderAttemptId       String?             @unique
+  physicalProcessId     String?
+  sourceTenderAttemptId String?
+  workPackageId         String?             @unique
+  plannedStart          DateTime            @db.Date
+  plannedEnd            DateTime            @db.Date
+  lockedAt              DateTime?
+  lockedById            String?
+  version               Int                 @default(1)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  tenderAttempt         TenderAttempt?      @relation("BaselineTenderAttempt", fields: [tenderAttemptId], references: [id], onDelete: Restrict)
+  physicalProcess       PhysicalProcess?    @relation("BaselinePhysical", fields: [physicalProcessId], references: [id], onDelete: Restrict)
+  sourceTenderAttempt   TenderAttempt?      @relation("BaselineSourceAttempt", fields: [sourceTenderAttemptId], references: [id], onDelete: Restrict)
+  workPackage           WorkPackage?        @relation("BaselineWorkPackage", fields: [workPackageId], references: [id], onDelete: Restrict)
+  lockedBy              User?               @relation(fields: [lockedById], references: [id], onDelete: Restrict)
+  revisions             ScheduleRevision[]
+
+  @@unique([physicalProcessId, sourceTenderAttemptId])
+}
+
+/// immutable. Revisi terakhir = jadwal aktif; urutan menentukan warna kuning/oranye di Gantt.
+model ScheduleRevision {
+  id           String           @id @default(cuid())
+  baselineId   String
+  revisionNo   Int
+  plannedStart DateTime         @db.Date
+  plannedEnd   DateTime         @db.Date
+  reason       String
+  changedById  String
+  changedAt    DateTime         @default(now())
+  baseline     ScheduleBaseline @relation(fields: [baselineId], references: [id], onDelete: Restrict)
+  changedBy    User             @relation(fields: [changedById], references: [id], onDelete: Restrict)
+
+  @@unique([baselineId, revisionNo])
+}
+
+// ----------------------------------------------------------------------------- BAST
+
+/// Paling banyak satu DIAJUKAN per proyek (partial unique). Lampiran lewat FileObject kind BAST.
+model BastDocument {
+  id            String     @id @default(cuid())
+  projectId     String
+  number        String
+  date          DateTime   @db.Date
+  status        BastStatus @default(DIAJUKAN)
+  submittedById String
+  submittedAt   DateTime   @default(now())
+  verifiedById  String?
+  verifiedAt    DateTime?
+  cancelledById String?
+  cancelledAt   DateTime?
+  cancelReason  String?
+  version       Int        @default(1)
+  project       Project    @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  submittedBy   User       @relation("BastSubmittedBy", fields: [submittedById], references: [id], onDelete: Restrict)
+  verifiedBy    User?      @relation("BastVerifiedBy", fields: [verifiedById], references: [id], onDelete: Restrict)
+  cancelledBy   User?      @relation("BastCancelledBy", fields: [cancelledById], references: [id], onDelete: Restrict)
+
+  @@index([projectId])
+}
+
+// ----------------------------------------------------------------------------- SISTEM
+
+/// Pemilik polimorfik (ownerType + ownerId), integritas dijaga service.
+/// PENDING > 24 jam dibersihkan workflow harian. Batas: foto 5 MB, lainnya 10 MB.
+model FileObject {
+  id           String     @id @default(cuid())
+  projectId    String?
+  kind         FileKind
+  ownerType    String
+  ownerId      String
+  key          String     @unique
+  originalName String
+  mimeType     String
+  sizeBytes    Int
+  status       FileStatus @default(PENDING)
+  uploadedById String
+  uploadedAt   DateTime   @default(now())
+  project      Project?   @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  uploadedBy   User       @relation(fields: [uploadedById], references: [id], onDelete: Restrict)
+
+  @@index([ownerType, ownerId])
+  @@index([projectId])
+  @@index([status, uploadedAt])
+}
+
+/// immutable. Sengaja TANPA FK ke Project agar tetap ada setelah purge.
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  projectId  String?
+  entityType String
+  entityId   String
+  action     String
+  before     Json?
+  after      Json?
+  reason     String?
+  createdAt  DateTime @default(now())
+  actor      User?    @relation(fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([projectId, createdAt])
+  @@index([entityType, entityId])
+  @@index([actorId, createdAt])
+}
+
+/// immutable. Dibuat dalam transaksi purge sebelum data proyek dihapus. Tanpa FK ke Project.
+model ProjectTombstone {
+  projectId  String   @id
+  code       String   @unique
+  name       String
+  purgedAt   DateTime @default(now())
+  purgedById String
+  reason     String?
+  purgedBy   User     @relation(fields: [purgedById], references: [id], onDelete: Restrict)
+}
