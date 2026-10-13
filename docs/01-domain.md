@@ -171,7 +171,7 @@ Selama `WAITING_BAST`: kiriman, koreksi, log progres, revisi jadwal ditolak (409
 - Kurva S: rencana = kumulatif berbobot rencana linear baseline per minggu; aktual = progres berbobot per akhir minggu.
 - Gantt matriks mingguan (satu-satunya visualisasi jadwal), hierarki Proyek → Pekerjaan → tender attempt / fisik / Paket Kerja. W1 = Senin minggu tanggal paling awal dari baseline, revisi, actual semua proses.
 - Warna: baseline abu-abu (tidak dihapus, bagian yang dilepas tetap abu-abu); tambahan revisi pertama kuning; tambahan revisi berikutnya oranye; tambahan lama tetap kuning; sel revisi bewarna solid tanpa pola garis (D-27). Simbol `#` berjalan, `✓` selesai; simbol tidak mengganti warna. Tender `#` sejak Mulai Tender, USPK milestone; paket `#` PR → COMPLETED lalu `✓`; fisik `✓` saat 100%.
-- Penanda waktu: garis vertikal merah penuh setinggi tabel pada batas kanan minggu berjalan (minggu dengan tanggal hari ini).
+- Penanda waktu: garis vertikal merah penuh setinggi tabel pada batas kanan minggu berjalan (minggu dengan tanggal hari ini). Dihitung saat render di sisi klien, bukan konstanta, supaya tetap benar saat tanggal berganti.
 
 ## 12. BAST, tahan, batal, arsip, hapus
 
