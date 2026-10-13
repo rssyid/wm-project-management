@@ -17,8 +17,8 @@ Definisikan sekali di `src/app/globals.css` (Tailwind v4 `@theme` + variabel sha
 | `--surface` | `#F5F6F4` | Latar halaman |
 | `--panel` | `#FFFFFF` | Latar tabel, form, panel |
 | `--line` | `#DCE1DE` | Garis tabel, border input, pemisah |
-| `--ews-green` | `#2E7D4F` | EWS hijau, status selesai |
-| `--ews-yellow` | `#8A6D0B` (teks) / `#FBF3D5` (latar) | EWS kuning |
+| `--ews-green` | `#2B7848` (teks) / `#E8F2EC` (latar) | EWS hijau, status selesai |
+| `--ews-yellow` | `#7A5F08` (teks) / `#FBF3D5` (latar) | EWS kuning |
 | `--ews-red` | `#B3261E` (teks) / `#FBE9E7` (latar) | EWS merah, aksi destruktif |
 | `--gantt-base` | `#C8CDCB` | Sel baseline |
 | `--gantt-rev1` | `#F2D16B` | Tambahan revisi pertama |
