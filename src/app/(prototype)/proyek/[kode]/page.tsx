@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDate, formatPercent, formatRupiah } from "@/shared/format";
-import { GanttLegend, GanttMatrix } from "@/prototype/gantt";
+import { GanttMatrix } from "@/prototype/gantt";
 import { MutationOnly } from "@/prototype/role";
 import {
   SAMPLE_GANTT,
@@ -112,13 +112,10 @@ export default async function ProjectWorkspacePage({
         {TABS.map((tab) => (
           <TabsContent key={tab} value={tab} className="pt-4">
             {tab === "Jadwal" ? (
-              <>
-                <GanttLegend />
-                <GanttMatrix
-                  rows={SAMPLE_GANTT}
-                  caption={`Gantt ${project.code}`}
-                />
-              </>
+              <GanttMatrix
+                rows={SAMPLE_GANTT}
+                caption={`Gantt ${project.code}`}
+              />
             ) : (
               <p className="text-ink-muted">
                 Isi tab {tab} dibuat di fase F2–F6.

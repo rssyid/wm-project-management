@@ -1,3 +1,6 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import { SAMPLE_GANTT } from "@/prototype/sample-data";
@@ -59,7 +62,7 @@ describe("data contoh Gantt prototipe", () => {
   });
 });
 
-describe("decoder sel Gantt", () => {
+describe("decode sel Gantt", () => {
   it("menerjemahkan baseline, revisi, dan simbol berjalan", () => {
     const row = SAMPLE_GANTT.find((item) => item.id === "w1-t2");
     expect(row).toBeDefined();
@@ -85,5 +88,23 @@ describe("decoder sel Gantt", () => {
     for (const status of selesai) {
       expect(status).toContain("Selesai");
     }
+  });
+});
+
+describe("pewarnaan Gantt", () => {
+  it("D-27: kelas pewarnaan tidak memuat pola garis", async () => {
+    const source = await readFile(
+      path.join(process.cwd(), "src/prototype/gantt.tsx"),
+      "utf8",
+    );
+    expect(source).not.toContain("gantt-stripes");
+  });
+
+  it("D-27: utilitas pola garis sudah dihapus dari globals.css", async () => {
+    const source = await readFile(
+      path.join(process.cwd(), "src/app/globals.css"),
+      "utf8",
+    );
+    expect(source).not.toContain("gantt-stripes");
   });
 });

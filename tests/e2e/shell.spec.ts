@@ -50,6 +50,52 @@ test.describe("shell aplikasi", () => {
     }
   });
 
+  test("D-28: garis merah hanya di batas kanan minggu berjalan, legenda di bawah tabel", async ({
+    page,
+  }) => {
+    await page.goto("/portofolio");
+    const gantt = page.getByRole("table", { name: "Gantt portofolio" });
+    await expect(gantt).toBeVisible();
+
+    // Garis penanda muncul tepat satu kali di baris header (W11 = 13 Okt 2026).
+    const headerRow = gantt.locator("thead tr");
+    await expect(headerRow.locator("th.border-r-2")).toHaveCount(1);
+    await expect(headerRow.locator("th", { hasText: "W11" })).toHaveClass(
+      /border-r-2/,
+    );
+
+    // Legenda berada setelah tabel, bukan sebelum.
+    const legend = page.getByRole("list", { name: "Legenda Gantt" });
+    await expect(legend).toBeVisible();
+    const legendBox = await legend.boundingBox();
+    const tableBox = await gantt.boundingBox();
+    expect(legendBox?.y).toBeGreaterThan(tableBox?.y ?? 0);
+
+    for (const label of [
+      "Rencana",
+      "Target revisi",
+      "Revisi minggu ini",
+      "Progres",
+      "Selesai",
+    ]) {
+      await expect(legend).toContainText(label);
+    }
+  });
+
+  test("D-27: sel revisi bewarna solid tanpa pola garis", async ({ page }) => {
+    await page.goto("/portofolio");
+    const gantt = page.getByRole("table", { name: "Gantt portofolio" });
+    const striped = gantt.locator("[class*=stripes]");
+    await expect(striped).toHaveCount(0);
+
+    // Sel revisi oranye terisi penuh, tanpa padding atau sudut membulat.
+    const revisi = gantt
+      .locator("span.bg-gantt-rev1, span.bg-gantt-rev2")
+      .first();
+    await expect(revisi).toBeVisible();
+    await expect(revisi).not.toHaveClass(/rounded/);
+  });
+
   test("kolom identitas Gantt tetap terlihat saat tabel digeser di mobile", async ({
     page,
     isMobile,

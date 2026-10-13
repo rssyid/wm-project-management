@@ -116,15 +116,6 @@
   --radius-xl: 8px;
 }
 
-/* docs/01 §11 (UI-03): revision cells carry a stripe pattern in addition to their color. */
-@utility gantt-stripes {
-  background-image: repeating-linear-gradient(
-    135deg,
-    transparent 0 4px,
-    rgb(0 0 0 / 0.2) 4px 6px
-  );
-}
-
 @layer base {
   * {
     border-color: var(--border);

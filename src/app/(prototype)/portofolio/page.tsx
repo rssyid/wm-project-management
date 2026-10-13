@@ -1,5 +1,5 @@
 import { PageHeader } from "@/components/page-header";
-import { GanttLegend, GanttMatrix } from "@/prototype/gantt";
+import { GanttMatrix } from "@/prototype/gantt";
 import { SAMPLE_GANTT } from "@/prototype/sample-data";
 
 export default function PortfolioPage() {
@@ -9,7 +9,6 @@ export default function PortfolioPage() {
         title="Portofolio"
         description="Gantt matriks mingguan untuk proyek terfilter."
       />
-      <GanttLegend />
       <GanttMatrix rows={SAMPLE_GANTT} caption="Gantt portofolio" />
     </>
   );
