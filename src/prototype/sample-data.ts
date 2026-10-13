@@ -184,8 +184,10 @@ function row(
   };
 }
 
+// docs/01 §11: W1 is the Monday of the earliest week. 2026-08-03 is a Monday and 2026-10-12 is
+// W11, the week this prototype was reviewed.
 export const GANTT_FIRST_MONDAY = "2026-08-03";
-export const GANTT_CURRENT_WEEK = 8;
+export const GANTT_CURRENT_WEEK = 11;
 
 export const SAMPLE_GANTT: readonly GanttRow[] = [
   row(
