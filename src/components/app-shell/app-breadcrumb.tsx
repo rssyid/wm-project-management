@@ -38,7 +38,9 @@ export function AppBreadcrumb() {
               {index > 0 ? <BreadcrumbSeparator /> : null}
               <BreadcrumbItem className="min-w-0">
                 {last ? (
-                  <BreadcrumbPage className="truncate">{crumb.label}</BreadcrumbPage>
+                  <BreadcrumbPage className="truncate">
+                    {crumb.label}
+                  </BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink asChild>
                     <Link href={crumb.href}>{crumb.label}</Link>

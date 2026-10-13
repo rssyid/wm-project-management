@@ -29,29 +29,47 @@ const INDENT = ["pl-3", "pl-6", "pl-9"] as const;
 
 export function GanttLegend() {
   return (
-    <ul className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-ink-muted" aria-label="Legenda Gantt">
+    <ul
+      className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-ink-muted"
+      aria-label="Legenda Gantt"
+    >
       {(["base", "rev1", "rev2"] as const).map((kind) => (
         <li key={kind} className="flex items-center gap-1.5">
-          <span aria-hidden="true" className={cn("inline-block size-3 rounded-sm", CELL_CLASS[kind])} />
+          <span
+            aria-hidden="true"
+            className={cn("inline-block size-3 rounded-sm", CELL_CLASS[kind])}
+          />
           {CELL_LABEL[kind].replace(/^./, (c) => c.toUpperCase())}
         </li>
       ))}
       <li className="flex items-center gap-1.5">
-        <span aria-hidden="true" className="font-semibold text-ink">#</span>
+        <span aria-hidden="true" className="font-semibold text-ink">
+          #
+        </span>
         Berjalan
       </li>
       <li className="flex items-center gap-1.5">
-        <span aria-hidden="true" className="font-semibold text-ink">✓</span>
+        <span aria-hidden="true" className="font-semibold text-ink">
+          ✓
+        </span>
         Selesai
       </li>
     </ul>
   );
 }
 
-export function GanttMatrix({ rows, caption }: { rows: readonly GanttRow[]; caption: string }) {
+export function GanttMatrix({
+  rows,
+  caption,
+}: {
+  rows: readonly GanttRow[];
+  caption: string;
+}) {
   const weekCount = rows[0]?.cells.length ?? 0;
   const firstMonday = new Date(`${GANTT_FIRST_MONDAY}T00:00:00+07:00`);
-  const weeks = Array.from({ length: weekCount }, (_, index) => addWeeks(firstMonday, index));
+  const weeks = Array.from({ length: weekCount }, (_, index) =>
+    addWeeks(firstMonday, index),
+  );
 
   return (
     <div className="overflow-x-auto rounded-lg border bg-panel">
@@ -59,13 +77,22 @@ export function GanttMatrix({ rows, caption }: { rows: readonly GanttRow[]; capt
         <caption className="sr-only">{caption}</caption>
         <thead className="bg-surface">
           <tr>
-            <th scope="col" className="sticky left-0 z-10 min-w-56 border-b border-r bg-surface px-3 py-2 text-left font-medium text-ink-muted md:min-w-72">
+            <th
+              scope="col"
+              className="sticky left-0 z-10 min-w-56 border-r border-b bg-surface px-3 py-2 text-left font-medium text-ink-muted md:min-w-72"
+            >
               Proses
             </th>
-            <th scope="col" className="hidden border-b px-3 py-2 text-right font-medium text-ink-muted md:table-cell">
+            <th
+              scope="col"
+              className="hidden border-b px-3 py-2 text-right font-medium text-ink-muted md:table-cell"
+            >
               Plan mulai
             </th>
-            <th scope="col" className="hidden border-b border-r px-3 py-2 text-right font-medium text-ink-muted md:table-cell">
+            <th
+              scope="col"
+              className="hidden border-r border-b px-3 py-2 text-right font-medium text-ink-muted md:table-cell"
+            >
               Plan selesai
             </th>
             {weeks.map((monday, index) => (
@@ -74,11 +101,14 @@ export function GanttMatrix({ rows, caption }: { rows: readonly GanttRow[]; capt
                 scope="col"
                 className={cn(
                   "min-w-11 border-b px-1 py-2 text-center font-medium text-ink-muted",
-                  index + 1 === GANTT_CURRENT_WEEK && "bg-canal-soft text-canal",
+                  index + 1 === GANTT_CURRENT_WEEK &&
+                    "bg-canal-soft text-canal",
                 )}
               >
                 <span className="block">W{index + 1}</span>
-                <span className="block text-xs font-normal tabular-nums">{formatShortDate(monday)}</span>
+                <span className="block text-xs font-normal tabular-nums">
+                  {formatShortDate(monday)}
+                </span>
               </th>
             ))}
           </tr>
@@ -89,22 +119,29 @@ export function GanttMatrix({ rows, caption }: { rows: readonly GanttRow[]; capt
               <th
                 scope="row"
                 className={cn(
-                  "sticky left-0 z-10 border-b border-r bg-panel py-2 pr-3 text-left align-top",
+                  "sticky left-0 z-10 border-r border-b bg-panel py-2 pr-3 text-left align-top",
                   INDENT[row.depth],
                   row.depth === 0 ? "font-semibold" : "font-normal",
                 )}
               >
                 <span className="block text-ink">{row.name}</span>
-                <span className="block text-xs text-ink-muted">{row.status}</span>
+                <span className="block text-xs text-ink-muted">
+                  {row.status}
+                </span>
               </th>
               <td className="hidden border-b px-3 py-2 text-right tabular-nums md:table-cell">
                 {formatDate(new Date(row.planStart))}
               </td>
-              <td className="hidden border-b border-r px-3 py-2 text-right tabular-nums md:table-cell">
+              <td className="hidden border-r border-b px-3 py-2 text-right tabular-nums md:table-cell">
                 {formatDate(new Date(row.planEnd))}
               </td>
               {row.cells.map((cell, index) => {
-                const symbolLabel = cell.symbol === "#" ? ", berjalan" : cell.symbol === "✓" ? ", selesai" : "";
+                const symbolLabel =
+                  cell.symbol === "#"
+                    ? ", berjalan"
+                    : cell.symbol === "✓"
+                      ? ", selesai"
+                      : "";
                 return (
                   <td
                     key={index}

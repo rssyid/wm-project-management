@@ -29,7 +29,9 @@ function subscribe(listener: () => void) {
 }
 
 function getSnapshot(): Role {
-  const match = document.cookie.match(new RegExp(`(?:^|; )${PROTOTYPE_ROLE_COOKIE}=([^;]+)`));
+  const match = document.cookie.match(
+    new RegExp(`(?:^|; )${PROTOTYPE_ROLE_COOKIE}=([^;]+)`),
+  );
   const value = match?.[1];
   return isRole(value) ? value : DEFAULT_ROLE;
 }
@@ -52,16 +54,16 @@ export function MutationOnly({ children }: { children: ReactNode }) {
   return usePrototypeRole() === "MANAGEMENT_VIEWER" ? null : children;
 }
 
-export function SuperAdminOnly({ children }: { children: ReactNode }) {
-  return usePrototypeRole() === "SUPER_ADMIN" ? children : null;
-}
-
 export function RoleSwitcher() {
   const role = usePrototypeRole();
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" aria-label={`Peran prototipe: ${ROLE_LABEL[role]}. Ganti peran`}>
+        <Button
+          variant="outline"
+          size="sm"
+          aria-label={`Peran prototipe: ${ROLE_LABEL[role]}. Ganti peran`}
+        >
           <span className="max-w-[9rem] truncate">{ROLE_LABEL[role]}</span>
           <ChevronDown aria-hidden="true" />
         </Button>
@@ -79,7 +81,9 @@ export function RoleSwitcher() {
           {ROLES.map((option) => (
             <DropdownMenuRadioItem key={option} value={option}>
               {ROLE_LABEL[option]}
-              {option === role ? <Check aria-hidden="true" className="ml-auto" /> : null}
+              {option === role ? (
+                <Check aria-hidden="true" className="ml-auto" />
+              ) : null}
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>

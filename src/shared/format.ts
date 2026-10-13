@@ -1,5 +1,5 @@
 // docs/02 §5: timestamps are stored in UTC and always shown in WIB.
-export const APP_TIME_ZONE = "Asia/Jakarta";
+const APP_TIME_ZONE = "Asia/Jakarta";
 
 // Intl instead of @date-fns/tz: TZDate calls `new Date()` internally, which Next 16
 // cacheComponents rejects during prerender.

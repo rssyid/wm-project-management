@@ -14,7 +14,10 @@ const columns: ReadonlyArray<DataTableColumn<SampleProject>> = [
     id: "code",
     header: "Kode",
     cell: ({ row }) => (
-      <Link href={`/proyek/${row.original.code}`} className="font-medium text-canal hover:underline">
+      <Link
+        href={`/proyek/${row.original.code}`}
+        className="font-medium text-canal hover:underline"
+      >
         {row.original.code}
       </Link>
     ),
@@ -28,7 +31,11 @@ const columns: ReadonlyArray<DataTableColumn<SampleProject>> = [
         ? `${row.original.mainEstate} (+${row.original.extraEstates})`
         : row.original.mainEstate,
   },
-  { id: "status", header: "Status", cell: ({ row }) => <ProjectStatusBadge status={row.original.status} /> },
+  {
+    id: "status",
+    header: "Status",
+    cell: ({ row }) => <ProjectStatusBadge status={row.original.status} />,
+  },
   {
     id: "progress",
     header: "Progres",
@@ -38,7 +45,12 @@ const columns: ReadonlyArray<DataTableColumn<SampleProject>> = [
   {
     id: "ews",
     header: "EWS",
-    cell: ({ row }) => <EwsBadge level={row.original.ews.level} deviation={row.original.ews.deviation} />,
+    cell: ({ row }) => (
+      <EwsBadge
+        level={row.original.ews.level}
+        deviation={row.original.ews.deviation}
+      />
+    ),
   },
   { id: "pic", header: "PIC", cell: ({ row }) => row.original.pic },
   {
@@ -49,21 +61,31 @@ const columns: ReadonlyArray<DataTableColumn<SampleProject>> = [
   },
 ];
 
-export function ProjectTable({ projects, caption }: { projects: readonly SampleProject[]; caption: string }) {
+export function ProjectTable({
+  projects,
+  caption,
+}: {
+  projects: readonly SampleProject[];
+  caption: string;
+}) {
   return (
     <DataTable
       caption={caption}
       columns={columns}
       data={projects}
       getRowId={(project) => project.code}
-      empty={<EmptyState message="Belum ada proyek yang cocok dengan filter." />}
+      empty={
+        <EmptyState message="Belum ada proyek yang cocok dengan filter." />
+      }
       renderMobileRow={(project) => (
         <Link href={`/proyek/${project.code}`} className="flex flex-col gap-1">
           <span className="font-medium text-ink">{project.name}</span>
           <span className="text-xs text-ink-muted">{project.code}</span>
           <span className="flex flex-wrap items-center gap-2">
             <ProjectStatusBadge status={project.status} />
-            <span className="text-dense tabular-nums">{formatPercent(project.progress)}</span>
+            <span className="text-dense tabular-nums">
+              {formatPercent(project.progress)}
+            </span>
           </span>
         </Link>
       )}

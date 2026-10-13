@@ -2,6 +2,7 @@ pnpm-lock.yaml
 src/generated/
 .next/
 docs/
+.kilo/
 prisma/seed-data/
 playwright-report/
 test-results/

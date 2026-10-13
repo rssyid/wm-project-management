@@ -5,7 +5,10 @@ import { SAMPLE_GANTT } from "@/prototype/sample-data";
 export default function PortfolioPage() {
   return (
     <>
-      <PageHeader title="Portofolio" description="Gantt matriks mingguan untuk proyek terfilter." />
+      <PageHeader
+        title="Portofolio"
+        description="Gantt matriks mingguan untuk proyek terfilter."
+      />
       <GanttLegend />
       <GanttMatrix rows={SAMPLE_GANTT} caption="Gantt portofolio" />
     </>

@@ -7,7 +7,10 @@ const KPIS = [
   { label: "Proyek aktif", value: String(SAMPLE_KPI.activeProjects) },
   { label: "EWS merah", value: String(SAMPLE_KPI.ewsRed) },
   { label: "EWS kuning", value: String(SAMPLE_KPI.ewsYellow) },
-  { label: "Progres berbobot", value: formatPercent(SAMPLE_KPI.weightedProgress) },
+  {
+    label: "Progres berbobot",
+    value: formatPercent(SAMPLE_KPI.weightedProgress),
+  },
 ];
 
 export default function DashboardPage() {
@@ -22,13 +25,20 @@ export default function DashboardPage() {
         {KPIS.map((kpi) => (
           <div key={kpi.label} className="px-4">
             <dt className="text-dense text-ink-muted">{kpi.label}</dt>
-            <dd className="text-2xl font-bold tabular-nums text-ink">{kpi.value}</dd>
+            <dd className="text-2xl font-bold text-ink tabular-nums">
+              {kpi.value}
+            </dd>
           </div>
         ))}
       </dl>
       <h2 className="mb-3 text-base font-semibold">Deviasi terbesar</h2>
-      <ProjectTable projects={byDeviation.slice(0, 10)} caption="Proyek dengan deviasi EWS terbesar" />
-      <p className="mt-6 text-dense text-ink-muted">Kurva S portofolio dibuat di F5.</p>
+      <ProjectTable
+        projects={byDeviation.slice(0, 10)}
+        caption="Proyek dengan deviasi EWS terbesar"
+      />
+      <p className="mt-6 text-dense text-ink-muted">
+        Kurva S portofolio dibuat di F5.
+      </p>
     </>
   );
 }

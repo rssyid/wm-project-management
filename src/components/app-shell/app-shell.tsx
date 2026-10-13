@@ -1,6 +1,10 @@
 import type { ReactNode } from "react";
 
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 
 import { AppBreadcrumb } from "./app-breadcrumb";
 import { AppSidebar } from "./app-sidebar";

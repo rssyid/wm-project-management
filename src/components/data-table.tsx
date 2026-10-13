@@ -27,7 +27,10 @@ export const dataTableFeatures = tableFeatures({
   columnMeta: {} as DataTableColumnMeta,
 });
 
-export type DataTableColumn<TData extends RowData> = ColumnDef<typeof dataTableFeatures, TData>;
+export type DataTableColumn<TData extends RowData> = ColumnDef<
+  typeof dataTableFeatures,
+  TData
+>;
 
 type DataTableProps<TData extends RowData> = {
   columns: ReadonlyArray<DataTableColumn<TData>>;
@@ -71,10 +74,13 @@ export function DataTable<TData extends RowData>({
                     key={header.id}
                     scope="col"
                     className={cn(
-                      header.column.columnDef.meta?.align === "right" && "text-right",
+                      header.column.columnDef.meta?.align === "right" &&
+                        "text-right",
                     )}
                   >
-                    {header.isPlaceholder ? null : <table.FlexRender header={header} />}
+                    {header.isPlaceholder ? null : (
+                      <table.FlexRender header={header} />
+                    )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -87,7 +93,8 @@ export function DataTable<TData extends RowData>({
                   <TableCell
                     key={cell.id}
                     className={cn(
-                      cell.column.columnDef.meta?.align === "right" && "text-right tabular-nums",
+                      cell.column.columnDef.meta?.align === "right" &&
+                        "text-right tabular-nums",
                     )}
                   >
                     <table.FlexRender cell={cell} />

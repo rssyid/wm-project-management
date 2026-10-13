@@ -8,7 +8,7 @@
       "vercel *": "ask",
       "pnpm prisma migrate deploy*": "ask",
       "pnpm prisma db seed*": "ask",
-      "git push*": "ask"
-    }
-  }
+      "git push*": "ask",
+    },
+  },
 }

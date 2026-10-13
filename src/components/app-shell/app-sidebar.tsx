@@ -34,8 +34,15 @@ export function AppSidebar() {
                 const active = isActivePath(pathname, item.href);
                 return (
                   <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
-                      <Link href={item.href} aria-current={active ? "page" : undefined}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={active}
+                      tooltip={item.label}
+                    >
+                      <Link
+                        href={item.href}
+                        aria-current={active ? "page" : undefined}
+                      >
                         <item.icon aria-hidden="true" className="size-4" />
                         <span>{item.label}</span>
                       </Link>

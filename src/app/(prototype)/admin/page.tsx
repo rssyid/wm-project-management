@@ -9,7 +9,10 @@ export default function AdminPage() {
   return (
     <>
       <PageHeader title="Admin" />
-      <ul aria-label="Menu admin" className="max-w-[720px] divide-y rounded-lg border bg-panel">
+      <ul
+        aria-label="Menu admin"
+        className="max-w-[720px] divide-y rounded-lg border bg-panel"
+      >
         {items.map((item) => (
           <li key={item.label} className="px-4 py-3">
             {item.label}

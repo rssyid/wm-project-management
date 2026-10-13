@@ -38,7 +38,9 @@ export const ADMIN_MENU: readonly AdminMenu[] = [
 ];
 
 export function adminMenuFor(role: Role): readonly AdminMenu[] {
-  return role === "SUPER_ADMIN" ? ADMIN_MENU : ADMIN_MENU.filter((item) => !item.saOnly);
+  return role === "SUPER_ADMIN"
+    ? ADMIN_MENU
+    : ADMIN_MENU.filter((item) => !item.saOnly);
 }
 
 export function isActivePath(pathname: string, href: string): boolean {

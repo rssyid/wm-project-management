@@ -1,5 +1,9 @@
 // Mirrors the Prisma `Role` enum; usable on the client where the generated client is not.
-export const ROLES = ["SUPER_ADMIN", "WM_HO_SPECIALIST", "MANAGEMENT_VIEWER"] as const;
+export const ROLES = [
+  "SUPER_ADMIN",
+  "WM_HO_SPECIALIST",
+  "MANAGEMENT_VIEWER",
+] as const;
 
 export type Role = (typeof ROLES)[number];
 
@@ -10,5 +14,7 @@ export const ROLE_LABEL: Record<Role, string> = {
 };
 
 export function isRole(value: unknown): value is Role {
-  return typeof value === "string" && (ROLES as readonly string[]).includes(value);
+  return (
+    typeof value === "string" && (ROLES as readonly string[]).includes(value)
+  );
 }

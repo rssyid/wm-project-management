@@ -34,7 +34,10 @@ type StatusBadgeProps = {
 };
 
 export function StatusBadge({ kind, sequence, label, tone }: StatusBadgeProps) {
-  const prefix = sequence === undefined ? KIND_PREFIX[kind] : `${KIND_PREFIX[kind]} #${sequence}`;
+  const prefix =
+    sequence === undefined
+      ? KIND_PREFIX[kind]
+      : `${KIND_PREFIX[kind]} #${sequence}`;
   return (
     <span
       className={cn(

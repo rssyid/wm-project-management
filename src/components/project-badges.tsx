@@ -29,12 +29,22 @@ const EWS_TONE: Record<EwsLevel, StatusTone> = {
 
 export function ProjectStatusBadge({ status }: { status: ProjectStatus }) {
   return (
-    <StatusBadge kind="project" label={PROJECT_STATUS_LABEL[status]} tone={PROJECT_STATUS_TONE[status]} />
+    <StatusBadge
+      kind="project"
+      label={PROJECT_STATUS_LABEL[status]}
+      tone={PROJECT_STATUS_TONE[status]}
+    />
   );
 }
 
 /** docs/05 §9: "EWS: Merah (12,3)". Deviation arrives as a Decimal string from progress-ews. */
-export function EwsBadge({ level, deviation }: { level: EwsLevel; deviation: string }) {
+export function EwsBadge({
+  level,
+  deviation,
+}: {
+  level: EwsLevel;
+  deviation: string;
+}) {
   return (
     <StatusBadge
       kind="ews"

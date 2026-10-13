@@ -12,10 +12,14 @@ export function PageHeader({ title, description, actions }: PageHeaderProps) {
       <div className="min-w-0">
         <h1 className="text-xl font-semibold text-ink">{title}</h1>
         {description ? (
-          <p className="mt-1 max-w-[72ch] text-dense text-ink-muted">{description}</p>
+          <p className="mt-1 max-w-[72ch] text-dense text-ink-muted">
+            {description}
+          </p>
         ) : null}
       </div>
-      {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
+      {actions ? (
+        <div className="flex shrink-0 items-center gap-2">{actions}</div>
+      ) : null}
     </div>
   );
 }

@@ -9,7 +9,9 @@ export default function PrototypeLayout({ children }: { children: ReactNode }) {
     <AppShell
       userArea={
         <>
-          <span className="hidden text-dense text-ink-muted sm:inline">Pengguna contoh</span>
+          <span className="hidden text-dense text-ink-muted sm:inline">
+            Pengguna contoh
+          </span>
           <RoleSwitcher />
         </>
       }
