@@ -72,7 +72,14 @@ export function GanttMatrix({
   );
 
   return (
-    <div className="overflow-x-auto rounded-lg border bg-panel">
+    // WCAG 2.1.1: wadah yang bisa digeser harus bisa difokus, kalau tidak keyboard user
+    // tidak bisa menjelajah kolom minggu di layar kecil.
+    <div
+      className="overflow-x-auto rounded-lg border bg-panel"
+      tabIndex={0}
+      role="group"
+      aria-label={caption}
+    >
       <table className="border-separate border-spacing-0 text-dense">
         <caption className="sr-only">{caption}</caption>
         <thead className="bg-surface">

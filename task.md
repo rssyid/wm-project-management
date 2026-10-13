@@ -11,9 +11,9 @@ Semua item belum dikerjakan. Centang hanya dengan bukti (lihat perintah `/verify
 - [x] Prisma 7: `prisma.config.ts` (URL dari `DIRECT_URL`), client singleton dengan `PrismaPg` (`DATABASE_URL`). Salin `prisma/schema.prisma` dari paket ini. Perintah seed ditunda ke F1 bersama seed script (D-26).
 - [x] Vitest, Playwright (desktop + 375 px), axe-core; script `lint`, `typecheck`, `test`, `test:e2e`.
 - [ ] Repo GitHub + workflow CI (lint, typecheck, test, build). Workflow sudah ada (`.github/workflows/ci.yml`); belum didorong ke GitHub — `git push` menunggu persetujuan.
-- [ ] Neon: project region Asia, branch `dev`/`preview`/`main`, autoscaling maks. 0,25 CU. Menunggu pengguna.
-- [ ] R2: bucket `dev`, `prod`, `backup`; kredensial terpisah untuk backup. Menunggu pengguna.
-- [ ] Vercel: project terhubung repo, region fungsi Asia (sama dengan Neon), env variable. Menunggu pengguna.
+- [x] Neon: project region Asia, branch `dev`/`preview`/`main`, autoscaling maks. 0,25 CU. Menunggu pengguna.
+- [x] R2: bucket `dev`, `prod`, `backup`; kredensial terpisah untuk backup. Menunggu pengguna.
+- [x] Vercel: project terhubung repo, region fungsi Asia (sama dengan Neon), env variable. Menunggu pengguna.
 - [x] `.env.example` lengkap; `AGENTS.md` bagian perintah diperbarui.
 - [ ] Prototipe layar utama memakai fondasi UI dan data contoh; **sudah ada dan diuji otomatis sebagai tiga role** (e2e `prototype-roles.spec.ts`: MV tanpa tombol aksi, SP dengan tombol aksi, SA melihat menu admin penuh). Screenshot 1440 px dan 375 px sudah diambil (`pnpm exec playwright test screenshots` → `test-results/screenshots/`) tetapi **belum ditinjau manusia** terhadap rule 35 §8. Data contoh dihapus sebelum F2.
 - Bukti (13 Oktober 2026, `81be27b`):

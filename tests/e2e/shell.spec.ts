@@ -20,10 +20,24 @@ test.describe("shell aplikasi", () => {
     await expect(page).toHaveURL(/\/proyek$/);
   });
 
-  test("tidak ada pelanggaran axe serius di dashboard dan daftar proyek", async ({
+  test("root diarahkan ke dashboard", async ({ page }) => {
+    await page.goto("/");
+    await expect(page).toHaveURL(/\/dashboard$/);
+  });
+
+  test("tidak ada pelanggaran axe serius di semua halaman prototipe", async ({
     page,
   }) => {
-    for (const path of ["/dashboard", "/proyek"]) {
+    const paths = [
+      "/dashboard",
+      "/proyek",
+      "/proyek/WM-THIP-2026-0001",
+      "/portofolio",
+      "/laporan",
+      "/master",
+      "/admin",
+    ];
+    for (const path of paths) {
       await page.goto(path);
       const results = await new AxeBuilder({ page })
         .withTags(["wcag2a", "wcag2aa"])
