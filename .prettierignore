@@ -1,0 +1,7 @@
+pnpm-lock.yaml
+src/generated/
+.next/
+docs/
+prisma/seed-data/
+playwright-report/
+test-results/
