@@ -26,8 +26,9 @@
   --ews-red: #b3261e;
   --ews-red-soft: #fbe9e7;
   --gantt-base: #c8cdcb;
-  --gantt-rev1: #f2d16b;
-  --gantt-rev2: #f0a04b;
+  /* D-33: Gantt rev1 mengikuti warna pada gambar acuan. */
+  --gantt-rev1: #ffff00;
+  --gantt-rev2: #ffc000;
 
   /* shadcn semantic variables mapped onto the tokens above. */
   --background: var(--surface);

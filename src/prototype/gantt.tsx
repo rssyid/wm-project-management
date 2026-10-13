@@ -143,13 +143,13 @@ export function GanttMatrix({
       >
         <table className="border-separate border-spacing-0 text-dense">
           <caption className="sr-only">{caption}</caption>
-          <thead className="bg-surface">
+          <thead className="bg-panel">
             <tr>
               <th
                 scope="col"
                 rowSpan={3}
                 className={cn(
-                  "sticky left-0 z-10 border-r border-b border-line bg-surface px-1 text-center font-medium text-ink-muted",
+                  "sticky left-0 z-10 border-r border-b border-line bg-panel px-1 text-center font-medium text-ink-muted",
                   NO_COLUMN_WIDTH,
                 )}
               >
@@ -158,7 +158,7 @@ export function GanttMatrix({
               <th
                 scope="col"
                 rowSpan={3}
-                className="sticky left-10 z-10 min-w-56 border-r border-b border-line bg-surface px-3 text-left font-medium text-ink-muted md:min-w-72"
+                className="sticky left-10 z-10 min-w-56 border-r border-b border-line bg-panel px-3 text-left font-medium text-ink-muted md:min-w-72"
               >
                 Job Item
               </th>
