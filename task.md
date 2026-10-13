@@ -21,19 +21,21 @@ Semua item belum dikerjakan. Centang hanya dengan bukti (lihat perintah `/verify
   | Gerbang `docs/06` §2 | Uji | Hasil |
   | --- | --- | --- |
   | CI hijau | `pnpm lint` · `pnpm typecheck` · `pnpm format:check` · `pnpm test` · `pnpm build` | lulus semua |
-  | CI hijau | `pnpm test:e2e` (desktop 1440×900 + mobile 375×812, chromium) | 14/14 lulus |
+  | CI hijau | `pnpm test:e2e` (desktop 1440×900 + mobile 375×812, chromium) | 16/16 lulus |
   | App kosong ter-deploy | `pnpm build` → `pnpm start --port 3100`; route `/`, `/dashboard`, `/proyek`, `/proyek/[kode]`, `/portofolio`, `/laporan`, `/master`, `/admin` | semua prerender statis tanpa error |
+  | Root ke dashboard | `shell.spec.ts` root diarahkan ke dashboard | lulus di kedua viewport |
   | Prototipe dicoba sebagai tiga role | `prototype-roles.spec.ts`: viewer melihat daftar proyek tanpa tombol aksi · specialist melihat tombol aksi · admin hanya menampilkan audit log untuk specialist dan viewer | lulus di kedua viewport |
-  | Aksesibilitas | `shell.spec.ts` axe `wcag2a`/`wcag2aa` di `/dashboard` dan `/proyek` | nihil pelanggaran serious/critical |
-  | Keyboard & Gantt mobile | `shell.spec.ts`: menu utama via keyboard; kolom identitas Gantt tetap di kiri saat tabel digeser 375 px | lulus |
+  | Aksesibilitas | `shell.spec.ts` axe `wcag2a`/`wcag2aa` di **7 route** (`/dashboard`, `/proyek`, `/proyek/[kode]`, `/portofolio`, `/laporan`, `/master`, `/admin`) | nihil pelanggaran serious/critical |
+  | Keyboard & Gantt mobile | `shell.spec.ts`: menu utama via keyboard; kolom identitas Gantt tetap di kiri saat tabel digeser 375 px; wadah Gantt bisa difokus | lulus |
 
-  - 7/7 unit test `format.test.ts` lulus (tanggal WIB, rupiah, persen, desimal).
+  - 13/13 unit test lulus: `format.test.ts` (tanggal WIB, rupiah, persen, desimal) dan `prototype-gantt.test.ts` (lebar baris seragam, id unik, karakter tak dikenal tidak hilang diam-diam, revisi kuning sebelum oranye).
   - `grep` hex di `src/**/*.tsx|ts`: nihil (rule 35 §8 butir 2).
   - Commit: `42bd50b` scaffold · `d94918d` template · `b1f6799` token · `4fed899` fondasi UI · `f123c50` Prisma · `c8a88ae` test tooling · `5a1e850` prototipe · `5c6eff6` CI + dokumen · `93cf95b` screenshot · `a138770` rule 35 · `d52fe0f` bukti · `95c112d` slop-check · `81be27b` Gantt W11.
   - Deviasi dari rencana: route prototipe memakai route group `(prototype)` pada path asli (`/dashboard`, `/proyek`, dst.), bukan prefix `/prototipe`; perintah seed Prisma ditunda ke F1 (D-26); D-22 label status; D-23/D-24 gelaskan token EWS; D-25 ganti `@date-fns/tz` dengan `Intl`.
   - `/slop-check`: 4 temuan, semua diperbaiki — `SuperAdminOnly` kode mati (05 #5), `APP_TIME_ZONE` ekspor tak perlu (05 #1), `pnpm format` tidak pernah dijalankan sehingga 40 file tidak rapi dan tidak ada penjaga (05 #9), Prettier merapikan `.kilo/` yang tidak disentuh (05 #9). `FormSection` sengaja dipertahankan karena diminta `task.md` item 4 meski belum ada yang memakainya.
   - Deviasi lintas dokumen (laporan, bukan perubahan kode): `docs/05-ui.md` §5 "Dashboard: kartu jumlah per status" bertentangan dengan rule 35 §5 dan §7; sudah diselaraskan menjadi baris angka KPI. `docs/05-ui.md` §8 (tooltip Gantt, tombol "Ke minggu ini", lipatan baris) dan §5 (Kurva S, daftar pekerjaan tanpa log minggu ini) belum di prototipe — sengaja, dikerjakan F4–F5.
-  - Sisa: tinjau screenshot oleh pemilik proyek (agen tidak dapat melihat gambar), checklist Neon/R2/Vercel, `git push` ke GitHub.
+  - Audit 14 Oktober 2026 (`bddf88a`): memperluas axe dari 2 ke 7 route menemukan dua cacat nyata — wadah Gantt tidak bisa difokus (WCAG 2.1.1, pengguna keyboard tidak bisa menggeser kolom minggu di 375 px) dan label tab tak aktif `text-foreground/60` hanya 4,14:1. Keduanya diperbaiki. Ditambah 6 unit test invarian data Gantt karena decoder `row()` menelan error (simbol hilang diam-diam bila panjang string beda, typo karakter jadi sel kosong).
+  - Sisa: tinjau screenshot oleh pemilik proyek (agen tidak dapat melihat gambar), `git push` 16 commit ke GitHub lalu pastikan CI hijau di sana.
 
 ## F1 — Fondasi (AC-01–06, AC-60–62)
 
