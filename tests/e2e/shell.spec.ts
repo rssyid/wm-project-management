@@ -122,19 +122,22 @@ test.describe("shell aplikasi", () => {
     const gantt = page.getByRole("table", { name: "Gantt portofolio" });
     await expect(gantt).toBeVisible();
 
-    // Garis penanda hanya di tepi kanan W11 (12 Okt 2026), satu di setiap baris header
-    // dan di setiap baris badan.
+    // D-35: garis penanda hanya di baris 2 (W1..Wn), baris 3 (tanggal), dan baris badan;
+    // baris 1 (No., Job Item, Plan, Timeline) tidak ikut.
     const head = gantt.locator("thead");
-    for (const index of [0, 1, 2]) {
+    for (const index of [1, 2]) {
       await expect(
         head.locator("tr").nth(index).locator("th.border-r-\\[3px\\]"),
       ).toHaveCount(1);
     }
     await expect(
+      head.locator("tr").nth(0).locator("th.border-r-\\[3px\\]"),
+    ).toHaveCount(0);
+    await expect(
       head.locator("tr").nth(1).getByRole("columnheader", { name: "W11" }),
-    ).toHaveClass(/border-r-ews-red/);
+    ).toHaveClass(/border-r-gantt-edge/);
 
-    // Tidak boleh warna merah di sisi lain: itu memunculkan garis horizontal per baris.
+    // Tidak boleh ada kelas merah di sisi lain atau dari token badge EWS.
     await expect(gantt.locator(".border-ews-red")).toHaveCount(0);
     await expect(gantt.locator(".bg-canal-soft")).toHaveCount(0);
     await expect(
@@ -170,16 +173,16 @@ test.describe("shell aplikasi", () => {
 
     await page.getByRole("button", { name: "26 minggu" }).click();
     await expect(weekHeaders).toHaveCount(26);
-    await expect(gantt.locator(".border-r-ews-red").first()).toBeVisible();
+    await expect(gantt.locator(".border-r-gantt-edge").first()).toBeVisible();
 
     // Pada 8 minggu, minggu berjalan (W11) di luar rentang sehingga garis hilang.
     await page.getByRole("button", { name: "8 minggu" }).click();
     await expect(weekHeaders).toHaveCount(8);
-    await expect(gantt.locator(".border-r-ews-red")).toHaveCount(0);
+    await expect(gantt.locator(".border-r-gantt-edge")).toHaveCount(0);
 
     await page.getByRole("button", { name: "52 minggu" }).click();
     await expect(weekHeaders).toHaveCount(52);
-    await expect(gantt.locator(".border-r-ews-red").first()).toBeVisible();
+    await expect(gantt.locator(".border-r-gantt-edge").first()).toBeVisible();
   });
 
   test("D-27: sel revisi bewarna solid tanpa pola garis", async ({ page }) => {

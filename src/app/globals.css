@@ -29,6 +29,9 @@
   /* D-33: Gantt rev1 mengikuti warna pada gambar acuan. */
   --gantt-rev1: #ffff00;
   --gantt-rev2: #ffc000;
+  /* D-35: garis penanda minggu berjalan khusus Gantt, tidak memakai --ews-red supaya
+     badge EWS tetap lulus AA. rgb(255 0 0) sama dengan #FF0000. */
+  --gantt-edge: rgb(255 0 0);
 
   /* shadcn semantic variables mapped onto the tokens above. */
   --background: var(--surface);
@@ -76,6 +79,7 @@
   --color-gantt-base: var(--gantt-base);
   --color-gantt-rev1: var(--gantt-rev1);
   --color-gantt-rev2: var(--gantt-rev2);
+  --color-gantt-edge: var(--gantt-edge);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);

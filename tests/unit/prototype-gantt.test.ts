@@ -127,15 +127,25 @@ describe("pewarnaan Gantt", () => {
     expect(source).not.toContain("gantt-stripes");
   });
 
-  it("garis merah dibatasi sisi kanan, tidak merembes ke bawah", async () => {
+  it("D-35: garis merah memakai token Gantt, bukan --ews-red", async () => {
     const source = await readFile(
       path.join(process.cwd(), "src/prototype/gantt.tsx"),
       "utf8",
     );
-    // `border-ews-red` memberi warna keempat sisi sehingga garis bawah sel ikut merah
-    // dan muncul sebagai garis horizontal di setiap baris.
-    expect(source).toContain("border-r-ews-red");
+    expect(source).toContain("border-r-gantt-edge");
+    // `border-ews-red` memberi warna keempat sisi dan menurunkan kontras badge EWS
+    // (rgb(255 0 0) di atas #FBE9E7 hanya 4,1:1, gagal AA).
+    expect(source).not.toContain("border-ews-red");
     expect(source).not.toMatch(/[\s"]border-ews-red[\s"]/);
+  });
+
+  it("D-35: token gantt-edge memakai rgb(255 0 0)", async () => {
+    const source = await readFile(
+      path.join(process.cwd(), "src/app/globals.css"),
+      "utf8",
+    );
+    expect(source).toMatch(/--gantt-edge:\s*rgb\(255\s+0\s+0\)/);
+    expect(source).toContain("--color-gantt-edge: var(--gantt-edge)");
   });
 
   it("sel kosong pada minggu berjalan tidak diberi warna latar", async () => {

@@ -113,10 +113,14 @@ export function GanttMatrix({
   const showEdge = currentWeek !== null && currentWeek <= weeks;
   const isEdge = (index: number) => showEdge && index + 1 === currentWeek;
 
-  // D-28: `border-r-ews-red` wajib, bukan `border-ews-red`; yang terakhir memberi warna
-  // keempat sisi sehingga garis bawah tiap sel ikut merah dan muncul sebagai garis horizontal.
+  // D-28 + D-35: garis merah khusus Gantt, tidak muncul di baris 1. Pemecahan th
+  // Timeline tidak lagi diperlukan karena baris 1 tidak membawa garis merah.
+  // `border-r-gantt-edge` spesifik sisi kanan, sehingga `border-b` tiap sel tidak ikut
+  // merah dan tidak muncul sebagai garis horizontal per baris.
   const edgeClass = (index: number) =>
-    isEdge(index) ? "border-r-[3px] border-r-ews-red" : "border-r border-line";
+    isEdge(index)
+      ? "border-r-[3px] border-r-gantt-edge"
+      : "border-r border-line";
 
   return (
     <div>
@@ -165,37 +169,17 @@ export function GanttMatrix({
               <th
                 scope="colgroup"
                 colSpan={2}
-                className="hidden border-b border-line px-3 py-1.5 text-center font-medium text-ink-muted md:table-cell"
+                className="hidden border-r border-b border-line px-3 py-1.5 text-center font-medium text-ink-muted md:table-cell"
               >
                 Plan
               </th>
-              {showEdge && currentWeek !== null ? (
-                <>
-                  <th
-                    scope="colgroup"
-                    colSpan={currentWeek}
-                    className={cn(
-                      "border-b border-line px-3 py-1.5 text-center font-medium text-ink-muted",
-                      edgeClass(currentWeek - 1),
-                    )}
-                  >
-                    Timeline
-                  </th>
-                  <th
-                    scope="colgroup"
-                    colSpan={weeks - currentWeek}
-                    className="border-b border-line px-3 py-1.5"
-                  />
-                </>
-              ) : (
-                <th
-                  scope="colgroup"
-                  colSpan={weeks}
-                  className="border-b border-line px-3 py-1.5 text-center font-medium text-ink-muted"
-                >
-                  Timeline
-                </th>
-              )}
+              <th
+                scope="colgroup"
+                colSpan={weeks}
+                className="border-b border-line px-3 py-1.5 text-center font-medium text-ink-muted"
+              >
+                Timeline
+              </th>
             </tr>
             <tr>
               <th
