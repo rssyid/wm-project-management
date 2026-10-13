@@ -4,19 +4,25 @@ Semua item belum dikerjakan. Centang hanya dengan bukti (lihat perintah `/verify
 
 ## F0 — Persiapan
 
-- [ ] Scaffold Next.js 16 (App Router, TS strict), pnpm, ESLint, Prettier; kunci versi patch semua library di `package.json`.
-- [ ] Hapus sisa template create-next-app: halaman contoh, aset logo, README bawaan (rule 05 #19).
-- [ ] Tailwind v4 + shadcn/ui (new-york); token warna dan tipografi persis rule 35-design di `globals.css`; font Inter lewat `next/font`.
-- [ ] Fondasi UI sesuai rule 35-design: shell (Sidebar shadcn + top bar + breadcrumb, sheet di mobile), `PageHeader`, `DataTable`, `FormSection`, `StatusBadge`, `EmptyState`. Komponen shadcn ditambah hanya yang dipakai.
-- [ ] Prisma 7: `prisma.config.ts` (URL dari `DIRECT_URL`, perintah seed), client singleton dengan `PrismaPg` (`DATABASE_URL`). Salin `prisma/schema.prisma` dari paket ini.
-- [ ] Vitest, Playwright (desktop + 375 px), axe-core; script `lint`, `typecheck`, `test`, `test:e2e`.
-- [ ] Repo GitHub + workflow CI (lint, typecheck, test, build).
-- [ ] Neon: project region Asia, branch `dev`/`preview`/`main`, autoscaling maks. 0,25 CU.
-- [ ] R2: bucket `dev`, `prod`, `backup`; kredensial terpisah untuk backup.
-- [ ] Vercel: project terhubung repo, region fungsi Asia (sama dengan Neon), env variable.
-- [ ] `.env.example` lengkap; `AGENTS.md` bagian perintah diperbarui.
-- [ ] Prototipe layar utama (dashboard, daftar proyek, workspace, Gantt) memakai fondasi UI dan data contoh; dicoba sebagai tiga role; screenshot 1440 px dan 375 px ditinjau terhadap rule 35-design; temuan dicatat. Data contoh dihapus sebelum F2.
+- [x] Scaffold Next.js 16 (App Router, TS strict), pnpm, ESLint, Prettier; kunci versi patch semua library di `package.json`.
+- [x] Hapus sisa template create-next-app: halaman contoh, aset logo, README bawaan (rule 05 #19).
+- [x] Tailwind v4 + shadcn/ui (new-york); token warna dan tipografi persis rule 35-design di `globals.css`; font Inter lewat `next/font`.
+- [x] Fondasi UI sesuai rule 35-design: shell (Sidebar shadcn + top bar + breadcrumb, sheet di mobile), `PageHeader`, `DataTable`, `FormSection`, `StatusBadge`, `EmptyState`. Komponen shadcn ditambah hanya yang dipakai.
+- [x] Prisma 7: `prisma.config.ts` (URL dari `DIRECT_URL`), client singleton dengan `PrismaPg` (`DATABASE_URL`). Salin `prisma/schema.prisma` dari paket ini. Perintah seed ditunda ke F1 bersama seed script (D-26).
+- [x] Vitest, Playwright (desktop + 375 px), axe-core; script `lint`, `typecheck`, `test`, `test:e2e`.
+- [ ] Repo GitHub + workflow CI (lint, typecheck, test, build). Workflow sudah ada (`.github/workflows/ci.yml`); belum didorong ke GitHub — `git push` menunggu persetujuan.
+- [ ] Neon: project region Asia, branch `dev`/`preview`/`main`, autoscaling maks. 0,25 CU. Menunggu pengguna.
+- [ ] R2: bucket `dev`, `prod`, `backup`; kredensial terpisah untuk backup. Menunggu pengguna.
+- [ ] Vercel: project terhubung repo, region fungsi Asia (sama dengan Neon), env variable. Menunggu pengguna.
+- [x] `.env.example` lengkap; `AGENTS.md` bagian perintah diperbarui.
+- [ ] Prototipe layar utama memakai fondasi UI dan data contoh; **sudah ada dan diuji otomatis sebagai tiga role** (e2e `prototype-roles.spec.ts`: MV tanpa tombol aksi, SP dengan tombol aksi, SA melihat menu admin penuh). Screenshot 1440 px dan 375 px sudah diambil (`pnpm exec playwright test screenshots` → `test-results/screenshots/`) tetapi **belum ditinjau manusia** terhadap rule 35 §8. Data contoh dihapus sebelum F2.
 - Bukti:
+  - `pnpm lint` bersih · `pnpm typecheck` bersih · `pnpm test` 7/7 lulus · `pnpm build` BUILD_EXIT_OK · `pnpm test:e2e` 12/12 lulus (desktop 1440×900 dan mobile 375×812, chromium).
+  - `grep` hex di `src/**/*.tsx|ts`: nihil (rule 35 §8 butir 2); semua warna dari token `globals.css`.
+  - axe-core tanpa pelanggaran serious/critical di `/dashboard` dan `/proyek` setelah D-23/D-24.
+  - Commit: `42bd50b` scaffold · `d94918d` template · `b1f6799` token · `4fed899` fondasi UI · `f123c50` Prisma · `c8a88ae` test tooling · `5a1e850` prototipe · `5c6eff6` CI + dokumen · `93cf95b` screenshot.
+  - Deviasi dari rencana: route prototipe memakai route group `(prototype)` pada path asli (`/dashboard`, `/proyek`, dst.), bukan prefix `/prototipe`; label status D-22; D-23/D-24 gelaskan token EWS; D-25 ganti `@date-fns/tz` dengan `Intl`.
+  - Sisa: tinjau screenshot, checklist Neon/R2/Vercel, push ke GitHub.
 
 ## F1 — Fondasi (AC-01–06, AC-60–62)
 
