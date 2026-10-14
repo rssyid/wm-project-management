@@ -70,6 +70,8 @@ Akses data global; `companyId` disimpan untuk pembatasan per company di masa dep
 | `SWAKELOLA` | SPK ke vendor `INTERNAL` → fisik | Fisik | Opsional |
 | `PURCHASE` | PR → PO → produksi → kiriman | Tanpa fisik | Wajib ≥ 1; progres 100% dari material |
 
+Baris pengelompok (Proyek, Pekerjaan) tidak punya baseline sendiri sehingga tidak membawa bar abu-abu. Bar pada baris Proyek adalah roll-up rentang anak-anaknya, sama seperti Start/End proyek; bukan baseline proses (D-36).
+
 | Proses | Baseline dikunci saat | Actual start | Actual end |
 | --- | --- | --- | --- |
 | Tender attempt | USPK attempt dibuat | Mulai Tender | SPK release pertama pada attempt |
