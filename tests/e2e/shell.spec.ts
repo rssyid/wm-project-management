@@ -28,6 +28,10 @@ test.describe("shell aplikasi", () => {
   test("tidak ada pelanggaran axe serius di semua halaman prototipe", async ({
     page,
   }) => {
+    // Tujuh halaman dipindai berurutan; default 30 detik habis saat delapan worker
+    // paralel. Assertion-nya tetap sama, hanya anggaran waktunya yang realistis.
+    test.setTimeout(120_000);
+
     const paths = [
       "/dashboard",
       "/proyek",

@@ -49,6 +49,29 @@ describe("data contoh Gantt prototipe", () => {
     }
   });
 
+  it("D-36: baris pekerjaan tidak membawa bar baseline", () => {
+    // docs/01 §4: hanya tender attempt, fisik, dan Paket Kerja yang punya baseline.
+    // Baris pengelompok (proyek, pekerjaan) tidak boleh menampilkan bar; bar proyek
+    // adalah roll-up rentang anak-anaknya.
+    for (const row of SAMPLE_GANTT) {
+      if (row.depth !== 1) continue;
+      expect(
+        row.cells.every((cell) => cell.kind === "none"),
+        `${row.id} (jenjang 1) seharusnya tanpa bar`,
+      ).toBe(true);
+      expect(
+        row.cells.every((cell) => cell.symbol === null),
+        `${row.id} (jenjang 1) seharusnya tanpa simbol`,
+      ).toBe(true);
+    }
+  });
+
+  it("D-36: baris proyek tetap menampilkan roll-up rentang", () => {
+    const proyek = SAMPLE_GANTT.find((row) => row.depth === 0);
+    expect(proyek).toBeDefined();
+    expect(proyek?.cells.some((cell) => cell.kind === "base")).toBe(true);
+  });
+
   it("D-27: simbol hanya di atas sel berwarna (invariant)", () => {
     // Simbol duduk di dalam sel bar, jadi sel tanpa rencana tidak boleh memuat simbol.
     // Pergeseran satu karakter pada notasi plan/symbols akan melanggar ini.

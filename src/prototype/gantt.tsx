@@ -185,14 +185,14 @@ export function GanttMatrix({
               <th
                 scope="col"
                 rowSpan={2}
-                className="hidden border-b border-line px-3 text-center font-medium text-ink-muted md:table-cell"
+                className="hidden border-r border-b border-line px-3 text-center font-medium text-ink-muted md:table-cell"
               >
                 Start
               </th>
               <th
                 scope="col"
                 rowSpan={2}
-                className="hidden border-b border-line px-3 text-center font-medium text-ink-muted md:table-cell"
+                className="hidden border-r border-b border-line px-3 text-center font-medium text-ink-muted md:table-cell"
               >
                 End
               </th>
@@ -251,10 +251,10 @@ export function GanttMatrix({
                     {row.status}
                   </span>
                 </th>
-                <td className="hidden border-b border-line px-3 py-1 text-center tabular-nums md:table-cell">
+                <td className="hidden border-r border-b border-line px-3 py-1 text-center tabular-nums md:table-cell">
                   {formatGanttDate(new Date(row.planStart))}
                 </td>
-                <td className="hidden border-b border-line px-3 py-1 text-center tabular-nums md:table-cell">
+                <td className="hidden border-r border-b border-line px-3 py-1 text-center tabular-nums md:table-cell">
                   {formatGanttDate(new Date(row.planEnd))}
                 </td>
                 {row.cells.slice(0, weeks).map((cell, index) => {

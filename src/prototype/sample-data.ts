@@ -199,6 +199,7 @@ export const SAMPLE_GANTT: readonly GanttRow[] = [
     "Proyek: Pengadaan",
     "2026-08-03",
     "2026-12-19",
+    // D-36: bar proyek adalah roll-up rentang anak-anaknya, bukan baseline proses.
     "bbbbbbbbbbbbbbbb",
     "................",
   ),
@@ -209,8 +210,9 @@ export const SAMPLE_GANTT: readonly GanttRow[] = [
     "Bobot 60,00%",
     "2026-08-03",
     "2026-12-19",
-    "bbbbbbbbbbbbbbbb",
-    "................",
+    // D-36: baris pekerjaan adalah baris pengelompok, tidak membawa bar baseline.
+    ".",
+    ".",
   ),
   row(
     "w1-t1",
@@ -259,8 +261,9 @@ export const SAMPLE_GANTT: readonly GanttRow[] = [
     "Bobot 40,00%",
     "2026-08-10",
     "2026-10-03",
-    ".bbbbbbbb",
-    "................",
+    // D-36: baris pekerjaan adalah baris pengelompok, tidak membawa bar baseline.
+    ".",
+    ".",
   ),
   row(
     "w2-pk",
