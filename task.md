@@ -78,7 +78,9 @@ Semua item belum dikerjakan. Centang hanya dengan bukti (lihat perintah `/verify
   - Deviasi dari rencana: (a) `GET /api/me` belum dibuat — data session tersedia lewat Server Component, endpoint baru berguna saat klien perlu menyegarkan session; (b) `src/infra/decimal.ts` dan `src/shared/date.ts` belum dibuat karena F1 belum punya field Decimal atau tanggal bisnis — dibuat bersama konsumen pertamanya di F2/F6; (c) komponen UI upload dan kompresi foto ditunda ke F2 (konsumen pertama survei); (d) CORS bucket R2 belum diatur — dibutuhkan saat UI upload ada.
   - Catatan untuk F2: skema update master memakai `updateSchemaFor()` agar `isActive` diterima; `PATCH` memisahkan aksi aktif/nonaktif dari body mentah (D-42, D-43); setiap wadah `overflow-x-auto` baru wajib punya `tabIndex={0}` dan `aria-label`.
   - Tampilan `/master`, `/master/[type]`, `/admin/user`, dan `/login` **sudah ditinjau manusia** (14 Oktober 2026) dan dinyatakan sesuai. Screenshot 1440 px dan 375 px dihasilkan `screenshots.spec.ts` di `test-results/screenshots/`.
-  - CI GitHub Actions belum dijalankan untuk F1: perubahan masih di working tree dan belum di-commit/di-push (agen tidak menjalankan `git add`/`git commit`/`git push` tanpa permintaan eksplisit). Job `verify` dan `e2e` sudah diubah untuk branch Neon `test` (D-39); nomor run CI perlu diisi setelah push pertama.
+- Commit: `05002a4` migration + seed + harness · `de66955` auth, error, audit · `e527312` master data · `bbe552c` R2 files + admin user · `25f4fca` shell session + e2e · `fa4b051` CI, dependensi, dokumen.
+- Sisa pekerjaan F1: tidak ada. Yang tersisa di luar coder: push branch `main` agar job CI berjalan dan nomor run-nya diisi di sini.
+  - CI GitHub Actions belum dijalankan untuk F1: perubahan sudah di-commit di `main` tetapi belum di-push (agen tidak menjalankan `git push` tanpa permintaan eksplisit). Job `verify` dan `e2e` sudah diubah untuk branch Neon `test` (D-39); nomor run CI perlu diisi setelah push.
 
 ## F2 — Proyek dan AFCE (AC-10–25)
 
