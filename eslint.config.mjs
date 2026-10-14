@@ -9,10 +9,17 @@ const eslintConfig = defineConfig([
   prettier,
   {
     rules: {
-      "no-console": "error",
+      // console.log banned everywhere; console.error/warn dipakai untuk log server dan
+      // pesan ke user saat request gagal.
+      "no-console": ["error", { allow: ["error", "warn"] }],
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/ban-ts-comment": "error",
     },
+  },
+  {
+    // Skrip CLI dan seed bukan kode aplikasi: mencetak hasil ke terminal adalah tujuannya.
+    files: ["prisma/seed.ts", "prisma/seed/**/*.ts", "scripts/**/*.ts"],
+    rules: { "no-console": "off" },
   },
   globalIgnores([
     ".next/**",

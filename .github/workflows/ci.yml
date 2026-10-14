@@ -9,6 +9,22 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Integration test dan e2e memakai branch Neon `test`. Semua job menulis ke database test,
+# tidak pernah ke produksi.
+env:
+  DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+  DIRECT_URL: ${{ secrets.TEST_DIRECT_URL }}
+  TEST_DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+  TEST_DIRECT_URL: ${{ secrets.TEST_DIRECT_URL }}
+  BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+  BETTER_AUTH_URL: http://localhost:3100
+  SEED_ADMIN_EMAIL: ${{ secrets.SEED_ADMIN_EMAIL }}
+  SEED_ADMIN_PASSWORD: ${{ secrets.SEED_ADMIN_PASSWORD }}
+  R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+  R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+  R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+  R2_BUCKET: ${{ secrets.R2_BUCKET }}
+
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -20,13 +36,17 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm db:test:prepare
       - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm build
 
+  # Dijalankan setelah verify karena keduanya memakai branch test yang sama: integration test
+  # mengosongkan seluruh tabel, sedangkan e2e menyiapkan akun uji sendiri lewat global setup.
   e2e:
+    needs: verify
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

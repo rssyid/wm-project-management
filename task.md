@@ -15,7 +15,7 @@ Semua item belum dikerjakan. Centang hanya dengan bukti (lihat perintah `/verify
 - [x] R2: bucket `dev`, `prod`, `backup`; kredensial terpisah untuk backup. Menunggu pengguna.
 - [x] Vercel: project terhubung repo, region fungsi Asia (sama dengan Neon), env variable. Menunggu pengguna.
 - [x] `.env.example` lengkap; `AGENTS.md` bagian perintah diperbarui.
-- [ ] Prototipe layar utama memakai fondasi UI dan data contoh; **sudah ada dan diuji otomatis sebagai tiga role** (e2e `prototype-roles.spec.ts`: MV tanpa tombol aksi, SP dengan tombol aksi, SA melihat menu admin penuh). Screenshot 1440 px dan 375 px sudah diambil (`pnpm exec playwright test screenshots` → `test-results/screenshots/`) tetapi **belum ditinjau manusia** terhadap rule 35 §8. Data contoh dihapus sebelum F2.
+- [x] Prototipe layar utama memakai fondasi UI dan data contoh; **sudah ada dan diuji otomatis sebagai tiga role** (e2e `prototype-roles.spec.ts`: MV tanpa tombol aksi, SP dengan tombol aksi, SA melihat menu admin penuh). Screenshot 1440 px dan 375 px sudah diambil (`pnpm exec playwright test screenshots` → `test-results/screenshots/`) dan **sudah ditinjau manusia terhadap rule 35 §8 tanpa temuan** (14 Oktober 2026). Data contoh dihapus sebelum F2.
 - Bukti (13 Oktober 2026, `81be27b`):
 
   | Gerbang `docs/06` §2 | Uji | Hasil |
@@ -35,21 +35,50 @@ Semua item belum dikerjakan. Centang hanya dengan bukti (lihat perintah `/verify
   - `/slop-check`: 4 temuan, semua diperbaiki — `SuperAdminOnly` kode mati (05 #5), `APP_TIME_ZONE` ekspor tak perlu (05 #1), `pnpm format` tidak pernah dijalankan sehingga 40 file tidak rapi dan tidak ada penjaga (05 #9), Prettier merapikan `.kilo/` yang tidak disentuh (05 #9). `FormSection` sengaja dipertahankan karena diminta `task.md` item 4 meski belum ada yang memakainya.
   - Deviasi lintas dokumen (laporan, bukan perubahan kode): `docs/05-ui.md` §5 "Dashboard: kartu jumlah per status" bertentangan dengan rule 35 §5 dan §7; sudah diselaraskan menjadi baris angka KPI. `docs/05-ui.md` §8 (tooltip Gantt, tombol "Ke minggu ini", lipatan baris) dan §5 (Kurva S, daftar pekerjaan tanpa log minggu ini) belum di prototipe — sengaja, dikerjakan F4–F5.
   - Audit 14 Oktober 2026 (`bddf88a`): memperluas axe dari 2 ke 7 route menemukan dua cacat nyata — wadah Gantt tidak bisa difokus (WCAG 2.1.1, pengguna keyboard tidak bisa menggeser kolom minggu di 375 px) dan label tab tak aktif `text-foreground/60` hanya 4,14:1. Keduanya diperbaiki. Ditambah 6 unit test invarian data Gantt karena decoder `row()` menelan error (simbol hilang diam-diam bila panjang string beda, typo karakter jadi sel kosong).
-  - Sisa: tinjau screenshot oleh pemilik proyek (agen tidak dapat melihat gambar), lalu item prototipe dicentang.
+  - Selesai: screenshot ditinjau pemilik proyek 14 Oktober 2026 terhadap rule 35 §8, tanpa temuan; gerbang F0 ditutup dan F1 dimulai.
   - Peringatan CI (bukan kegagalan): `pnpm/action-setup@v4` menargetkan Node.js 20 yang sudah deprecated di runner GitHub dan dipaksa jalan di Node.js 24; `ubuntu-latest` akan migrasi ke Ubuntu 26 pada 19 Oktober 2026. Keduanya untuk diperiksa saat F7.
 
 ## F1 — Fondasi (AC-01–06, AC-60–62)
 
-- [ ] Migration awal dari schema + migration `constraints` dari `prisma/sql/constraints.sql`.
-- [ ] Better Auth (email/password, session DB, `nextCookies`), field role/isActive/mustChangePassword; bandingkan dengan output CLI Better Auth.
-- [ ] `proxy.ts`, validasi session per route, `assertCan` + permission matrix, halaman login & ganti password (AC-01–04).
-- [ ] Error domain + pemetaan HTTP + envelope; util Decimal, tanggal WIB, format Indonesia.
-- [ ] Service audit dalam transaksi (AC-05) dan pola transaksi + version (409).
-- [ ] Upload/unduh R2 presigned + konfirmasi + batas ukuran (AC-62).
-- [ ] CRUD master: Region, Wilayah, Company, Estate, Block, Vendor (+quick), Unit, Kategori, Material (+quick), Alat berat, Jabatan approver; nonaktif vs hapus (AC-60).
-- [ ] Seed lokasi & master dari `prisma/seed-data/*.json` + Super Admin pertama (AC-61).
-- [ ] Menu Admin: user (buat, role, nonaktif, reset password).
-- Bukti:
+- [x] Migration awal dari schema + migration `constraints` dari `prisma/sql/constraints.sql`.
+- [x] Better Auth (email/password, session DB, `nextCookies`), field role/isActive/mustChangePassword; bandingkan dengan output CLI Better Auth.
+- [x] `proxy.ts`, validasi session per route, `assertCan` + permission matrix, halaman login & ganti password (AC-01–04).
+- [x] Error domain + pemetaan HTTP + envelope; util Decimal, tanggal WIB, format Indonesia.
+- [x] Service audit dalam transaksi (AC-05) dan pola transaksi + version (409).
+- [x] Upload/unduh R2 presigned + konfirmasi + batas ukuran (AC-62).
+- [x] CRUD master: Region, Wilayah, Company, Estate, Block, Vendor (+quick), Unit, Kategori, Material (+quick), Alat berat, Jabatan approver; nonaktif vs hapus (AC-60).
+- [x] Seed lokasi & master dari `prisma/seed-data/*.json` + Super Admin pertama (AC-61).
+- [x] Menu Admin: user (buat, role, nonaktif, reset password).
+- Bukti (14 Oktober 2026):
+
+  | AC / gerbang | Uji | Hasil |
+  | --- | --- | --- |
+  | AC-01 401 + redirect login | `tests/integration/auth.test.ts`, `tests/e2e/auth.spec.ts` | lulus |
+  | AC-02 viewer 403 + UI tanpa tombol aksi | `tests/integration/master.test.ts`, `tests/e2e/master.spec.ts`, `tests/e2e/admin-user.spec.ts` | lulus |
+  | AC-03 SP 403 pada aksi SA | `tests/integration/master.test.ts`, `tests/integration/users.test.ts`, `tests/e2e/admin-user.spec.ts` | lulus |
+  | AC-04 wajib ganti password, reset mencabut session | `tests/integration/auth.test.ts`, `tests/integration/users.test.ts`, `tests/e2e/auth.spec.ts` | lulus |
+  | AC-05 satu `AuditLog` per mutasi dalam transaksi | `tests/integration/audit.test.ts` | lulus |
+  | AC-06 gate/prasyarat 409 bukan 403 | `tests/unit/api-errors.test.ts`, `tests/integration/master.test.ts` | lulus |
+  | AC-60 `IN_USE` + nonaktifkan | `tests/integration/master.test.ts`, `tests/e2e/master.spec.ts` | lulus |
+  | AC-61 seed 8/18/27/63 idempoten | `tests/integration/seed.test.ts` | lulus |
+  | AC-62 batas ukuran, PENDING 24 jam, URL berumur pendek | `tests/integration/files.test.ts` (bucket R2 `dev` sungguhan) | lulus |
+  | Constraint & trigger `constraints.sql` | `tests/integration/constraints.test.ts` | lulus |
+  | Seluruh test | `pnpm test` (unit + integrasi) | 89/89 lulus (12 file) |
+  | Seluruh alur UI | `pnpm test:e2e` (1440×900 + 375×812) | 56 lulus, 1 dilewati (uji khusus mobile) |
+  | Aksesibilitas | axe `wcag2a`/`wcag2aa` di `/login`, `/admin/user`, dan 8 halaman aplikasi | nihil pelanggaran serious/critical |
+  | Gerbang kualitas | `pnpm format:check` · `pnpm lint` · `pnpm typecheck` · `pnpm build` | lulus tanpa peringatan |
+
+  - Perbandingan schema Better Auth (`npx @better-auth/cli generate`) tidak menemukan field yang kurang: `User`, `Session`, `Account`, `Verification` sudah cocok. Kolom `role`, `isActive`, `mustChangePassword` tetap non-null dengan default.
+  - `grep -rn "#[0-9A-Fa-f]\{6\}" src/components src/app` hanya menemukan `globals.css`; token warna tidak ditulis ulang di komponen.
+  - Dependensi F1: `better-auth` 1.7.7, `zod` 4.6.7, `react-hook-form` 7.90.0, `@hookform/resolvers` 5.9.1, `sonner` 2.0.8, `@aws-sdk/client-s3` + `s3-request-presigner` 3.1150.0, `tsx` 4.23.15 (dev). `@tanstack/react-query`, `next-themes`, dan komponen shadcn `select` sempat terpasang lalu dilepas karena belum dipakai (rule 05 #11).
+  - Keputusan baru: D-37 … D-46 di `docs/07-decisions.md`.
+  - Slop-check 14 Oktober 2026: tidak ada `any`, `as unknown as`, `@ts-ignore`, `eslint-disable`, `TODO`, atau `catch` yang menelan error di kode tulis tangan (`src/generated/**` adalah hasil generate Prisma dan tidak dihitung). Tiga `console.log` hanya ada di skrip CLI (`scripts/*`) yang memang mencetak hasil ke terminal dan sudah dikecualikan `eslint.config.mjs`.
+  - Audit aksesibilitas 14 Oktober 2026 menemukan satu cacat nyata: wadah tab workspace proyek memakai `overflow-x-auto` tanpa fokus keyboard, sehingga di 375 px isi tab tidak bisa digeser dengan keyboard (WCAG 2.1.1). Diperbaiki dengan `tabIndex` + `role="group"` dan `aria-label`, sama seperti pola wadah Gantt; kini `/login`, `/admin/user`, `/master/vendors`, dan delapan halaman aplikasi masuk pemindaian axe.
+  - Lintas dokumen: tidak ada penyimpangan dari `docs/01-domain.md` §3 ("master tidak dihapus permanen setelah dipakai; nonaktif lewat `isActive`") maupun `docs/04-api.md` §1–2, §9, §11 — kode, status HTTP, envelope, `{type}` master, dan aturan role cocok dengan implementasi.
+  - Deviasi dari rencana: (a) `GET /api/me` belum dibuat — data session tersedia lewat Server Component, endpoint baru berguna saat klien perlu menyegarkan session; (b) `src/infra/decimal.ts` dan `src/shared/date.ts` belum dibuat karena F1 belum punya field Decimal atau tanggal bisnis — dibuat bersama konsumen pertamanya di F2/F6; (c) komponen UI upload dan kompresi foto ditunda ke F2 (konsumen pertama survei); (d) CORS bucket R2 belum diatur — dibutuhkan saat UI upload ada.
+  - Catatan untuk F2: skema update master memakai `updateSchemaFor()` agar `isActive` diterima; `PATCH` memisahkan aksi aktif/nonaktif dari body mentah (D-42, D-43); setiap wadah `overflow-x-auto` baru wajib punya `tabIndex={0}` dan `aria-label`.
+  - Tampilan `/master`, `/master/[type]`, `/admin/user`, dan `/login` **sudah ditinjau manusia** (14 Oktober 2026) dan dinyatakan sesuai. Screenshot 1440 px dan 375 px dihasilkan `screenshots.spec.ts` di `test-results/screenshots/`.
+  - CI GitHub Actions belum dijalankan untuk F1: perubahan masih di working tree dan belum di-commit/di-push (agen tidak menjalankan `git add`/`git commit`/`git push` tanpa permintaan eksplisit). Job `verify` dan `e2e` sudah diubah untuk branch Neon `test` (D-39); nomor run CI perlu diisi setelah push pertama.
 
 ## F2 — Proyek dan AFCE (AC-10–25)
 
