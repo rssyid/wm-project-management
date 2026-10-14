@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { MutationOnly } from "@/prototype/role";
+import { MutationsOnly } from "@/components/auth/mutations-only";
 import { ProjectTable } from "@/prototype/project-table";
 import { SAMPLE_PROJECTS } from "@/prototype/sample-data";
 
@@ -12,12 +12,12 @@ export default function ProjectListPage() {
       <PageHeader
         title="Proyek"
         actions={
-          <MutationOnly>
+          <MutationsOnly>
             <Button>
               <Plus aria-hidden="true" />
               Buat proyek
             </Button>
-          </MutationOnly>
+          </MutationsOnly>
         }
       />
       <ProjectTable projects={SAMPLE_PROJECTS} caption="Daftar proyek" />

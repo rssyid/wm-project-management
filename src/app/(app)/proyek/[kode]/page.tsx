@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatDate, formatPercent, formatRupiah } from "@/shared/format";
 import { GanttMatrix } from "@/prototype/gantt";
-import { MutationOnly } from "@/prototype/role";
+import { MutationsOnly } from "@/components/auth/mutations-only";
 import {
   SAMPLE_GANTT,
   SAMPLE_PROJECTS,
@@ -41,10 +41,10 @@ export default async function ProjectWorkspacePage({
         title={`${project.code} · ${project.name}`}
         description={`${project.category} · ${project.companyCode} · ${project.mainEstate} · ${project.wilayah}, ${project.region}`}
         actions={
-          <MutationOnly>
+          <MutationsOnly>
             <Button>Mulai tender</Button>
             <Button variant="outline">Lainnya</Button>
-          </MutationOnly>
+          </MutationsOnly>
         }
       />
 
@@ -100,7 +100,13 @@ export default async function ProjectWorkspacePage({
       </section>
 
       <Tabs defaultValue="Jadwal">
-        <div className="overflow-x-auto">
+        {/* WCAG 2.1.1: wadah yang bisa digeser harus bisa difokus keyboard. */}
+        <div
+          className="overflow-x-auto"
+          tabIndex={0}
+          role="group"
+          aria-label="Tab workspace proyek"
+        >
           <TabsList variant="line">
             {TABS.map((tab) => (
               <TabsTrigger key={tab} value={tab}>

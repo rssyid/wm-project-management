@@ -1,7 +1,11 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
+import { storageStatePath } from "./helpers/storage";
+
 test.describe("shell aplikasi", () => {
+  test.use({ storageState: storageStatePath("WM_HO_SPECIALIST") });
+
   test("menu utama terbuka di desktop dan bisa dipakai dengan keyboard", async ({
     page,
     isMobile,
@@ -25,12 +29,12 @@ test.describe("shell aplikasi", () => {
     await expect(page).toHaveURL(/\/dashboard$/);
   });
 
-  test("tidak ada pelanggaran axe serius di semua halaman prototipe", async ({
+  test("tidak ada pelanggaran axe serius di halaman aplikasi", async ({
     page,
   }) => {
-    // Tujuh halaman dipindai berurutan; default 30 detik habis saat delapan worker
-    // paralel. Assertion-nya tetap sama, hanya anggaran waktunya yang realistis.
-    test.setTimeout(120_000);
+    // Sembilan halaman dipindai berurutan; default 30 detik habis saat worker paralel.
+    // Assertion-nya tetap sama, hanya anggaran waktunya yang realistis.
+    test.setTimeout(180_000);
 
     const paths = [
       "/dashboard",
@@ -39,6 +43,7 @@ test.describe("shell aplikasi", () => {
       "/portofolio",
       "/laporan",
       "/master",
+      "/master/vendors",
       "/admin",
     ];
     for (const path of paths) {
@@ -103,6 +108,8 @@ test.describe("shell aplikasi", () => {
   test("D-31: kolom No. bernomor otomatis sesuai jenjang", async ({ page }) => {
     await page.goto("/portofolio");
     const gantt = page.getByRole("table", { name: "Gantt portofolio" });
+    // allTextContents() tidak menunggu; pastikan tabel sudah dirender setelah session dibaca.
+    await expect(gantt).toBeVisible();
     const numbers = await gantt
       .locator("tbody tr td:first-child")
       .allTextContents();
