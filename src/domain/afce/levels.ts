@@ -30,6 +30,11 @@ export function differsFromMatrix(
   return !sameLevels(snapshotPositionIds, tierLevelPositionIds);
 }
 
+export type LevelOwner = {
+  afceAttemptId?: string;
+  arSupplementId?: string;
+};
+
 /**
  * D-53: level disalin ulang dari tier baru hanya bila level saat ini masih sama persis dengan
  * tier yang dipakai sebelumnya. Bila sudah diubah manual, level tidak ditimpa dan ditandai
@@ -37,12 +42,12 @@ export function differsFromMatrix(
  */
 export async function syncLevelsFromTier(
   tx: Tx,
-  attemptId: string,
+  owner: LevelOwner,
   previousTierId: string | null,
   tierLevels: readonly TierLevelLike[],
 ): Promise<boolean> {
   const current = await tx.approvalLevelSnapshot.findMany({
-    where: { afceAttemptId: attemptId },
+    where: owner,
     select: { levelNo: true, positionId: true },
   });
   const previousTierLevels =
@@ -61,9 +66,7 @@ export async function syncLevelsFromTier(
     );
   if (!untouched) return false;
 
-  await tx.approvalLevelSnapshot.deleteMany({
-    where: { afceAttemptId: attemptId },
-  });
+  await tx.approvalLevelSnapshot.deleteMany({ where: owner });
   await tx.approvalLevelSnapshot.createMany({
     data: [...tierLevels]
       .sort((left, right) => left.levelNo - right.levelNo)
@@ -75,7 +78,7 @@ export async function syncLevelsFromTier(
           );
         }
         return {
-          afceAttemptId: attemptId,
+          ...owner,
           levelNo: level.levelNo,
           positionId: level.positionId,
           positionNameSnapshot: level.position.name,
@@ -87,7 +90,7 @@ export async function syncLevelsFromTier(
 
 export async function replaceLevels(
   tx: Tx,
-  attemptId: string,
+  owner: LevelOwner,
   positionIds: readonly string[],
   actorId: string,
   projectId: string,
@@ -107,14 +110,12 @@ export async function replaceLevels(
   );
 
   const before = await tx.approvalLevelSnapshot.findMany({
-    where: { afceAttemptId: attemptId },
+    where: owner,
     select: { levelNo: true, positionId: true, positionNameSnapshot: true },
     orderBy: { levelNo: "asc" },
   });
 
-  await tx.approvalLevelSnapshot.deleteMany({
-    where: { afceAttemptId: attemptId },
-  });
+  await tx.approvalLevelSnapshot.deleteMany({ where: owner });
   await tx.approvalLevelSnapshot.createMany({
     data: positionIds.map((positionId, index) => {
       const name = nameById.get(positionId);
@@ -125,7 +126,7 @@ export async function replaceLevels(
         );
       }
       return {
-        afceAttemptId: attemptId,
+        ...owner,
         levelNo: index + 1,
         positionId,
         positionNameSnapshot: name,
@@ -136,8 +137,8 @@ export async function replaceLevels(
   await writeAudit(tx, {
     actorId,
     projectId,
-    entityType: "AfceAttempt",
-    entityId: attemptId,
+    entityType: "ArSupplement",
+    entityId: owner.arSupplementId ?? owner.afceAttemptId ?? "",
     action: "UPDATE",
     reason: "Level approval",
     before: { levels: before },

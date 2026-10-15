@@ -266,7 +266,7 @@ export async function replaceBoq(
     if (tier && tier.id !== attempt.matrixTierId) {
       await syncLevelsFromTier(
         tx,
-        attemptId,
+        { afceAttemptId: attemptId },
         attempt.matrixTierId,
         await tierLevelsOf(tx, tier.id),
       );
@@ -299,7 +299,13 @@ export async function setLevels(
       data: { version: { increment: 1 } },
     });
     if (updated.count === 0) throw versionConflict();
-    await replaceLevels(tx, attemptId, positionIds, actorId, attempt.projectId);
+    await replaceLevels(
+      tx,
+      { afceAttemptId: attemptId },
+      positionIds,
+      actorId,
+      attempt.projectId,
+    );
     return { id: attemptId };
   });
 }
@@ -341,7 +347,7 @@ export async function submitAttempt(
       });
       await syncLevelsFromTier(
         tx,
-        attemptId,
+        { afceAttemptId: attemptId },
         attempt.matrixTierId,
         await tierLevelsOf(tx, tier.id),
       );
