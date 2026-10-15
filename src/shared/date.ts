@@ -9,39 +9,40 @@ import { DomainError } from "@/shared/errors";
 const APP_TIME_ZONE = "Asia/Jakarta";
 const BUSINESS_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 
-function partsOf(value: Date): { year: number; month: number; day: number } {
-  return {
-    year: value.getUTCFullYear(),
-    month: value.getUTCMonth() + 1,
-    day: value.getUTCDate(),
-  };
-}
-
-/** `2026-10-14` → tengah malam UTC, aman ditulis ke kolom @db.Date. */
-export function parseBusinessDate(value: string): Date {
+/** Komponen tanggal dari string `YYYY-MM-DD`, null bila format atau kalendarnya salah. */
+function matchBusinessDate(
+  value: string,
+): { year: number; month: number; day: number } | null {
   const match = BUSINESS_DATE_PATTERN.exec(value.trim());
-  if (!match) {
-    throw new DomainError(
-      "VALIDATION_ERROR",
-      `Tanggal "${value}" tidak sesuai format YYYY-MM-DD.`,
-    );
-  }
+  if (!match) return null;
   const year = Number(match[1]);
   const month = Number(match[2]);
   const day = Number(match[3]);
   const date = new Date(Date.UTC(year, month - 1, day));
-  const parts = partsOf(date);
   if (
-    parts.year !== year ||
-    parts.month !== month ||
-    parts.day !== day
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() + 1 !== month ||
+    date.getUTCDate() !== day
   ) {
+    return null;
+  }
+  return { year, month, day };
+}
+
+export function isBusinessDateString(value: string): boolean {
+  return matchBusinessDate(value) !== null;
+}
+
+/** `2026-10-14` → tengah malam UTC, aman ditulis ke kolom @db.Date. */
+export function parseBusinessDate(value: string): Date {
+  const parts = matchBusinessDate(value);
+  if (!parts) {
     throw new DomainError(
       "VALIDATION_ERROR",
-      `Tanggal "${value}" tidak ada di kalender.`,
+      `Tanggal "${value}" tidak sesuai format YYYY-MM-DD atau tidak ada di kalender.`,
     );
   }
-  return date;
+  return new Date(Date.UTC(parts.year, parts.month - 1, parts.day));
 }
 
 /** Tanggal hasil baca database → `YYYY-MM-DD` memakai komponen lokal, seperti driver pg. */
@@ -63,14 +64,14 @@ export function todayBusinessDateIso(): string {
 }
 
 function utcFromIso(iso: string): number {
-  const match = BUSINESS_DATE_PATTERN.exec(iso);
-  if (!match) {
+  const parts = matchBusinessDate(iso);
+  if (!parts) {
     throw new DomainError(
       "VALIDATION_ERROR",
       `Tanggal "${iso}" tidak sesuai format YYYY-MM-DD.`,
     );
   }
-  return Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  return Date.UTC(parts.year, parts.month - 1, parts.day);
 }
 
 /** Urutan tanggal examined lewat perbandingan string; format sama panjang selalu dapat dibandingkan. */

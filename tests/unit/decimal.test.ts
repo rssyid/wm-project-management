@@ -4,7 +4,6 @@ import {
   decimal,
   decimalEquals,
   decimalToString,
-  isDecimalAmount,
   sumDecimal,
   ZERO,
 } from "@/infra/decimal";
@@ -35,15 +34,5 @@ describe("serialisasi Decimal", () => {
   it("mengirim dua desimal ke klien", () => {
     expect(decimalToString(decimal("65.4"))).toBe("65.40");
     expect(decimalToString(null)).toBeNull();
-  });
-});
-
-describe("validasi input uang", () => {
-  it("hanya menerima digit dengan maksimal dua desimal", () => {
-    expect(isDecimalAmount("1250000.10")).toBe(true);
-    expect(isDecimalAmount("1250000")).toBe(true);
-    expect(isDecimalAmount("1250000.123")).toBe(false);
-    expect(isDecimalAmount("1.250.000")).toBe(false);
-    expect(isDecimalAmount("-50")).toBe(false);
   });
 });

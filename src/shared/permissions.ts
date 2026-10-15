@@ -7,6 +7,10 @@ export const ACTIONS = [
   "master.write",
   "file.write",
   "user.manage",
+  "project.write",
+  "approval.record",
+  "approval.matrix.manage",
+  "project.cancel",
 ] as const;
 
 export type Action = (typeof ACTIONS)[number];
@@ -17,6 +21,10 @@ const ROLE_MATRIX: Record<Action, readonly Role[]> = {
   "master.write": ["SUPER_ADMIN", "WM_HO_SPECIALIST"],
   "file.write": ["SUPER_ADMIN", "WM_HO_SPECIALIST"],
   "user.manage": ["SUPER_ADMIN"],
+  "project.write": ["SUPER_ADMIN", "WM_HO_SPECIALIST"],
+  "approval.record": ["SUPER_ADMIN", "WM_HO_SPECIALIST"],
+  "approval.matrix.manage": ["SUPER_ADMIN"],
+  "project.cancel": ["SUPER_ADMIN"],
 };
 
 export function assertCan(

@@ -27,13 +27,3 @@ export function decimalToString(
 ): string | null {
   return value === null || value === undefined ? null : value.toFixed(2);
 }
-
-const DECIMAL_PATTERN = /^\d{1,13}(\.\d{1,2})?$/;
-
-/**
- * Skema Zod untuk input uang: digit tanpa tanda dengan maksimal dua desimal. Semua nominal di
- * domain bersifat non-negatif (BOQ ≥ 0, tier min ≥ 0, anggaran ≥ 0).
- */
-export function isDecimalAmount(value: string): boolean {
-  return DECIMAL_PATTERN.test(value.trim());
-}
