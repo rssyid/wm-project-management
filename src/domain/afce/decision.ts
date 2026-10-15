@@ -1,8 +1,5 @@
 import { writeAudit } from "@/domain/audit/service";
-import {
-  assertDecisionAllowed,
-  type DecisionLike,
-} from "@/domain/afce/duration";
+import { assertDecisionAllowed } from "@/domain/afce/duration";
 import { attachFiles } from "@/domain/files/links";
 import {
   autoTransitionProject,
@@ -121,18 +118,27 @@ export async function recordDecision(
       );
     }
 
-    const previousDecisions: DecisionLike[] = document.levels
-      .filter((row) => row.levelNo < current.levelNo && row.record)
-      .map((row) => ({
-        result: row.record?.result ?? "APPROVED",
-        decisionDate: row.record?.decisionDate ?? new Date(0),
-      }));
+    const previousDecisions = document.levels.filter(
+      (row) => row.levelNo < current.levelNo,
+    );
+
+    // AC-21: level N baru boleh diputuskan setelah semua level sebelumnya punya keputusan.
+    const undecided = previousDecisions.find((row) => !row.record);
+    if (undecided) {
+      throw new DomainError(
+        "PRECONDITION_FAILED",
+        `Level ${undecided.levelNo} ${undecided.positionNameSnapshot} belum diputuskan.`,
+      );
+    }
 
     assertDecisionAllowed({
       decisionDate: input.decisionDate,
       today: todayBusinessDateIso(),
       approvalEmailDate: businessDateIso(document.approvalEmailDate),
-      previousDecisions,
+      previousDecisions: previousDecisions.map((row) => ({
+        result: row.record?.result ?? "APPROVED",
+        decisionDate: row.record?.decisionDate ?? new Date(0),
+      })),
     });
 
     await requireMutableProject(tx, document.projectId);

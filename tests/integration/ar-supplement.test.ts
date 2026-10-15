@@ -86,7 +86,7 @@ describe("AR tambahan", () => {
         number: "AR/2026/001",
         amount: "75000000.00",
         reason: "Penambahan pekerjaan chilled water",
-        date: "2026-11-05",
+        date: "2026-10-06",
         ...body,
       },
     });
@@ -117,7 +117,7 @@ describe("AR tambahan", () => {
     expect(list.data[0]).toMatchObject({
       amount: "75000000.00",
       reason: "Penambahan pekerjaan chilled water",
-      date: "2026-11-05",
+      date: "2026-10-06",
       status: "DRAFT",
     });
     expect(list.data[0]?.levels).toHaveLength(2);
@@ -146,8 +146,8 @@ describe("AR tambahan", () => {
       params: { id: supplementId },
       body: {
         version: 1,
-        submittedDate: "2026-11-06",
-        approvalEmailDate: "2026-11-05",
+        submittedDate: "2026-10-07",
+        approvalEmailDate: "2026-10-06",
       },
     });
     expect(submitted.status).toBe(200);
@@ -165,7 +165,7 @@ describe("AR tambahan", () => {
         body: {
           result: "APPROVED",
           approverName: "Bapak EM",
-          decisionDate: "2026-11-08",
+          decisionDate: "2026-10-08",
         },
       });
       expect(decision.status).toBe(200);
@@ -202,8 +202,8 @@ describe("AR tambahan", () => {
       params: { id: supplementId },
       body: {
         version: 1,
-        submittedDate: "2026-11-06",
-        approvalEmailDate: "2026-11-05",
+        submittedDate: "2026-10-07",
+        approvalEmailDate: "2026-10-06",
       },
     });
     const levels = await prisma.approvalLevelSnapshot.findMany({
@@ -219,7 +219,7 @@ describe("AR tambahan", () => {
       body: {
         result: "DITOLAK",
         approverName: "Bapak EM",
-        decisionDate: "2026-11-08",
+        decisionDate: "2026-10-08",
       },
     });
 
@@ -263,7 +263,7 @@ describe("AR tambahan", () => {
       body: {
         amount: "75000000.00",
         reason: "Penambahan pekerjaan chilled water",
-        date: "2026-11-05",
+        date: "2026-10-06",
       },
     });
     expect(response.status).toBe(403);

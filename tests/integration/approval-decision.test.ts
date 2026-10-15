@@ -94,8 +94,8 @@ describe("keputusan approval AFCE", () => {
       params: { id: attempt.id },
       body: {
         version: 2,
-        submittedDate: "2026-10-20",
-        approvalEmailDate: "2026-10-18",
+        submittedDate: "2026-10-07",
+        approvalEmailDate: "2026-10-06",
       },
     });
     if (submit.status !== 200) {
@@ -128,10 +128,11 @@ describe("keputusan approval AFCE", () => {
     const { response, json } = await decide(second.id, {
       result: "APPROVED",
       approverName: "Bapak RH",
-      decisionDate: "2026-10-25",
+      decisionDate: "2026-10-12",
     });
     expect(response.status).toBe(409);
-    expect(json.error?.message).toContain("sebelum");
+    expect(json.error?.code).toBe("PRECONDITION_FAILED");
+    expect(json.error?.message).toContain("belum diputuskan");
   });
 
   it("AC-21 tanggal keputusan tidak boleh lebih awal dari tanggal email", async () => {
@@ -141,10 +142,10 @@ describe("keputusan approval AFCE", () => {
     const { response, json } = await decide(first.id, {
       result: "APPROVED",
       approverName: "Bapak EM",
-      decisionDate: "2026-10-17",
+      decisionDate: "2026-10-05",
     });
     expect(response.status).toBe(400);
-    expect(json.error?.message).toContain("2026-10-18");
+    expect(json.error?.message).toContain("2026-10-06");
   });
 
   it("AC-21 level yang sudah punya keputusan tidak bisa diisi lagi", async () => {
@@ -154,14 +155,14 @@ describe("keputusan approval AFCE", () => {
     const firstDecision = await decide(first.id, {
       result: "APPROVED",
       approverName: "Bapak EM",
-      decisionDate: "2026-10-21",
+      decisionDate: "2026-10-09",
     });
     expect(firstDecision.response.status).toBe(200);
 
     const secondDecision = await decide(first.id, {
       result: "DITOLAK",
       approverName: "Bapak EM",
-      decisionDate: "2026-10-22",
+      decisionDate: "2026-10-10",
     });
     expect(secondDecision.response.status).toBe(409);
     expect(secondDecision.json.error?.code).toBe("ACTIVE_CONFLICT");
@@ -174,7 +175,7 @@ describe("keputusan approval AFCE", () => {
     const { response, json } = await decide(first.id, {
       result: "DITOLAK",
       approverName: "Bapak EM",
-      decisionDate: "2026-10-22",
+      decisionDate: "2026-10-10",
       notes: "RAB perlu revisi",
     });
     expect(response.status).toBe(200);
@@ -204,7 +205,7 @@ describe("keputusan approval AFCE", () => {
     await decide(first.id, {
       result: "DITOLAK",
       approverName: "Bapak EM",
-      decisionDate: "2026-10-22",
+      decisionDate: "2026-10-10",
     });
 
     const rejected = await prisma.afceAttempt.findFirstOrThrow({
@@ -240,12 +241,12 @@ describe("keputusan approval AFCE", () => {
     await decide(levels[0]!.id, {
       result: "APPROVED",
       approverName: "Bapak EM",
-      decisionDate: "2026-10-21",
+      decisionDate: "2026-10-09",
     });
     const final = await decide(levels[1]!.id, {
       result: "APPROVED",
       approverName: "Bapak GEM",
-      decisionDate: "2026-10-25",
+      decisionDate: "2026-10-12",
     });
     expect(final.response.status).toBe(200);
     expect(final.json.data).toMatchObject({
@@ -273,7 +274,7 @@ describe("keputusan approval AFCE", () => {
     await decide(levels[0]!.id, {
       result: "APPROVED",
       approverName: "Bapak EM",
-      decisionDate: "2026-10-21",
+      decisionDate: "2026-10-09",
     });
 
     const records = await prisma.approvalRecord.count({
@@ -299,7 +300,7 @@ describe("keputusan approval AFCE", () => {
       body: {
         result: "APPROVED",
         approverName: "Bapak EM",
-        decisionDate: "2026-10-21",
+        decisionDate: "2026-10-09",
       },
     });
     expect(response.status).toBe(403);
