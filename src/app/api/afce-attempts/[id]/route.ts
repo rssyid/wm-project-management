@@ -1,7 +1,7 @@
 import { ok, toErrorResponse } from "@/app/api/_lib/respond";
 import { parseJson, requirePermission } from "@/app/api/_lib/session";
 import { getAttempt } from "@/domain/afce/queries";
-import { updateAttempt } from "@/domain/afce/service";
+import { updateAttempt } from "@/domain/afce/attempts";
 import { DomainError } from "@/shared/errors";
 import { updateAfceAttemptSchema } from "@/shared/schemas/afce";
 

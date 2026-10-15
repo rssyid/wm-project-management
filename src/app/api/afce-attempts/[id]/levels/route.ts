@@ -1,6 +1,6 @@
 import { ok, toErrorResponse } from "@/app/api/_lib/respond";
 import { parseJson, requirePermission } from "@/app/api/_lib/session";
-import { setLevels } from "@/domain/afce/service";
+import { setLevels } from "@/domain/afce/boq";
 import { approvalLevelsSchema } from "@/shared/schemas/afce";
 
 type Context = { params: Promise<{ id: string }> };

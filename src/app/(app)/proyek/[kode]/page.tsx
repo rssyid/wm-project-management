@@ -7,7 +7,7 @@ import { ArSupplementPanel } from "@/components/project/ar-supplement-panel";
 import { NextSteps, type NextAction } from "@/components/project/next-steps";
 import { SurveyTab } from "@/components/project/survey-tab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { listArSupplements } from "@/domain/afce/ar";
+import { listArSupplements } from "@/domain/afce/ar-queries";
 import { listAttempts } from "@/domain/afce/queries";
 import { listOwnerFiles } from "@/domain/files/links";
 import { getProjectByCode } from "@/domain/project/queries";

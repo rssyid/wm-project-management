@@ -1,77 +1,21 @@
 import { versionConflict, writeAudit } from "@/domain/audit/service";
-import { replaceLevels, syncLevelsFromTier } from "@/domain/afce/levels";
+import { requireDraftAttempt, tierLevelsOf } from "@/domain/afce/draft";
+import { syncLevelsFromTier } from "@/domain/afce/levels";
 import { findTierForAmount, tierNotFound } from "@/domain/afce/queries";
 import {
   autoTransitionProject,
   requireMutableProject,
   transitionProject,
 } from "@/domain/project-transition/service";
-import { decimal, sumDecimal, ZERO } from "@/infra/decimal";
-import type { Tx } from "@/infra/tx";
+import { decimal, ZERO } from "@/infra/decimal";
 import { withTransaction } from "@/infra/tx";
 import { parseBusinessDate } from "@/shared/date";
 import { DomainError } from "@/shared/errors";
 import type {
   CreateAfceAttemptInput,
-  ReplaceBoqInput,
   UpdateAfceAttemptInput,
 } from "@/shared/schemas/afce";
 import { PROJECT_STATUS_LABEL } from "@/shared/project-status";
-
-type AttemptState = {
-  id: string;
-  projectId: string;
-  status: "DRAFT" | "DIAJUKAN" | "APPROVED" | "DITOLAK";
-  basisAmount: ReturnType<typeof decimal>;
-  matrixTierId: string | null;
-  version: number;
-};
-
-const boqSelect = {
-  lineNo: true,
-  buildingName: true,
-  activityName: true,
-  amount: true,
-  notes: true,
-} as const;
-
-/** Setelah diajukan nilai dan level terkunci; hanya attempt DRAFT yang boleh diubah. */
-async function requireDraftAttempt(
-  tx: Tx,
-  attemptId: string,
-): Promise<AttemptState> {
-  const attempt = await tx.afceAttempt.findUnique({
-    where: { id: attemptId },
-    select: {
-      id: true,
-      projectId: true,
-      status: true,
-      basisAmount: true,
-      matrixTierId: true,
-      version: true,
-    },
-  });
-  if (!attempt)
-    throw new DomainError("NOT_FOUND", "Attempt AFCE tidak ditemukan.");
-  if (attempt.status !== "DRAFT") {
-    throw new DomainError(
-      "PRECONDITION_FAILED",
-      `Attempt AFCE sudah diajukan sehingga isinya terkunci.`,
-    );
-  }
-  return attempt;
-}
-
-async function tierLevelsOf(tx: Tx, tierId: string) {
-  return tx.approvalMatrixTierLevel.findMany({
-    where: { tierId },
-    select: {
-      levelNo: true,
-      positionId: true,
-      position: { select: { name: true } },
-    },
-  });
-}
 
 /**
  * AC-23: attempt baru boleh menyalin BOQ attempt ditolak lewat `copyFromAttemptId`; attempt
@@ -114,7 +58,10 @@ export async function createAttempt(
     if (input.copyFromAttemptId) {
       const source = await tx.afceAttempt.findUnique({
         where: { id: input.copyFromAttemptId },
-        select: { projectId: true, boqItems: { select: boqSelect } },
+        select: {
+          projectId: true,
+          boqItems: { select: { activityName: true, amount: true } },
+        },
       });
       if (!source || source.projectId !== projectId) {
         throw new DomainError(
@@ -206,106 +153,8 @@ export async function updateAttempt(
       entityId: attemptId,
       action: "UPDATE",
       before: { version: attempt.version },
-      after: {
-        afceNumber: input.afceNumber,
-        rabReady: input.rabReady,
-      },
+      after: { afceNumber: input.afceNumber, rabReady: input.rabReady },
     });
-    return { id: attemptId };
-  });
-}
-
-/**
- * AC-17: nilai AFCE = total BOQ, dihitung ulang selama DRAFT. Bila total memindahkan nilai ke
- * tier lain, level disalin ulang hanya bila level belum diubah manual (D-53).
- */
-export async function replaceBoq(
-  attemptId: string,
-  input: ReplaceBoqInput,
-  actorId: string,
-) {
-  return withTransaction(async (tx) => {
-    const attempt = await requireDraftAttempt(tx, attemptId);
-    const before = await tx.boqItem.findMany({
-      where: { afceAttemptId: attemptId },
-      select: boqSelect,
-      orderBy: { lineNo: "asc" },
-    });
-
-    const basisAmount = sumDecimal(
-      input.items.map((item) => decimal(item.amount)),
-    );
-    const tier = basisAmount.greaterThan(0)
-      ? await findTierForAmount(basisAmount)
-      : null;
-
-    const updated = await tx.afceAttempt.updateMany({
-      where: { id: attemptId, version: input.version },
-      data: {
-        basisAmount,
-        ...(tier && tier.id !== attempt.matrixTierId
-          ? { matrixTierId: tier.id }
-          : {}),
-        version: { increment: 1 },
-      },
-    });
-    if (updated.count === 0) throw versionConflict();
-
-    await tx.boqItem.deleteMany({ where: { afceAttemptId: attemptId } });
-    await tx.boqItem.createMany({
-      data: input.items.map((item, index) => ({
-        afceAttemptId: attemptId,
-        lineNo: index + 1,
-        buildingName: item.buildingName ?? null,
-        activityName: item.activityName,
-        amount: decimal(item.amount),
-        notes: item.notes ?? null,
-      })),
-    });
-
-    if (tier && tier.id !== attempt.matrixTierId) {
-      await syncLevelsFromTier(
-        tx,
-        { afceAttemptId: attemptId },
-        attempt.matrixTierId,
-        await tierLevelsOf(tx, tier.id),
-      );
-    }
-
-    await writeAudit(tx, {
-      actorId,
-      projectId: attempt.projectId,
-      entityType: "AfceAttempt",
-      entityId: attemptId,
-      action: "UPDATE",
-      reason: "BOQ",
-      before: { items: before },
-      after: { lines: input.items.length, basisAmount: basisAmount.toFixed(2) },
-    });
-    return { id: attemptId, basisAmount: basisAmount.toFixed(2) };
-  });
-}
-
-export async function setLevels(
-  attemptId: string,
-  positionIds: readonly string[],
-  version: number,
-  actorId: string,
-) {
-  return withTransaction(async (tx) => {
-    const attempt = await requireDraftAttempt(tx, attemptId);
-    const updated = await tx.afceAttempt.updateMany({
-      where: { id: attemptId, version },
-      data: { version: { increment: 1 } },
-    });
-    if (updated.count === 0) throw versionConflict();
-    await replaceLevels(
-      tx,
-      { afceAttemptId: attemptId },
-      positionIds,
-      actorId,
-      attempt.projectId,
-    );
     return { id: attemptId };
   });
 }

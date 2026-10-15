@@ -1,6 +1,7 @@
 import { ok, toErrorResponse } from "@/app/api/_lib/respond";
 import { parseJson, requirePermission } from "@/app/api/_lib/session";
-import { createArSupplement, listArSupplements } from "@/domain/afce/ar";
+import { listArSupplements } from "@/domain/afce/ar-queries";
+import { createArSupplement } from "@/domain/afce/ar";
 import { createArSupplementSchema } from "@/shared/schemas/afce";
 
 type Context = { params: Promise<{ id: string }> };

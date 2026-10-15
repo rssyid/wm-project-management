@@ -1,6 +1,6 @@
 import { ok, toErrorResponse } from "@/app/api/_lib/respond";
 import { parseJson, requirePermission } from "@/app/api/_lib/session";
-import { replaceBoq } from "@/domain/afce/service";
+import { replaceBoq } from "@/domain/afce/boq";
 import { replaceBoqSchema } from "@/shared/schemas/afce";
 
 type Context = { params: Promise<{ id: string }> };

@@ -3,12 +3,13 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
 import { FormSection } from "@/components/form-section";
 import { PageHeader } from "@/components/page-header";
+import { EstatePicker } from "@/components/project/estate-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -75,15 +76,10 @@ export function ProjectForm({ regions, companies, categories, pics }: Props) {
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "estates",
-  });
-
+  const estateArray = useFieldArray({ control, name: "estates" });
   const regionId = watch("regionId");
   const companyId = watch("companyId");
   const primaryEstateId = watch("primaryEstateId");
-  const chosenEstates = watch("estates");
 
   const companiesInRegion = useMemo(
     () =>
@@ -127,16 +123,6 @@ export function ProjectForm({ regions, companies, categories, pics }: Props) {
     }
     toast.success("Proyek dibuat");
     router.push(`/proyek/${body.data.code}`);
-  }
-
-  function toggleEstate(estateId: string, checked: boolean) {
-    const index = fields.findIndex((field) => field.estateId === estateId);
-    if (checked) {
-      append({ estateId, blockId: "" });
-      return;
-    }
-    if (index >= 0) remove(index);
-    if (primaryEstateId === estateId) setValue("primaryEstateId", "");
   }
 
   return (
@@ -219,91 +205,36 @@ export function ProjectForm({ regions, companies, categories, pics }: Props) {
               ))}
             </select>
           </Field>
-
-          <fieldset className="flex flex-col gap-2">
-            <legend className="text-sm font-medium">Estate proyek</legend>
-            {estates.length === 0 ? (
-              <p className="text-sm text-ink-muted">
-                Pilih Company lebih dulu untuk melihat Estate.
-              </p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {estates.map((estate) => (
-                  <label
-                    key={estate.id}
-                    className="flex items-center gap-2 rounded border bg-panel px-3 py-2 text-sm"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={chosenEstates.some(
-                        (row) => row.estateId === estate.id,
-                      )}
-                      onChange={(event) =>
-                        toggleEstate(estate.id, event.target.checked)
-                      }
-                    />
-                    {estate.code} · {estate.name}
-                  </label>
-                ))}
-              </div>
-            )}
-            {errors.estates?.message ? (
-              <p className="text-xs text-destructive">
-                {errors.estates.message}
-              </p>
-            ) : null}
-          </fieldset>
-
-          {fields.map((field, index) => {
-            const estate = estates.find((row) => row.id === field.estateId);
-            if (!estate) return null;
-            return (
-              <div key={field.id} className="rounded border bg-panel p-3">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-sm font-medium">
-                    {estate.code} · {estate.name}
-                  </span>
-                  <label className="flex items-center gap-2 text-sm">
-                    <input
-                      type="radio"
-                      name="primaryEstateId"
-                      value={estate.id}
-                      checked={primaryEstateId === estate.id}
-                      onChange={() => setValue("primaryEstateId", estate.id)}
-                    />
-                    Estate utama
-                  </label>
-                </div>
-                {estate.blocks.length > 0 ? (
-                  <Controller
-                    control={control}
-                    name={`estates.${index}.blockId`}
-                    render={({ field: blockField }) => (
-                      <div className="mt-2 flex flex-col gap-1">
-                        <Label>Block (opsional)</Label>
-                        <select
-                          {...blockField}
-                          className="h-9 w-full rounded border bg-panel px-2 text-sm"
-                        >
-                          <option value="">Lintas blok</option>
-                          {estate.blocks.map((block) => (
-                            <option key={block.id} value={block.id}>
-                              {block.blockCode} · {block.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-                  />
-                ) : null}
-              </div>
-            );
-          })}
-          {errors.primaryEstateId ? (
-            <p className="text-xs text-destructive">
-              {errors.primaryEstateId.message}
-            </p>
-          ) : null}
+          <EstatePicker
+            estates={estates}
+            selection={watch("estates").map((row, index) => ({
+              id: estateArray.fields[index]?.id ?? `${row.estateId}-${index}`,
+              estateId: row.estateId,
+              blockId: row.blockId,
+            }))}
+            primaryEstateId={primaryEstateId}
+            onToggle={(estateId, checked) => {
+              if (checked) {
+                estateArray.append({ estateId, blockId: "" });
+                return;
+              }
+              const index = estateArray.fields.findIndex(
+                (field) => field.estateId === estateId,
+              );
+              if (index >= 0) estateArray.remove(index);
+              if (primaryEstateId === estateId) {
+                setValue("primaryEstateId", "");
+              }
+            }}
+            onBlockChange={(index, blockId) =>
+              setValue(`estates.${index}.blockId`, blockId)
+            }
+            onPrimaryChange={(estateId) =>
+              setValue("primaryEstateId", estateId)
+            }
+            error={errors.estates?.message}
+            primaryError={errors.primaryEstateId?.message}
+          />
         </FormSection>
 
         <FormSection title="Target dan anggaran">

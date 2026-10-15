@@ -1,6 +1,6 @@
 import { ok, toErrorResponse } from "@/app/api/_lib/respond";
 import { parseJson, requirePermission } from "@/app/api/_lib/session";
-import { submitAttempt } from "@/domain/afce/service";
+import { submitAttempt } from "@/domain/afce/attempts";
 import { submitApprovalDocSchema } from "@/shared/schemas/afce";
 
 type Context = { params: Promise<{ id: string }> };

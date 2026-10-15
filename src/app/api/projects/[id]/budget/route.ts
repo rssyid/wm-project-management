@@ -1,6 +1,6 @@
 import { ok, toErrorResponse } from "@/app/api/_lib/respond";
 import { requirePermission } from "@/app/api/_lib/session";
-import { getBudget } from "@/domain/afce/ar";
+import { getBudget } from "@/domain/afce/budget";
 
 type Context = { params: Promise<{ id: string }> };
 

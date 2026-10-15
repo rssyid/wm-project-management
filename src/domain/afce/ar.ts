@@ -2,49 +2,16 @@ import { matchTier, noMatchingTierError } from "@/domain/approval-matrix/tier";
 import { replaceLevels, syncLevelsFromTier } from "@/domain/afce/levels";
 import { writeAudit } from "@/domain/audit/service";
 import { requireMutableProject } from "@/domain/project-transition/service";
-import { decimal, decimalToString, ZERO } from "@/infra/decimal";
+import { decimal } from "@/infra/decimal";
 import { prisma } from "@/infra/db";
 import type { Tx } from "@/infra/tx";
 import { withTransaction } from "@/infra/tx";
-import { businessDateIso, parseBusinessDate } from "@/shared/date";
+import { parseBusinessDate } from "@/shared/date";
 import { DomainError } from "@/shared/errors";
 import type {
   CreateArSupplementInput,
   UpdateArSupplementInput,
 } from "@/shared/schemas/afce";
-
-const supplementSelect = {
-  id: true,
-  projectId: true,
-  number: true,
-  amount: true,
-  reason: true,
-  date: true,
-  status: true,
-  matrixTierId: true,
-  submittedDate: true,
-  approvalEmailDate: true,
-  decidedDate: true,
-  version: true,
-  matrixTier: { select: { id: true, name: true } },
-  levels: {
-    select: {
-      id: true,
-      levelNo: true,
-      positionId: true,
-      positionNameSnapshot: true,
-      record: {
-        select: {
-          id: true,
-          result: true,
-          approverName: true,
-          decisionDate: true,
-        },
-      },
-    },
-    orderBy: { levelNo: "asc" },
-  },
-} as const;
 
 async function tierLevelsOf(tx: Tx, tierId: string) {
   return tx.approvalMatrixTierLevel.findMany({
@@ -57,6 +24,7 @@ async function tierLevelsOf(tx: Tx, tierId: string) {
   });
 }
 
+/** Tier AR memakai nominal tambahan, bukan nilai AFCE (D-08). */
 async function tierForAr(amount: ReturnType<typeof decimal>) {
   const tiers = await prisma.approvalMatrixTier.findMany({
     where: { isActive: true, forArSupplement: true },
@@ -73,60 +41,11 @@ async function tierForAr(amount: ReturnType<typeof decimal>) {
   return matchTier(tiers, "AR", amount);
 }
 
-function toView(row: {
-  id: string;
-  number: string | null;
-  amount: ReturnType<typeof decimal>;
-  reason: string;
-  status: "DRAFT" | "DIAJUKAN" | "APPROVED" | "DITOLAK";
-  version: number;
-  date: Date;
-  submittedDate: Date | null;
-  approvalEmailDate: Date | null;
-  decidedDate: Date | null;
-  levels: {
-    id: string;
-    levelNo: number;
-    positionId: string;
-    positionNameSnapshot: string;
-    record: {
-      id: string;
-      result: "APPROVED" | "DITOLAK";
-      approverName: string;
-      decisionDate: Date;
-    } | null;
-  }[];
-}) {
-  return {
-    ...row,
-    amount: decimalToString(row.amount),
-    date: businessDateIso(row.date),
-    submittedDate: row.submittedDate
-      ? businessDateIso(row.submittedDate)
-      : null,
-    approvalEmailDate: row.approvalEmailDate
-      ? businessDateIso(row.approvalEmailDate)
-      : null,
-    decidedDate: row.decidedDate ? businessDateIso(row.decidedDate) : null,
-    levels: row.levels.map((level) => ({
-      ...level,
-      record: level.record
-        ? {
-            ...level.record,
-            decisionDate: businessDateIso(level.record.decisionDate),
-          }
-        : null,
-    })),
-  };
-}
-
-export async function listArSupplements(projectId: string) {
-  const rows = await prisma.arSupplement.findMany({
-    where: { projectId },
-    select: supplementSelect,
-    orderBy: { date: "desc" },
-  });
-  return rows.map(toView);
+function versionConflict() {
+  return new DomainError(
+    "VERSION_CONFLICT",
+    "Data sudah diubah orang lain. Muat ulang halaman lalu ulangi.",
+  );
 }
 
 /** AC-25: AR tambahan boleh di semua status kecuali COMPLETED dan CANCELLED (dicegah requireMutableProject). */
@@ -187,8 +106,6 @@ export async function updateArSupplement(
         projectId: true,
         status: true,
         amount: true,
-        reason: true,
-        date: true,
         matrixTierId: true,
         version: true,
       },
@@ -217,12 +134,7 @@ export async function updateArSupplement(
         version: { increment: 1 },
       },
     });
-    if (updated.count === 0) {
-      throw new DomainError(
-        "VERSION_CONFLICT",
-        "Data sudah diubah orang lain. Muat ulang halaman lalu ulangi.",
-      );
-    }
+    if (updated.count === 0) throw versionConflict();
 
     if (tier.id !== before.matrixTierId) {
       await syncLevelsFromTier(
@@ -239,7 +151,7 @@ export async function updateArSupplement(
       entityType: "ArSupplement",
       entityId: id,
       action: "UPDATE",
-      before: { amount: decimalToString(before.amount) },
+      before: { amount: before.amount.toFixed(2) },
       after: { amount: amount.toFixed(2), reason: input.reason },
     });
     return { id };
@@ -255,7 +167,7 @@ export async function setArLevels(
   return withTransaction(async (tx) => {
     const supplement = await tx.arSupplement.findUnique({
       where: { id },
-      select: { projectId: true, status: true, version: true },
+      select: { projectId: true, status: true },
     });
     if (!supplement) {
       throw new DomainError("NOT_FOUND", "AR tambahan tidak ditemukan.");
@@ -270,12 +182,8 @@ export async function setArLevels(
       where: { id, version },
       data: { version: { increment: 1 } },
     });
-    if (updated.count === 0) {
-      throw new DomainError(
-        "VERSION_CONFLICT",
-        "Data sudah diubah orang lain. Muat ulang halaman lalu ulangi.",
-      );
-    }
+    if (updated.count === 0) throw versionConflict();
+
     await replaceLevels(
       tx,
       { arSupplementId: id },
@@ -296,13 +204,7 @@ export async function submitArSupplement(
   return withTransaction(async (tx) => {
     const supplement = await tx.arSupplement.findUnique({
       where: { id },
-      select: {
-        projectId: true,
-        status: true,
-        amount: true,
-        matrixTierId: true,
-        version: true,
-      },
+      select: { projectId: true, status: true },
     });
     if (!supplement) {
       throw new DomainError("NOT_FOUND", "AR tambahan tidak ditemukan.");
@@ -331,12 +233,7 @@ export async function submitArSupplement(
         version: { increment: 1 },
       },
     });
-    if (updated.count === 0) {
-      throw new DomainError(
-        "VERSION_CONFLICT",
-        "Data sudah diubah orang lain. Muat ulang halaman lalu ulangi.",
-      );
-    }
+    if (updated.count === 0) throw versionConflict();
 
     await writeAudit(tx, {
       actorId,
@@ -354,38 +251,4 @@ export async function submitArSupplement(
     });
     return { id };
   });
-}
-
-/** docs/04 §4: rencana, resmi, dan riwayat anggaran proyek. */
-export async function getBudget(projectId: string) {
-  const project = await prisma.project.findUnique({
-    where: { id: projectId },
-    select: { plannedBudget: true },
-  });
-  const entries = await prisma.budgetEntry.findMany({
-    where: { projectId },
-    select: {
-      id: true,
-      type: true,
-      amount: true,
-      effectiveDate: true,
-      arSupplementId: true,
-    },
-    orderBy: { createdAt: "asc" },
-  });
-  const officialTotal = entries.reduce(
-    (total, entry) => total.plus(entry.amount),
-    ZERO(),
-  );
-  return {
-    planned: decimalToString(project?.plannedBudget ?? null),
-    official: decimalToString(officialTotal),
-    entries: entries.map((entry) => ({
-      id: entry.id,
-      type: entry.type,
-      amount: decimalToString(entry.amount),
-      effectiveDate: businessDateIso(entry.effectiveDate),
-      arSupplementId: entry.arSupplementId,
-    })),
-  };
 }
