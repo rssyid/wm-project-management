@@ -1,0 +1,71 @@
+import { expect, test } from "@playwright/test";
+
+import { storageStatePath } from "./helpers/storage";
+
+/**
+ * AC-10 dan AC-11: alur membuat proyek lewat UI sampai kode otomatis tampil, lalu proyek bisa
+ * dibuka dari daftar. Data dibuat di branch Neon dev yang dipakai e2e.
+ */
+test.describe("buat proyek", () => {
+  test.use({ storageState: storageStatePath("WM_HO_SPECIALIST") });
+
+  test("AC-11 proyek baru wajib punya tepat satu Estate utama", async ({
+    page,
+  }) => {
+    await page.goto("/proyek/baru");
+    await expect(
+      page.getByRole("heading", { name: "Buat proyek" }),
+    ).toBeVisible();
+
+    await page.getByLabel("Nama proyek").fill("Proyek e2e kanal");
+    await page
+      .getByLabel("Kategori", { exact: true })
+      .selectOption({ index: 1 });
+
+    const region = page.getByLabel("Region", { exact: true });
+    await region.selectOption({ index: 1 });
+    const company = page.getByLabel("Company", { exact: true });
+    await company.selectOption({ index: 1 });
+
+    const estate = page.locator("fieldset input[type=checkbox]").first();
+    await estate.check();
+
+    // Belum ada Estate utama yang dipilih.
+    await page.getByRole("button", { name: "Simpan proyek" }).click();
+    await expect(page.getByText("Pilih Estate utama.")).toBeVisible();
+
+    await page.getByLabel("Estate utama").first().check();
+    await page.getByLabel("Target mulai").fill("2026-10-01");
+    await page.getByLabel("Target selesai").fill("2026-12-20");
+    await page.getByLabel("Anggaran rencana").fill("450000000.00");
+    await page.getByRole("button", { name: "Simpan proyek" }).click();
+
+    await expect(page).toHaveURL(/\/proyek\/WM-[A-Z0-9]+-\d{4}-\d{4}$/);
+    await expect(
+      page.getByRole("heading", { name: /Proyek: Draft/ }),
+    ).toBeVisible();
+  });
+
+  test("AC-13 proyek yang dibuat muncul di daftar proyek", async ({ page }) => {
+    await page.goto("/proyek");
+    await page.getByPlaceholder("Nama atau kode").fill("kanal");
+    await page.getByRole("button", { name: "Saring" }).click();
+
+    const table = page.getByRole("table", { name: "Daftar proyek" });
+    await expect(table).toBeVisible();
+    await expect(table).toContainText("WM-");
+  });
+});
+
+test.describe("viewer proyek", () => {
+  test.use({ storageState: storageStatePath("MANAGEMENT_VIEWER") });
+
+  test("AC-02 Management Viewer tidak melihat tombol aksi proyek", async ({
+    page,
+  }) => {
+    await page.goto("/proyek");
+    await expect(page.getByRole("link", { name: "Buat proyek" })).toHaveCount(
+      0,
+    );
+  });
+});
