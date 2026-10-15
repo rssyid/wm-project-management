@@ -40,9 +40,16 @@ test.describe("buat proyek", () => {
     await page.getByLabel("Anggaran rencana").fill("450000000.00");
     await page.getByRole("button", { name: "Simpan proyek" }).click();
 
-    await expect(page).toHaveURL(/\/proyek\/WM-[A-Z0-9]+-\d{4}-\d{4}$/);
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("WM-");
-    await expect(page.getByText("Proyek: Draf").first()).toBeVisible();
+    // Runner CI menjangkau Neon lebih lambat; respons POST bisa ~3 detik sebelum navigasi.
+    await expect(page).toHaveURL(/\/proyek\/WM-[A-Z0-9]+-\d{4}-\d{4}$/, {
+      timeout: 15_000,
+    });
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("WM-", {
+      timeout: 15_000,
+    });
+    await expect(page.getByText("Proyek: Draf").first()).toBeVisible({
+      timeout: 15_000,
+    });
   });
 
   test("AC-13 proyek yang dibuat muncul di daftar proyek", async ({
@@ -57,8 +64,8 @@ test.describe("buat proyek", () => {
     const data = isMobile
       ? page.getByRole("list", { name: "Daftar proyek" })
       : page.getByRole("table", { name: "Daftar proyek" });
-    await expect(data).toBeVisible();
-    await expect(data).toContainText("WM-");
+    await expect(data).toBeVisible({ timeout: 15_000 });
+    await expect(data).toContainText("WM-", { timeout: 15_000 });
   });
 });
 
