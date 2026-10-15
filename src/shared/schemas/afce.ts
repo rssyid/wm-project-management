@@ -78,11 +78,7 @@ export const updateArSupplementSchema = z.object({
 /** Keputusan satu level dari SAP, dicatat user; approver tidak login (docs/01 §6). */
 export const approvalDecisionSchema = z.object({
   result: z.enum(["APPROVED", "DITOLAK"]),
-  approverName: z
-    .string()
-    .trim()
-    .min(1, "Nama approver wajib diisi.")
-    .max(160),
+  approverName: z.string().trim().min(1, "Nama approver wajib diisi.").max(160),
   decisionDate: businessDateField,
   notes: optionalTextField(1000),
   evidenceFileId: z.string().trim().min(1).optional(),

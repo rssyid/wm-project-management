@@ -9,6 +9,7 @@ export type AuditAction =
   | "DELETE"
   | "DEACTIVATE"
   | "IMPORT"
+  | "TRANSITION"
   | "RESET_PASSWORD"
   | "CHANGE_PASSWORD";
 

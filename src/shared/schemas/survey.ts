@@ -1,10 +1,6 @@
 import { z } from "zod";
 
-import {
-  businessDateField,
-  idField,
-  optionalTextField,
-} from "./fields";
+import { businessDateField, idField, optionalTextField } from "./fields";
 
 /**
  * Survei (docs/01 §1): tanggal, surveyor, kondisi eksisting, rekomendasi, koordinat opsional.
@@ -49,7 +45,8 @@ export const surveySchema = z
       ctx.addIssue({
         code: "custom",
         path: ["latitude"],
-        message: "Isi latitude dan longitude sekaligus, atau kosongkan keduanya.",
+        message:
+          "Isi latitude dan longitude sekaligus, atau kosongkan keduanya.",
       });
     }
   });

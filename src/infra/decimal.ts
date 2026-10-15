@@ -11,7 +11,10 @@ export function decimal(value: string | number | DecimalValue): DecimalValue {
 export const ZERO = (): DecimalValue => new Prisma.Decimal(0);
 
 export function sumDecimal(values: readonly DecimalValue[]): DecimalValue {
-  return values.reduce<DecimalValue>((total, value) => total.plus(value), ZERO());
+  return values.reduce<DecimalValue>(
+    (total, value) => total.plus(value),
+    ZERO(),
+  );
 }
 
 export function decimalEquals(

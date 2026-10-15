@@ -8,19 +8,10 @@ import { isMoneyAmount } from "@/shared/money";
  * isi request, dan nilai di database punya satu bentuk yang sama; konversi ke Decimal dan
  * kolom @db.Date terjadi di domain service.
  */
-export const nameField = z
-  .string()
-  .trim()
-  .min(1, "Nama wajib diisi.")
-  .max(160);
+export const nameField = z.string().trim().min(1, "Nama wajib diisi.").max(160);
 
 export const optionalTextField = (max: number) =>
-  z
-    .string()
-    .trim()
-    .max(max, `Maksimal ${max} karakter.`)
-    .optional()
-    .nullable();
+  z.string().trim().max(max, `Maksimal ${max} karakter.`).optional().nullable();
 
 export const moneyField = z
   .string()

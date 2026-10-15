@@ -1,6 +1,8 @@
 import { runSeed } from "../../../prisma/seed/run";
 import { prisma } from "@/infra/db";
+import type { ProjectStatus } from "@/shared/project-status";
 import type { Role } from "@/shared/role";
+import { Prisma } from "@/generated/prisma/client";
 import { hashPassword } from "better-auth/crypto";
 
 let seeded = false;
@@ -54,20 +56,37 @@ export async function createUser(options: UserOptions = {}) {
 export async function createProject(options: {
   name?: string;
   createdById: string;
+  companyId?: string;
+  estateId?: string;
+  picUserId?: string | null;
+  targetStartDate?: Date;
+  targetEndDate?: Date;
+  plannedBudget?: string | number;
+  status?: ProjectStatus;
 }) {
-  const company = await prisma.company.findFirstOrThrow({
-    orderBy: { code: "asc" },
-  });
+  const company = options.companyId
+    ? await prisma.company.findUniqueOrThrow({
+        where: { id: options.companyId },
+      })
+    : await prisma.company.findFirstOrThrow({ orderBy: { code: "asc" } });
   const category = await prisma.projectCategory.findFirstOrThrow();
-  const estate = await prisma.estate.findFirstOrThrow({
-    orderBy: { code: "asc" },
-  });
+  const estate = options.estateId
+    ? await prisma.estate.findUniqueOrThrow({ where: { id: options.estateId } })
+    : await prisma.estate.findFirstOrThrow({ orderBy: { code: "asc" } });
   const project = await prisma.project.create({
     data: {
       code: `WM-TEST-${crypto.randomUUID().slice(0, 4).toUpperCase()}`,
       name: options.name ?? "Proyek Uji",
       companyId: company.id,
       categoryId: category.id,
+      picUserId: options.picUserId ?? null,
+      targetStartDate: options.targetStartDate ?? null,
+      targetEndDate: options.targetEndDate ?? null,
+      plannedBudget:
+        options.plannedBudget === undefined
+          ? null
+          : new Prisma.Decimal(options.plannedBudget),
+      status: options.status ?? "DRAFT",
       createdById: options.createdById,
       estates: { create: { estateId: estate.id, isPrimary: true } },
     },

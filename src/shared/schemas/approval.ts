@@ -35,7 +35,10 @@ export const createApprovalTierSchema = z
   )
   .refine(
     (value) => new Set(value.positionIds).size === value.positionIds.length,
-    { message: "Jabatan tidak boleh sama dalam satu tier.", path: ["positionIds"] },
+    {
+      message: "Jabatan tidak boleh sama dalam satu tier.",
+      path: ["positionIds"],
+    },
   );
 
 export const updateApprovalTierSchema = createApprovalTierSchema.extend({
