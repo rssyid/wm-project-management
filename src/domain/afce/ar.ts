@@ -31,6 +31,7 @@ const supplementSelect = {
     select: {
       id: true,
       levelNo: true,
+      positionId: true,
       positionNameSnapshot: true,
       record: {
         select: {
@@ -76,6 +77,9 @@ function toView(row: {
   id: string;
   number: string | null;
   amount: ReturnType<typeof decimal>;
+  reason: string;
+  status: "DRAFT" | "DIAJUKAN" | "APPROVED" | "DITOLAK";
+  version: number;
   date: Date;
   submittedDate: Date | null;
   approvalEmailDate: Date | null;
@@ -83,8 +87,14 @@ function toView(row: {
   levels: {
     id: string;
     levelNo: number;
+    positionId: string;
     positionNameSnapshot: string;
-    record: { decisionDate: Date } | null;
+    record: {
+      id: string;
+      result: "APPROVED" | "DITOLAK";
+      approverName: string;
+      decisionDate: Date;
+    } | null;
   }[];
 }) {
   return {
@@ -100,8 +110,11 @@ function toView(row: {
     decidedDate: row.decidedDate ? businessDateIso(row.decidedDate) : null,
     levels: row.levels.map((level) => ({
       ...level,
-      decisionDate: level.record
-        ? businessDateIso(level.record.decisionDate)
+      record: level.record
+        ? {
+            ...level.record,
+            decisionDate: businessDateIso(level.record.decisionDate),
+          }
         : null,
     })),
   };

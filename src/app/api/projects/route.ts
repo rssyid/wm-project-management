@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+
 import { ok, toErrorResponse } from "@/app/api/_lib/respond";
 import { parseJson, requirePermission } from "@/app/api/_lib/session";
 import { listProjects } from "@/domain/project/queries";
@@ -9,6 +11,8 @@ import {
 
 export async function GET(request: Request) {
   try {
+    // Daftar proyek bergantung pada session, jadi route dijalankan per permintaan.
+    await connection();
     await requirePermission(request, "read");
     const filters = projectFiltersSchema.parse(
       Object.fromEntries(new URL(request.url).searchParams),

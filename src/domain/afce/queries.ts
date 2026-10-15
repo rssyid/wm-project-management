@@ -144,6 +144,9 @@ export async function toAttemptView(row: AttemptRow) {
         orderedPositionIds(row.levels),
         matrixIds,
       ),
+      record: level.record
+        ? { ...level.record, decisionDate: iso(level.record.decisionDate) }
+        : null,
     })),
   };
 }

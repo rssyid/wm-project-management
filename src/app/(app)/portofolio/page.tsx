@@ -1,6 +1,5 @@
+import { EmptyState } from "@/components/empty-state";
 import { PageHeader } from "@/components/page-header";
-import { GanttMatrix } from "@/prototype/gantt";
-import { SAMPLE_GANTT } from "@/prototype/sample-data";
 
 export default function PortfolioPage() {
   return (
@@ -9,7 +8,7 @@ export default function PortfolioPage() {
         title="Portofolio"
         description="Gantt matriks mingguan untuk proyek terfilter."
       />
-      <GanttMatrix rows={SAMPLE_GANTT} caption="Gantt portofolio" />
+      <EmptyState message="Gantt portofolio dibangun pada fase F5, setelah service jadwal dan progres tersedia." />
     </>
   );
 }

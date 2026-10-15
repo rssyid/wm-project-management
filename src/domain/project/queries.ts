@@ -167,7 +167,19 @@ export async function getProject(projectId: string) {
           },
         },
       },
-      survey: { select: { id: true, surveyDate: true, surveyorNames: true } },
+      survey: {
+        select: {
+          id: true,
+          surveyDate: true,
+          surveyorNames: true,
+          existingCondition: true,
+          recommendation: true,
+          latitude: true,
+          longitude: true,
+          notes: true,
+          version: true,
+        },
+      },
       afceAttempts: {
         select: {
           id: true,
@@ -204,7 +216,12 @@ export async function getProject(projectId: string) {
     targetStartDate: iso(project.targetStartDate),
     targetEndDate: iso(project.targetEndDate),
     survey: project.survey
-      ? { ...project.survey, surveyDate: iso(project.survey.surveyDate) }
+      ? {
+          ...project.survey,
+          surveyDate: iso(project.survey.surveyDate),
+          latitude: project.survey.latitude?.toFixed(6) ?? null,
+          longitude: project.survey.longitude?.toFixed(6) ?? null,
+        }
       : null,
     afceAttempts: project.afceAttempts.map((attempt) => ({
       ...attempt,
@@ -222,6 +239,14 @@ export async function getProject(projectId: string) {
       effectiveDate: iso(entry.effectiveDate),
     })),
   };
+}
+
+export async function getProjectByCode(code: string) {
+  const row = await prisma.project.findUnique({
+    where: { code },
+    select: { id: true },
+  });
+  return row ? getProject(row.id) : null;
 }
 
 export async function getProjectHistory(projectId: string) {

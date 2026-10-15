@@ -5,9 +5,10 @@ import { adminMenuFor, type AdminMenu } from "@/components/app-shell/nav";
 import { PageHeader } from "@/components/page-header";
 import { getSessionUser } from "@/infra/session";
 
-/** Halaman yang dibuat di F1 saja; sisanya menyusul sesuai fase di docs/06 §2. */
+/** Halaman yang sudah dibuat per fase; sisanya menyusul sesuai docs/06 §2. */
 const ADMIN_ROUTES: Partial<Record<AdminMenu["label"], string>> = {
   User: "/admin/user",
+  "Matriks approval": "/admin/matriks-approval",
 };
 
 export default async function AdminPage() {

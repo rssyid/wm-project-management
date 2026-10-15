@@ -41,7 +41,6 @@ describe("matriks approval", () => {
   let userId: string;
   let positionIds: string[];
   let tierBawah: TierData;
-  let tierAtas: TierData;
 
   beforeAll(async () => {
     await ensureSeed();
@@ -155,7 +154,6 @@ describe("matriks approval", () => {
       positionIds: [positionIds[0]],
     });
     expect(atas.response.status).toBe(200);
-    tierAtas = atas.json.data as TierData;
 
     const sebelumBatas = await readJson<Envelope>(
       await callRoute(matchRoute, {
