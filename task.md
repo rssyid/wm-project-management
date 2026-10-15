@@ -94,15 +94,24 @@ Semua item belum dikerjakan. Centang hanya dengan bukti (lihat perintah `/verify
 
 ## F2 — Proyek dan AFCE (AC-10–25)
 
-- [ ] Transition service + riwayat status (AC-15) dan semua gate di dokumen domain §5.
-- [ ] Buat/ubah proyek: multi-Estate, kategori, data dasar, kode atomik (AC-10–13).
-- [ ] Survei + foto/dokumen/spasial, kunci setelah AFCE diajukan (AC-14).
-- [ ] Matriks approval: editor tier (SA), validasi rentang, endpoint match.
-- [ ] AFCE: attempt, BOQ, nilai = total, salin level dari tier, ubah level saat DRAFT, ajukan (tanggal pengajuan + email) (AC-16–20).
+- [x] Transition service + riwayat status (AC-15) dan semua gate di dokumen domain §5.
+- [x] Buat/ubah proyek: multi-Estate, kategori, data dasar, kode atomik (AC-10–13).
+- [x] Survei + foto/dokumen/spasial, kunci setelah AFCE diajukan (AC-14).
+- [x] Matriks approval: editor tier (SA), validasi rentang, endpoint match.
+- [x] AFCE: attempt, BOQ, nilai = total, salin level dari tier, ubah level saat DRAFT, ajukan (tanggal pengajuan + email) (AC-16–20).
 - [ ] Catat keputusan SAP per level, aturan urutan/tanggal, durasi, efek ditolak/approved, anggaran INITIAL (AC-21–24).
 - [ ] AR tambahan (AC-25); halaman anggaran.
-- [ ] UI: daftar proyek, form proyek, workspace (header, panel langkah berikutnya, tab Ringkasan/Survei/AFCE).
+- [x] UI: daftar proyek, form proyek, workspace (header, panel langkah berikutnya, tab Ringkasan/Survei/AFCE).
+- [ ] Tombol aksi sesuai role dan status di UI.
 - Bukti:
+  - Kode: L1 `src/infra/decimal.ts`, `src/shared/date.ts`, `src/shared/money.ts`; L2 permission + skema Zod; L3 `src/domain/project-transition/{gates,service}.ts`; L4 `src/domain/project/*` + `/api/projects/*`; L5 `src/domain/survey/service.ts`, `src/domain/files/links.ts`; L6 `src/domain/approval-matrix/{tier,service}.ts` + `/api/approval-tiers/*`; L7 `src/domain/afce/{draft,attempts,boq,levels,queries}.ts` + route; L8 `src/domain/afce/{duration,decision}.ts`; L9 `src/domain/afce/{ar,ar-queries,budget}.ts`; UI `src/components/project/*`, `src/components/admin/approval-tier-editor.tsx`, halaman `/proyek`, `/proyek/baru`, `/proyek/[kode]`, `/admin/matriks-approval`.
+  - Unit (lintas DB): `pnpm vitest run --project unit` → 58/58 lulus pada 15 Oktober 2026, termasuk AC-18 batas tier, AC-22 durasi level, dan aturan tanggal keputusan.
+  - Integrasi (lulus sebelum branch Neon `test` tidak dapat dijangkau, 15 Oktober 2026): `tests/integration/project-transition.test.ts` 11/11 (AC-15), `projects.test.ts` 17/17 (AC-10–13, AC-02, AC-05, AC-06), `survey.test.ts` 10/10 (AC-14), `approval-matrix.test.ts` 10/10 (AC-03, AC-18), `afce.test.ts` 13/13 (AC-16–20), `auth.test.ts` 7/7 (D-47).
+  - **Belum dijalankan** karena `P1001: Can't reach database server` ke branch Neon `test`: `tests/integration/approval-decision.test.ts` (AC-21–24) dan `ar-supplement.test.ts` (AC-25), lalu `pnpm test` penuh dan `pnpm test:e2e`. Kode dan test-nya sudah ada; bukti run menyusul setelah database hidup kembali.
+  - Gerbang non-DB pada 15 Oktober 2026: `pnpm format:check` ✓ · `pnpm lint` 0 error (1 peringatan dari pustaka pihak ketiga di `src/generated`) · `pnpm typecheck` ✓ · `pnpm build` ✓ (semua route API tercatat `ƒ (Dynamic)`).
+  - Keputusan baru: D-48 … D-57 di `docs/07-decisions.md`.
+  - Deviasi yang dicatat: daftar proyek belum punya kolom progres/EWS (D-52, menunggu F4), parameter `archived` belum menyaring (D-50, menunggu F6), tab workspace baru Ringkasan/Survei/AFCE-AR (D-57).
+  - Prasyarat belum dikerjakan oleh coder: CORS bucket R2 `dev` harus disetel agar unggah foto dari browser bisa diuji manual; dan tier matriks approval kosong sampai diisi lewat `/admin/matriks-approval` (seed sengaja tidak mengisinya).
 
 ## F3 — Pengadaan (AC-30–44)
 
