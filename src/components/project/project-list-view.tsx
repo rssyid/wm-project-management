@@ -8,6 +8,7 @@ import {
   type ProjectListRow,
 } from "@/components/project/project-table";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import {
   PROJECT_STATUSES,
   PROJECT_STATUS_LABEL,
@@ -66,19 +67,21 @@ export function ProjectListView({
       />
 
       <form method="get" className="mb-3 flex flex-wrap items-end gap-2">
-        <label className="flex flex-col gap-1">
-          <span className="text-dense text-ink-muted">Cari</span>
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="filter-q">Cari</Label>
           <input
+            id="filter-q"
             name="q"
             defaultValue={filters.q}
             placeholder="Nama atau kode"
             className="h-9 w-56 rounded border bg-panel px-3 text-sm"
           />
-        </label>
+        </div>
 
-        <label className="flex flex-col gap-1">
-          <span className="text-dense text-ink-muted">Status</span>
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="filter-status">Status</Label>
           <select
+            id="filter-status"
             name="status"
             defaultValue={filters.status}
             className="h-9 rounded border bg-panel px-2 text-sm"
@@ -90,11 +93,12 @@ export function ProjectListView({
               </option>
             ))}
           </select>
-        </label>
+        </div>
 
-        <label className="flex flex-col gap-1">
-          <span className="text-dense text-ink-muted">Region</span>
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="filter-region">Region</Label>
           <select
+            id="filter-region"
             name="regionId"
             defaultValue={filters.regionId}
             className="h-9 rounded border bg-panel px-2 text-sm"
@@ -106,11 +110,12 @@ export function ProjectListView({
               </option>
             ))}
           </select>
-        </label>
+        </div>
 
-        <label className="flex flex-col gap-1">
-          <span className="text-dense text-ink-muted">Company</span>
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="filter-company">Company</Label>
           <select
+            id="filter-company"
             name="companyId"
             defaultValue={filters.companyId}
             className="h-9 rounded border bg-panel px-2 text-sm"
@@ -122,11 +127,12 @@ export function ProjectListView({
               </option>
             ))}
           </select>
-        </label>
+        </div>
 
-        <label className="flex flex-col gap-1">
-          <span className="text-dense text-ink-muted">Kategori</span>
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="filter-category">Kategori</Label>
           <select
+            id="filter-category"
             name="categoryId"
             defaultValue={filters.categoryId}
             className="h-9 rounded border bg-panel px-2 text-sm"
@@ -138,7 +144,7 @@ export function ProjectListView({
               </option>
             ))}
           </select>
-        </label>
+        </div>
 
         <Button type="submit" variant="outline">
           Saring

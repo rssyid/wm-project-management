@@ -11,7 +11,6 @@ import { FormSection } from "@/components/form-section";
 import { FileUpload } from "@/components/project/file-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { surveySchema } from "@/shared/schemas/survey";
 
 export type SurveyDetail = {
@@ -212,10 +211,13 @@ function Field({
   error?: string;
   children: React.ReactNode;
 }) {
+  // Pembungkus `<label>` memberi nama aksesibel pada field tanpa mengelola id satu per satu.
   return (
     <div className="flex flex-col gap-1">
-      <Label>{label}</Label>
-      {children}
+      <label className="flex flex-col gap-1">
+        <span className="text-sm font-medium">{label}</span>
+        {children}
+      </label>
       {error ? <p className="text-xs text-destructive">{error}</p> : null}
     </div>
   );

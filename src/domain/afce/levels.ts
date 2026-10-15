@@ -137,7 +137,7 @@ export async function replaceLevels(
   await writeAudit(tx, {
     actorId,
     projectId,
-    entityType: "ArSupplement",
+    entityType: owner.arSupplementId ? "ArSupplement" : "AfceAttempt",
     entityId: owner.arSupplementId ?? owner.afceAttemptId ?? "",
     action: "UPDATE",
     reason: "Level approval",

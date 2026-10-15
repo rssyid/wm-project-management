@@ -1,3 +1,5 @@
+"use client";
+
 import { ProjectStatusBadge } from "@/components/project-badges";
 import { DataTable, type DataTableColumn } from "@/components/data-table";
 import { EmptyState } from "@/components/empty-state";

@@ -6,20 +6,14 @@ import { storageStatePath } from "./helpers/storage";
 test.describe("viewer tanpa tombol aksi", () => {
   test.use({ storageState: storageStatePath("MANAGEMENT_VIEWER") });
 
-  test("melihat daftar proyek tanpa tombol aksi", async ({
-    page,
-    isMobile,
-  }) => {
+  test("melihat daftar proyek tanpa aksi buat proyek", async ({ page }) => {
     await page.goto("/proyek");
-    await expect(page.getByRole("button", { name: "Buat proyek" })).toHaveCount(
+    await expect(page.getByRole("heading", { name: "Proyek" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Buat proyek" })).toHaveCount(
       0,
     );
-    // D-20: di bawah 768 px baris tabel menjadi daftar ringkas, bukan tabel.
-    await expect(
-      isMobile
-        ? page.getByRole("list", { name: "Daftar proyek" })
-        : page.getByRole("table", { name: "Daftar proyek" }),
-    ).toBeVisible();
+    // Tabel atau daftar ringkas hanya muncul bila ada proyek; bar filter selalu ada.
+    await expect(page.getByRole("button", { name: "Saring" })).toBeVisible();
   });
 });
 
@@ -28,9 +22,7 @@ test.describe("specialist melihat tombol aksi", () => {
 
   test("tombol buat proyek tampil", async ({ page }) => {
     await page.goto("/proyek");
-    await expect(
-      page.getByRole("button", { name: "Buat proyek" }),
-    ).toBeVisible();
+    await expect(page.getByRole("link", { name: "Buat proyek" })).toBeVisible();
   });
 });
 

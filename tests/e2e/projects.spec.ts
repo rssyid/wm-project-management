@@ -41,19 +41,24 @@ test.describe("buat proyek", () => {
     await page.getByRole("button", { name: "Simpan proyek" }).click();
 
     await expect(page).toHaveURL(/\/proyek\/WM-[A-Z0-9]+-\d{4}-\d{4}$/);
-    await expect(
-      page.getByRole("heading", { name: /Proyek: Draft/ }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("WM-");
+    await expect(page.getByText("Proyek: Draf").first()).toBeVisible();
   });
 
-  test("AC-13 proyek yang dibuat muncul di daftar proyek", async ({ page }) => {
+  test("AC-13 proyek yang dibuat muncul di daftar proyek", async ({
+    page,
+    isMobile,
+  }) => {
     await page.goto("/proyek");
-    await page.getByPlaceholder("Nama atau kode").fill("kanal");
+    await page.getByLabel("Cari").fill("kanal");
     await page.getByRole("button", { name: "Saring" }).click();
 
-    const table = page.getByRole("table", { name: "Daftar proyek" });
-    await expect(table).toBeVisible();
-    await expect(table).toContainText("WM-");
+    // D-20: tabel di desktop, daftar ringkas di bawah 768 px.
+    const data = isMobile
+      ? page.getByRole("list", { name: "Daftar proyek" })
+      : page.getByRole("table", { name: "Daftar proyek" });
+    await expect(data).toBeVisible();
+    await expect(data).toContainText("WM-");
   });
 });
 

@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, type FieldErrors } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -13,7 +13,10 @@ import { EstatePicker } from "@/components/project/estate-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createProjectSchema } from "@/shared/schemas/project";
+import {
+  projectDatesInOrder,
+  projectFormShape,
+} from "@/shared/schemas/project";
 
 export type FormOption = { id: string; name: string };
 
@@ -32,13 +35,11 @@ export type FormCompany = {
   estates: FormEstate[];
 };
 
-const projectFormSchema = createProjectSchema.extend({
-  regionId: z.string().min(1, "Pilih Region."),
-  primaryEstateId: z.string().min(1, "Pilih Estate utama."),
-  estates: z
-    .array(z.object({ estateId: z.string().min(1), blockId: z.string() }))
-    .min(1, "Pilih minimal satu Estate."),
-});
+// Skema form memakai bentuk field dari skema API lalu menambah Region dan Estate utama (AC-11),
+// karena `.extend` tidak boleh dipakai pada skema yang sudah ber-refine di Zod 4.
+const projectFormSchema = z
+  .object(projectFormShape)
+  .superRefine(projectDatesInOrder);
 
 type FormValues = z.infer<typeof projectFormSchema>;
 
@@ -137,11 +138,20 @@ export function ProjectForm({ regions, companies, categories, pics }: Props) {
         onSubmit={handleSubmit(submit)}
       >
         <FormSection title="Data dasar">
-          <Field label="Nama proyek" error={errors.name?.message}>
-            <Input {...register("name")} aria-invalid={Boolean(errors.name)} />
+          <Field id="name" label="Nama proyek" error={errors.name?.message}>
+            <Input
+              id="name"
+              {...register("name")}
+              aria-invalid={Boolean(errors.name)}
+            />
           </Field>
-          <Field label="Kategori" error={errors.categoryId?.message}>
+          <Field
+            id="categoryId"
+            label="Kategori"
+            error={errors.categoryId?.message}
+          >
             <select
+              id="categoryId"
               {...register("categoryId")}
               className="h-9 w-full rounded border bg-panel px-2 text-sm"
               aria-invalid={Boolean(errors.categoryId)}
@@ -154,8 +164,9 @@ export function ProjectForm({ regions, companies, categories, pics }: Props) {
               ))}
             </select>
           </Field>
-          <Field label="PIC">
+          <Field id="picUserId" label="PIC" error={errors.picUserId?.message}>
             <select
+              id="picUserId"
               {...register("picUserId")}
               className="h-9 w-full rounded border bg-panel px-2 text-sm"
             >
@@ -167,8 +178,9 @@ export function ProjectForm({ regions, companies, categories, pics }: Props) {
               ))}
             </select>
           </Field>
-          <Field label="Deskripsi">
+          <Field id="description" label="Deskripsi">
             <textarea
+              id="description"
               {...register("description")}
               rows={3}
               className="w-full rounded border bg-panel px-3 py-2 text-sm"
@@ -177,8 +189,9 @@ export function ProjectForm({ regions, companies, categories, pics }: Props) {
         </FormSection>
 
         <FormSection title="Lokasi">
-          <Field label="Region" error={errors.regionId?.message}>
+          <Field id="regionId" label="Region" error={errors.regionId?.message}>
             <select
+              id="regionId"
               {...register("regionId")}
               className="h-9 w-full rounded border bg-panel px-2 text-sm"
               aria-invalid={Boolean(errors.regionId)}
@@ -191,8 +204,13 @@ export function ProjectForm({ regions, companies, categories, pics }: Props) {
               ))}
             </select>
           </Field>
-          <Field label="Company" error={errors.companyId?.message}>
+          <Field
+            id="companyId"
+            label="Company"
+            error={errors.companyId?.message}
+          >
             <select
+              id="companyId"
               {...register("companyId")}
               className="h-9 w-full rounded border bg-panel px-2 text-sm"
               aria-invalid={Boolean(errors.companyId)}
@@ -232,22 +250,32 @@ export function ProjectForm({ regions, companies, categories, pics }: Props) {
             onPrimaryChange={(estateId) =>
               setValue("primaryEstateId", estateId)
             }
-            error={errors.estates?.message}
+            error={estateErrorMessage(errors) ?? errors.estates?.message}
             primaryError={errors.primaryEstateId?.message}
           />
         </FormSection>
 
         <FormSection title="Target dan anggaran">
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Target mulai" error={errors.targetStartDate?.message}>
+            <Field
+              id="targetStartDate"
+              label="Target mulai"
+              error={errors.targetStartDate?.message}
+            >
               <Input
+                id="targetStartDate"
                 type="date"
                 {...register("targetStartDate")}
                 aria-invalid={Boolean(errors.targetStartDate)}
               />
             </Field>
-            <Field label="Target selesai" error={errors.targetEndDate?.message}>
+            <Field
+              id="targetEndDate"
+              label="Target selesai"
+              error={errors.targetEndDate?.message}
+            >
               <Input
+                id="targetEndDate"
                 type="date"
                 {...register("targetEndDate")}
                 aria-invalid={Boolean(errors.targetEndDate)}
@@ -255,11 +283,13 @@ export function ProjectForm({ regions, companies, categories, pics }: Props) {
             </Field>
           </div>
           <Field
+            id="plannedBudget"
             label="Anggaran rencana"
             hint="boleh dikosongkan, tetapi wajib sebelum Mulai Survei"
             error={errors.plannedBudget?.message}
           >
             <Input
+              id="plannedBudget"
               inputMode="decimal"
               placeholder="450000000.00"
               {...register("plannedBudget")}
@@ -281,20 +311,37 @@ export function ProjectForm({ regions, companies, categories, pics }: Props) {
   );
 }
 
+/** Pesan error pada baris Estate berada di `estates[i].estateId`/`.blockId`, bukan di `estates`. */
+function estateErrorMessage(
+  errors: FieldErrors<FormValues>,
+): string | undefined {
+  const rows = errors.estates;
+  if (!Array.isArray(rows)) return undefined;
+  for (const row of rows) {
+    const message = row?.estateId?.message ?? row?.blockId?.message;
+    if (message) return message;
+  }
+  return undefined;
+}
+
 function Field({
+  id,
   label,
   hint,
   error,
   children,
 }: {
+  id: string;
   label: string;
   hint?: string;
   error?: string;
   children: React.ReactNode;
 }) {
+  // `htmlFor` dipakai agar nama aksesibel field hanya berisi labelnya, bukan seluruh isi
+  // select, sehingga `getByLabel` di e2e tidak ambigu.
   return (
     <div className="flex flex-col gap-1">
-      <Label>{label}</Label>
+      <Label htmlFor={id}>{label}</Label>
       {children}
       {hint ? <p className="text-xs text-ink-muted">{hint}</p> : null}
       {error ? <p className="text-xs text-destructive">{error}</p> : null}

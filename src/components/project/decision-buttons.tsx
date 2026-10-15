@@ -6,7 +6,6 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { todayBusinessDateIso } from "@/shared/date";
 
 /**
@@ -123,9 +122,9 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-1">
-      <Label>{label}</Label>
+    <label className="flex flex-col gap-1">
+      <span className="text-sm font-medium">{label}</span>
       {children}
-    </div>
+    </label>
   );
 }

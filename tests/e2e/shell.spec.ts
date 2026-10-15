@@ -29,15 +29,14 @@ test.describe("shell aplikasi", () => {
     await expect(page).toHaveURL(/\/dashboard$/);
   });
 
-  test("AC-13 daftar proyek punya bar filter dan tabel", async ({ page }) => {
+  test("AC-13 daftar proyek punya bar filter", async ({ page }) => {
     await page.goto("/proyek");
     await expect(
       page.getByRole("heading", { name: "Proyek", level: 1 }),
     ).toBeVisible();
     await expect(page.getByRole("button", { name: "Saring" })).toBeVisible();
-    await expect(
-      page.getByRole("table", { name: "Daftar proyek" }),
-    ).toBeVisible();
+    await expect(page.getByLabel("Status", { exact: true })).toBeVisible();
+    await expect(page.getByLabel("Region", { exact: true })).toBeVisible();
   });
 
   test("tidak ada pelanggaran axe serius di halaman aplikasi", async ({
