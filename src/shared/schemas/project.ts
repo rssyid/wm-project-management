@@ -55,6 +55,7 @@ export const createProjectSchema = z
 
 export const updateProjectSchema = z
   .object({
+    version: z.number().int().min(1),
     name: nameField.optional(),
     description: optionalTextField(2000),
     picUserId: z.string().trim().min(1).optional().nullable(),
@@ -64,7 +65,10 @@ export const updateProjectSchema = z
   })
   .superRefine(datesInOrder);
 
-export const replaceProjectEstatesSchema = z.object({ estates: estatesField });
+export const replaceProjectEstatesSchema = z.object({
+  version: z.number().int().min(1),
+  estates: estatesField,
+});
 
 /** Filter daftar proyek (docs/04 §3); `archived` diterima sejak F2 tetapi menyaring baru aktif di F6. */
 export const projectFiltersSchema = z.object({
