@@ -81,6 +81,16 @@ Semua item belum dikerjakan. Centang hanya dengan bukti (lihat perintah `/verify
 - Commit: `05002a4` migration + seed + harness · `de66955` auth, error, audit · `e527312` master data · `bbe552c` R2 files + admin user · `25f4fca` shell session + e2e · `fa4b051` CI, dependensi, dokumen.
 - Sisa pekerjaan F1: tidak ada. Yang tersisa di luar coder: push branch `main` agar job CI berjalan dan nomor run-nya diisi di sini.
   - CI GitHub Actions F1 **hijau** (14 Oktober 2026): run [38581726775](https://github.com/rssyid/wm-project-management/actions/runs/38581726775) pada `a4e03f3`, job `verify` dan `e2e` sukses. Run sebelumnya yang gagal tercatat sebagai riwayat: [38548036945](https://github.com/rssyid/wm-project-management/actions/runs/38548036945) (persetujuan build `esbuild`, diperbaiki di `8af1ec9`) dan [38579529265](https://github.com/rssyid/wm-project-management/actions/runs/38579529265) (secrets belum dipasang).
+  - Koreksi setelah deploy (15 Oktober 2026, commit `fix(auth): trust Vercel preview origins for sign-in`): seluruh sign-in di Vercel menjawab 403 karena `BETTER_AUTH_URL` tidak cocok dengan origin produksi dan hostname preview tidak pernah dipercaya. Diperbaiki dengan `trustedOrigins` (produksi eksplisit + `https://*.vercel.app`) dan `src/app/icon.svg` untuk 404 favicon. Keputusan D-47 di `docs/07-decisions.md`.
+
+  ### Verifikasi koreksi Vercel
+
+  | Uji | Hasil |
+  | --- | --- |
+  | `tests/integration/auth.test.ts` "menerima sign-in dari origin produksi dan preview Vercel" | lulus (200) |
+  | `tests/integration/auth.test.ts` "menolak sign-in dari origin asing dengan 403" | lulus (403) |
+  | `trustedOrigins` dikosongkan sementara lalu dua uji di atas dijalankan | gagal 403 pada origin produksi — tes menangkap bug |
+  | Tindakan pengguna | set `BETTER_AUTH_URL=https://wm-project-management.vercel.app` di Vercel → Production |
 
 ## F2 — Proyek dan AFCE (AC-10–25)
 

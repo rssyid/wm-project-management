@@ -26,7 +26,11 @@ async function signIn(email: string, password: string) {
  * (origin-check.mjs:108), yaitu kondisi browser sebenarnya. Karena itu tes memakai route
  * HTTP dengan header `origin` dan cookie, bukan pemanggilan API langsung.
  */
-async function signInFromOrigin(email: string, password: string, origin: string) {
+async function signInFromOrigin(
+  email: string,
+  password: string,
+  origin: string,
+) {
   return callRoute(authRoute, {
     method: "POST",
     path: "/api/auth/sign-in/email",
@@ -102,7 +106,11 @@ describe("Better Auth email/password", () => {
       "https://wm-project-management-abc123-xyz.vercel.app",
     ]) {
       const user = await createUser();
-      const response = await signInFromOrigin(user.email, user.password, origin);
+      const response = await signInFromOrigin(
+        user.email,
+        user.password,
+        origin,
+      );
       expect(response.status, `origin ${origin}`).toBe(200);
       expect(response.headers.getSetCookie().join(";")).toContain(
         "better-auth.session_token",

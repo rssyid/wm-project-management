@@ -99,6 +99,8 @@ Error domain dilempar sebagai tipe dengan kode (`INVALID_TRANSITION`, `PRECONDIT
 
 Environment variable: `DATABASE_URL` (pooled, runtime adapter), `DIRECT_URL` (koneksi langsung, dipakai `prisma.config.ts` untuk migrasi), `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `APP_TIMEZONE=Asia/Jakarta`, `SEED_ADMIN_EMAIL`, `SEED_ADMIN_PASSWORD`. Kredensial backup (`R2_BACKUP_*`) hanya di GitHub Actions.
 
+`BETTER_AUTH_URL` pada produksi berisi origin persis seperti yang dilihat browser (tanpa path dan tanpa garis miring akhir), misalnya `https://wm-project-management.vercel.app`. Hostname preview Vercel berbeda pada setiap PR, jadi `trustedOrigins` di `src/infra/auth.ts` memuat domain produksi secara eksplisit plus `https://*.vercel.app`. Tanpa itu Better Auth menjawab 403 pada setiap sign-in dari domain yang tidak ada di `baseURL`.
+
 CI (GitHub Actions): lint → typecheck → unit/integration test → `prisma migrate deploy` → deploy. Workflow harian terpisah: `pg_dump` (format custom, kompres) ke bucket backup; bersihkan `FileObject` PENDING > 24 jam; retensi 30 harian + 12 bulanan via lifecycle R2. Uji restore ke branch Neon terpisah setiap bulan.
 
 ## 9. Risiko diterima
