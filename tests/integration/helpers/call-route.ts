@@ -10,9 +10,13 @@ export async function callRoute<Ctx>(
     path?: string;
     body?: unknown;
     params?: unknown;
+    headers?: Record<string, string>;
   } = {},
 ): Promise<Response> {
   const headers = new Headers({ host: "localhost" });
+  for (const [key, value] of Object.entries(options.headers ?? {})) {
+    headers.set(key, value);
+  }
   if (options.cookie) headers.set("cookie", options.cookie);
   if (options.body !== undefined)
     headers.set("content-type", "application/json");

@@ -7,6 +7,17 @@ import { prisma } from "@/infra/db";
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_URL,
   secret: process.env.BETTER_AUTH_SECRET,
+  // Better Auth mematikan cek origin otomatis saat `isTest()` (create-context.mjs:211),
+  // sehingga test tidak akan pernah melihat 403. Nilai false memaksa perilaku produksi
+  // juga di integration test.
+  advanced: { disableOriginCheck: false },
+  // Better Auth hanya mempercayai origin dari `baseURL`; hostname preview Vercel berbeda
+  // setiap PR sehingga satu baseURL tidak cukup (docs/02 §8). Production ditulis eksplisit
+  // supaya tidak bergantung pada perilaku wildcard.
+  trustedOrigins: [
+    "https://wm-project-management.vercel.app",
+    "https://*.vercel.app",
+  ],
   database: prismaAdapter(prisma, { provider: "postgresql" }),
   emailAndPassword: {
     enabled: true,

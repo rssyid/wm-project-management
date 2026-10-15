@@ -4,6 +4,9 @@ import { auth } from "@/infra/auth";
 import { prisma } from "@/infra/db";
 import { toSessionUser } from "@/infra/session";
 
+import { POST as authRoute } from "@/app/api/auth/[...all]/route";
+
+import { callRoute } from "./helpers/call-route";
 import { createUser, ensureSeed } from "./helpers/factory";
 
 async function signIn(email: string, password: string) {
@@ -16,6 +19,20 @@ async function signIn(email: string, password: string) {
     .map((entry) => entry.split(";")[0])
     .join("; ");
   return { response, cookie };
+}
+
+/**
+ * Better Auth hanya memvalidasi origin bila request membawa header `cookie`
+ * (origin-check.mjs:108), yaitu kondisi browser sebenarnya. Karena itu tes memakai route
+ * HTTP dengan header `origin` dan cookie, bukan pemanggilan API langsung.
+ */
+async function signInFromOrigin(email: string, password: string, origin: string) {
+  return callRoute(authRoute, {
+    method: "POST",
+    path: "/api/auth/sign-in/email",
+    body: { email, password },
+    headers: { origin, cookie: "__vercel_live_token=uji" },
+  });
 }
 
 async function sessionFromCookie(cookie: string) {
@@ -75,5 +92,33 @@ describe("Better Auth email/password", () => {
 
     await prisma.session.deleteMany({ where: { userId: user.id } });
     expect(await sessionFromCookie(cookie)).toBeNull();
+  });
+
+  // Deploy pertama di Vercel menolak semua sign-in dengan 403 karena origin produksi dan
+  // preview tidak ada di trustedOrigins (D-47).
+  it("menerima sign-in dari origin produksi dan preview Vercel", async () => {
+    for (const origin of [
+      "https://wm-project-management.vercel.app",
+      "https://wm-project-management-abc123-xyz.vercel.app",
+    ]) {
+      const user = await createUser();
+      const response = await signInFromOrigin(user.email, user.password, origin);
+      expect(response.status, `origin ${origin}`).toBe(200);
+      expect(response.headers.getSetCookie().join(";")).toContain(
+        "better-auth.session_token",
+      );
+    }
+  });
+
+  it("menolak sign-in dari origin asing dengan 403", async () => {
+    const user = await createUser();
+
+    const response = await signInFromOrigin(
+      user.email,
+      user.password,
+      "https://evil.example",
+    );
+    expect(response.status).toBe(403);
+    expect(await prisma.session.count({ where: { userId: user.id } })).toBe(0);
   });
 });
