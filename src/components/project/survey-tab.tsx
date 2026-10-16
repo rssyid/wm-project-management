@@ -5,13 +5,15 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import type { z } from "zod";
 
 import { FormSection } from "@/components/form-section";
 import { FileUpload } from "@/components/project/file-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { surveySchema } from "@/shared/schemas/survey";
+import {
+  surveyFormSchema,
+  type SurveyFormValues,
+} from "@/shared/schemas/survey";
 
 export type SurveyDetail = {
   id: string;
@@ -29,12 +31,6 @@ export type SurveyDetail = {
     spatial: { id: string; originalName: string }[];
   };
 };
-
-const surveyFormSchema = surveySchema.omit({
-  photoFileIds: true,
-  documentFileIds: true,
-  spatialFileIds: true,
-});
 
 type Props = {
   projectId: string;
@@ -66,7 +62,7 @@ export function SurveyTab({ projectId, survey, locked }: Props) {
     },
   });
 
-  async function submit(values: z.infer<typeof surveyFormSchema>) {
+  async function submit(values: SurveyFormValues) {
     const response = await fetch(`/api/projects/${projectId}/survey`, {
       method: "PUT",
       headers: { "content-type": "application/json" },

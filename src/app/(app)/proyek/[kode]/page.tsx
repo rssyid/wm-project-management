@@ -27,19 +27,32 @@ type StepPlan = {
   actions: NextAction[];
 };
 
-/** Prasyarat dan aksi utama per status; status F3 ke atas belum punya aksi di fase ini. */
+/**
+ * Prasyarat dan aksi utama per status; status F3 ke atas belum punya aksi di fase ini.
+ * Prasyarat DRAFT → SURVEY dihitung dari data nyata dengan gate yang sama seperti
+ * `startSurvey` di service (AC-12), supaya tombol aktif tepat saat server mau menerimanya.
+ */
 function planFor(
   status: ProjectStatus,
   projectId: string,
-  hasSurvey: boolean,
+  facts: {
+    hasPic: boolean;
+    hasTarget: boolean;
+    hasBudget: boolean;
+    hasEstate: boolean;
+  },
 ): StepPlan {
   switch (status) {
     case "DRAFT":
       return {
         prerequisites: [
-          { label: "PIC sudah dipilih", done: false },
-          { label: "Target mulai dan selesai sudah diisi", done: false },
-          { label: "Anggaran rencana sudah diisi", done: false },
+          { label: "Lokasi Estate sudah dipilih", done: facts.hasEstate },
+          { label: "PIC sudah dipilih", done: facts.hasPic },
+          {
+            label: "Target mulai dan selesai sudah diisi",
+            done: facts.hasTarget,
+          },
+          { label: "Anggaran rencana sudah diisi", done: facts.hasBudget },
         ],
         actions: [
           {
@@ -51,11 +64,19 @@ function planFor(
         ],
       };
     case "SURVEY":
+      // Attempt boleh dibuat saat proyek Survei (docs/01 §6); RAB ditandai siap di dalam
+      // editor attempt, lalu pengajuan AFCE menyusul.
       return {
-        prerequisites: hasSurvey
-          ? []
-          : [{ label: "Survei belum diisi", done: false }],
-        actions: [],
+        prerequisites: [],
+        actions: [
+          {
+            key: "new-attempt",
+            label: "Buat attempt AFCE",
+            method: "POST",
+            path: `/api/projects/${projectId}/afce-attempts`,
+            body: {},
+          },
+        ],
       };
     case "RAB_READY":
       return {
@@ -104,7 +125,13 @@ export default async function ProjectWorkspacePage({
   const mainEstate =
     project.estates.find((estate) => estate.isPrimary) ?? project.estates[0];
   const officialEntries = project.budgetEntries;
-  const plan = planFor(project.status, project.id, project.survey !== null);
+  const plan = planFor(project.status, project.id, {
+    hasPic: project.pic !== null,
+    hasTarget:
+      project.targetStartDate !== null && project.targetEndDate !== null,
+    hasBudget: project.plannedBudget !== null,
+    hasEstate: project.estates.length > 0,
+  });
 
   return (
     <>

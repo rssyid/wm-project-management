@@ -70,8 +70,11 @@ function toTier(row: TierRow) {
   };
 }
 
-async function allTiers(excludeId?: string): Promise<TierForMatch[]> {
-  return prisma.approvalMatrixTier.findMany({
+async function allTiers(
+  client: Tx | typeof prisma,
+  excludeId?: string,
+): Promise<TierForMatch[]> {
+  return client.approvalMatrixTier.findMany({
     where: excludeId ? { id: { not: excludeId } } : {},
     select: {
       id: true,
@@ -83,6 +86,18 @@ async function allTiers(excludeId?: string): Promise<TierForMatch[]> {
       isActive: true,
     },
   });
+}
+
+/**
+ * D-60: rentang tier divalidasi di dalam transaksi yang mengunci baris tier, karena
+ * pemeriksaan hanya sah bila membaca data yang sama dalam lock yang sama. Baris dikunci dengan
+ * `FOR UPDATE`; advisory lock dihindari karena kolom `void`-nya tidak bisa di-deserialize
+ * Prisma dengan driver adapter.
+ */
+async function lockTierRanges(tx: Tx): Promise<void> {
+  await tx.$queryRaw`
+    SELECT "id" FROM "ApprovalMatrixTier" ORDER BY "id" FOR UPDATE
+  `;
 }
 
 export async function listTiers() {
@@ -135,14 +150,15 @@ export async function createTier(
     maxAmount: input.maxAmount ? decimal(input.maxAmount) : null,
     isActive: true,
   };
-  assertRanges(
-    await allTiers(),
-    candidate,
-    input.forAfce,
-    input.forArSupplement,
-  );
-
   return withTransaction(async (tx) => {
+    await lockTierRanges(tx);
+    assertRanges(
+      await allTiers(tx),
+      candidate,
+      input.forAfce,
+      input.forArSupplement,
+    );
+
     const created = await tx.approvalMatrixTier.create({
       data: {
         name: input.name,
@@ -192,16 +208,17 @@ export async function updateTier(
     maxAmount: input.maxAmount ? decimal(input.maxAmount) : null,
     isActive,
   };
-  if (isActive) {
-    assertRanges(
-      await allTiers(id),
-      candidate,
-      input.forAfce,
-      input.forArSupplement,
-    );
-  }
-
   return withTransaction(async (tx) => {
+    await lockTierRanges(tx);
+    if (isActive) {
+      assertRanges(
+        await allTiers(tx, id),
+        candidate,
+        input.forAfce,
+        input.forArSupplement,
+      );
+    }
+
     const updated = await tx.approvalMatrixTier.updateMany({
       where: { id, version: input.version },
       data: {
@@ -240,7 +257,7 @@ export async function updateTier(
 /** docs/04 §2: pencocokan untuk pratinjau di form; 409 bila tidak ada tier yang cocok. */
 export async function matchTierForAmount(doc: TierDoc, amount: string) {
   const value = decimal(amount);
-  const tier = matchTier(await allTiers(), doc, value);
+  const tier = matchTier(await allTiers(prisma), doc, value);
   if (!tier) throw noMatchingTierError(doc, value);
   return getTier(tier.id);
 }

@@ -6,7 +6,6 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 export type TierView = {
   id: string;
@@ -80,61 +79,67 @@ export function ApprovalTierEditor({
 
   return (
     <div className="flex flex-col gap-4">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b text-left text-ink-muted">
-            <th className="py-1">Tier</th>
-            <th className="py-1">Rentang</th>
-            <th className="py-1">Untuk</th>
-            <th className="py-1">Level</th>
-            <th className="py-1">Status</th>
-            <th className="py-1" />
-          </tr>
-        </thead>
-        <tbody>
-          {tiers.map((tier) => (
-            <tr key={tier.id} className="border-b align-top">
-              <td className="py-2 pr-2">{tier.name}</td>
-              <td className="py-2 pr-2 tabular-nums">
-                {tier.minAmount} – {tier.maxAmount ?? "tak terbatas"}
-              </td>
-              <td className="py-2 pr-2">
-                {tier.forAfce ? "AFCE" : ""}
-                {tier.forAfce && tier.forArSupplement ? ", " : ""}
-                {tier.forArSupplement ? "AR" : ""}
-              </td>
-              <td className="py-2 pr-2">
-                {tier.levels.map((level) => level.position.name).join(" → ")}
-              </td>
-              <td className="py-2 pr-2">
-                {tier.isActive ? "Aktif" : "Nonaktif"}
-              </td>
-              <td className="py-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    save("PATCH", `/api/approval-tiers/${tier.id}`, {
-                      version: tier.version,
-                      name: tier.name,
-                      forAfce: tier.forAfce,
-                      forArSupplement: tier.forArSupplement,
-                      minAmount: tier.minAmount,
-                      maxAmount: tier.maxAmount,
-                      positionIds: tier.levels.map(
-                        (level) => level.position.id,
-                      ),
-                      isActive: !tier.isActive,
-                    })
-                  }
-                >
-                  {tier.isActive ? "Nonaktifkan" : "Aktifkan"}
-                </Button>
-              </td>
+      {tiers.length === 0 ? (
+        <p className="text-ink-muted">
+          Belum ada tier matriks approval, sehingga AFCE belum bisa diajukan.
+        </p>
+      ) : (
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b text-left text-ink-muted">
+              <th className="py-1">Tier</th>
+              <th className="py-1">Rentang</th>
+              <th className="py-1">Untuk</th>
+              <th className="py-1">Level</th>
+              <th className="py-1">Status</th>
+              <th className="py-1" />
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {tiers.map((tier) => (
+              <tr key={tier.id} className="border-b align-top">
+                <td className="py-2 pr-2">{tier.name}</td>
+                <td className="py-2 pr-2 tabular-nums">
+                  {tier.minAmount} – {tier.maxAmount ?? "tak terbatas"}
+                </td>
+                <td className="py-2 pr-2">
+                  {tier.forAfce ? "AFCE" : ""}
+                  {tier.forAfce && tier.forArSupplement ? ", " : ""}
+                  {tier.forArSupplement ? "AR" : ""}
+                </td>
+                <td className="py-2 pr-2">
+                  {tier.levels.map((level) => level.position.name).join(" → ")}
+                </td>
+                <td className="py-2 pr-2">
+                  {tier.isActive ? "Aktif" : "Nonaktif"}
+                </td>
+                <td className="py-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      save("PATCH", `/api/approval-tiers/${tier.id}`, {
+                        version: tier.version,
+                        name: tier.name,
+                        forAfce: tier.forAfce,
+                        forArSupplement: tier.forArSupplement,
+                        minAmount: tier.minAmount,
+                        maxAmount: tier.maxAmount,
+                        positionIds: tier.levels.map(
+                          (level) => level.position.id,
+                        ),
+                        isActive: !tier.isActive,
+                      })
+                    }
+                  >
+                    {tier.isActive ? "Nonaktifkan" : "Aktifkan"}
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
 
       {open ? (
         <div className="flex max-w-[720px] flex-col gap-3 rounded border bg-panel p-4">
@@ -283,10 +288,13 @@ function Field({
   label: string;
   children: React.ReactNode;
 }) {
+  // Pembungkus `<label>` memberi nama aksesibel pada input tanpa mengelola id satu per satu.
   return (
     <div className="flex flex-col gap-1">
-      <Label>{label}</Label>
-      {children}
+      <label className="flex flex-col gap-1">
+        <span className="text-sm font-medium">{label}</span>
+        {children}
+      </label>
     </div>
   );
 }

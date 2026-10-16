@@ -82,14 +82,18 @@ test.describe("shell aplikasi", () => {
           .first();
     if ((await firstCode.count()) > 0) {
       await firstCode.click();
-      const results = await new AxeBuilder({ page })
-        .withTags(["wcag2a", "wcag2aa"])
-        .analyze();
-      const serious = results.violations.filter(
-        (violation) =>
-          violation.impact === "serious" || violation.impact === "critical",
-      );
-      expect(serious, "pelanggaran di workspace proyek").toEqual([]);
+      // Setiap tab dipindai karena isinya dirender terpisah dan bisa gagal sendiri.
+      for (const tab of ["Ringkasan", "Survei", "AFCE/AR"]) {
+        await page.getByRole("tab", { name: tab }).click();
+        const results = await new AxeBuilder({ page })
+          .withTags(["wcag2a", "wcag2aa"])
+          .analyze();
+        const serious = results.violations.filter(
+          (violation) =>
+            violation.impact === "serious" || violation.impact === "critical",
+        );
+        expect(serious, `pelanggaran di tab ${tab}`).toEqual([]);
+      }
     }
   });
 });

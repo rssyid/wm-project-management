@@ -11,6 +11,33 @@ import {
 } from "../tests/e2e/accounts";
 
 /**
+ * Tier e2e dihapus agar matriks approval bersih dari nol setiap run: matriks tidak boleh punya
+ * nominal tanpa tier (AC-18), sehingga tier sisa run sebelumnya membuat penambahan tier baru
+ * ditolak. Attempt dan AR uji lebih dulu dilepas dari tier karena relasinya Restrict.
+ */
+async function removeE2eTiers() {
+  const tiers = await prisma.approvalMatrixTier.findMany({
+    where: { name: { startsWith: "Tier e2e" } },
+    select: { id: true },
+  });
+  const ids = tiers.map((tier) => tier.id);
+  if (ids.length === 0) return 0;
+
+  await prisma.afceAttempt.updateMany({
+    where: { matrixTierId: { in: ids } },
+    data: { matrixTierId: null },
+  });
+  await prisma.arSupplement.updateMany({
+    where: { matrixTierId: { in: ids } },
+    data: { matrixTierId: null },
+  });
+  const deleted = await prisma.approvalMatrixTier.deleteMany({
+    where: { id: { in: ids } },
+  });
+  return deleted.count;
+}
+
+/**
  * Akun uji untuk Playwright, dibuat di database yang sama dengan `next start` (branch Neon
  * dev). Password dikembalikan ke nilai awal dan session lama dihapus supaya test ganti
  * password (AC-04) bisa dijalankan berulang.
@@ -69,7 +96,11 @@ async function main() {
     });
   }
 
-  console.log(`Akun e2e siap: ${ALL_E2E_ACCOUNTS.length}.`);
+  const removedTiers = await removeE2eTiers();
+
+  console.log(
+    `Akun e2e siap: ${ALL_E2E_ACCOUNTS.length}. Tier e2e dihapus: ${removedTiers}.`,
+  );
   await prisma.$disconnect();
 }
 

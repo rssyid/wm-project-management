@@ -29,12 +29,15 @@ type DraftRow = { buildingName: string; activityName: string; amount: string };
  */
 export function BoqEditor({ attemptId, version, items }: Props) {
   const router = useRouter();
+  // Attempt baru belum punya baris; satu baris kosong disiapkan supaya form langsung bisa diisi.
   const [rows, setRows] = useState<DraftRow[]>(
-    items.map((item) => ({
-      buildingName: item.buildingName ?? "",
-      activityName: item.activityName,
-      amount: item.amount ?? "0",
-    })),
+    items.length > 0
+      ? items.map((item) => ({
+          buildingName: item.buildingName ?? "",
+          activityName: item.activityName,
+          amount: item.amount ?? "0",
+        }))
+      : [{ buildingName: "", activityName: "", amount: "0" }],
   );
   const [busy, setBusy] = useState(false);
 

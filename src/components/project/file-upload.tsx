@@ -36,6 +36,7 @@ export function FileUpload({
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const inputId = `upload-${kind}-${ownerId}`;
 
   async function handleFiles(selected: FileList | null) {
     if (!selected || selected.length === 0) return;
@@ -95,9 +96,10 @@ export function FileUpload({
 
   return (
     <div className="flex flex-col gap-2">
-      <Label>{label}</Label>
+      <Label htmlFor={inputId}>{label}</Label>
       <input
         ref={inputRef}
+        id={inputId}
         type="file"
         multiple
         accept={kind === "SPATIAL_DATA" ? ".zip,.geojson" : undefined}
