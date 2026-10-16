@@ -265,11 +265,3 @@ export async function getProjectHistory(projectId: string) {
   ]);
   return { statusHistory, auditLogs };
 }
-
-/** Dipakai modul lain (AFCE, survei) untuk tahu apakah AFCE pernah diajukan. */
-export async function hasSubmittedAfce(projectId: string): Promise<boolean> {
-  const count = await prisma.afceAttempt.count({
-    where: { projectId, submittedDate: { not: null } },
-  });
-  return count > 0;
-}

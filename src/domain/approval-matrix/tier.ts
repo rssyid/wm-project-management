@@ -14,7 +14,7 @@ export type TierForMatch = {
   isActive: boolean;
 };
 
-export function appliesTo(doc: TierDoc, tier: TierForMatch): boolean {
+function appliesTo(doc: TierDoc, tier: TierForMatch): boolean {
   return doc === "AFCE" ? tier.forAfce : tier.forArSupplement;
 }
 

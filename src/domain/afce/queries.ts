@@ -1,4 +1,5 @@
 import { matchTier, noMatchingTierError } from "@/domain/approval-matrix/tier";
+import { levelDurations } from "@/domain/afce/duration";
 import { differsFromMatrix, orderedPositionIds } from "@/domain/afce/levels";
 import { Prisma } from "@/generated/prisma/client";
 import { decimalToString } from "@/infra/decimal";
@@ -115,10 +116,27 @@ async function tierPositionIds(
 
 /**
  * Bentuk untuk UI. D-49: `differsFromMatrix` dibandingkan terhadap tier yang tercatat pada
- * attempt, sehingga level manual ditandai tanpa kolom tambahan.
+ * attempt, sehingga level manual ditandai tanpa kolom tambahan. AC-22: durasi tiap level
+ * dihitung saat dibaca, bukan disimpan.
  */
 export async function toAttemptView(row: AttemptRow) {
   const matrixIds = await tierPositionIds(row.matrixTierId);
+  const durations = row.approvalEmailDate
+    ? levelDurations(
+        iso(row.approvalEmailDate) ?? "",
+        row.levels
+          .filter((level) => level.record !== null)
+          .map((level) => ({
+            result: level.record?.result ?? "APPROVED",
+            decisionDate: level.record?.decisionDate ?? new Date(0),
+            positionNameSnapshot: level.positionNameSnapshot,
+          })),
+      )
+    : [];
+  const durationByLevelNo = new Map(
+    durations.map((duration) => [duration.levelNo, duration.durationDays]),
+  );
+
   return {
     ...row,
     basisAmount: decimalToString(row.basisAmount),
@@ -144,6 +162,7 @@ export async function toAttemptView(row: AttemptRow) {
         orderedPositionIds(row.levels),
         matrixIds,
       ),
+      durationDays: durationByLevelNo.get(level.levelNo) ?? null,
       record: level.record
         ? { ...level.record, decisionDate: iso(level.record.decisionDate) }
         : null,

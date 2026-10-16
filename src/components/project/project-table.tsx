@@ -3,6 +3,7 @@
 import { ProjectStatusBadge } from "@/components/project-badges";
 import { DataTable, type DataTableColumn } from "@/components/data-table";
 import { EmptyState } from "@/components/empty-state";
+import { formatDate } from "@/shared/format";
 import {
   PROJECT_STATUS_LABEL,
   type ProjectStatus,
@@ -68,6 +69,18 @@ const columns: DataTableColumn<ProjectListRow>[] = [
     accessorKey: "pic",
     header: "PIC",
     cell: ({ row }) => row.original.pic ?? "—",
+  },
+  {
+    accessorKey: "targetEndDate",
+    header: "Target selesai",
+    meta: { align: "right" },
+    cell: ({ row }) => (
+      <span className="tabular-nums">
+        {row.original.targetEndDate
+          ? formatDate(new Date(row.original.targetEndDate))
+          : "—"}
+      </span>
+    ),
   },
 ];
 

@@ -84,8 +84,3 @@ export function compareBusinessDate(left: string, right: string): number {
 export function calendarDaysBetween(fromIso: string, toIso: string): number {
   return Math.round((utcFromIso(toIso) - utcFromIso(fromIso)) / 86_400_000);
 }
-
-export function addCalendarDays(iso: string, days: number): string {
-  const shifted = new Date(utcFromIso(iso) + days * 86_400_000);
-  return `${shifted.getUTCFullYear()}-${String(shifted.getUTCMonth() + 1).padStart(2, "0")}-${String(shifted.getUTCDate()).padStart(2, "0")}`;
-}

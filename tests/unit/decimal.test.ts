@@ -1,12 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  decimal,
-  decimalEquals,
-  decimalToString,
-  sumDecimal,
-  ZERO,
-} from "@/infra/decimal";
+import { decimal, decimalToString, sumDecimal } from "@/infra/decimal";
 
 describe("jumlah Decimal", () => {
   it("menjumlahkan baris BOQ tanpa kehilangan desimal", () => {
@@ -20,13 +14,6 @@ describe("jumlah Decimal", () => {
 
   it("menjumlahkan daftar kosong menjadi nol", () => {
     expect(decimalToString(sumDecimal([]))).toBe("0.00");
-  });
-});
-
-describe("perbandingan Decimal", () => {
-  it("menyatakan sama untuk nilai yang ditulis berbeda", () => {
-    expect(decimalEquals(decimal("100.50"), decimal("100.5"))).toBe(true);
-    expect(decimalEquals(ZERO(), decimal("-0.01"))).toBe(false);
   });
 });
 

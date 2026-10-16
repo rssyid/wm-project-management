@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 import { storageStatePath } from "./helpers/storage";
 
@@ -26,5 +26,36 @@ test.describe("screenshot tinjauan manusia", () => {
         fullPage: true,
       });
     }
+  });
+
+  test("capture screenshot workspace proyek pertama", async ({
+    page,
+    isMobile,
+  }, testInfo) => {
+    await page.goto("/proyek");
+    const firstCode = isMobile
+      ? page
+          .getByRole("list", { name: "Daftar proyek" })
+          .getByRole("link")
+          .first()
+      : page
+          .getByRole("table", { name: "Daftar proyek" })
+          .getByRole("link")
+          .first();
+
+    if ((await firstCode.count()) === 0) {
+      test.skip(true, "Belum ada proyek di database uji.");
+    }
+
+    await firstCode.click();
+    await page.waitForLoadState("networkidle");
+    const label = testInfo.project.name === "mobile" ? "375" : "1440";
+    await page.screenshot({
+      path: `test-results/screenshots/proyek-workspace-${label}.png`,
+      fullPage: true,
+    });
+    await expect(
+      page.getByRole("heading", { level: 1, name: /WM-/ }),
+    ).toBeVisible();
   });
 });

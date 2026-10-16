@@ -42,6 +42,7 @@ export type AttemptView = {
     positionId: string;
     positionNameSnapshot: string;
     differsFromMatrix: boolean;
+    durationDays: number | null;
     record: {
       id: string;
       result: "APPROVED" | "DITOLAK";
@@ -282,6 +283,11 @@ function AttemptCard({
                       : "Ditolak"}{" "}
                     oleh {level.record.approverName} pada{" "}
                     {level.record.decisionDate}
+                    {level.durationDays === null ? null : (
+                      <span className="tabular-nums">
+                        {` · ${level.durationDays} hari`}
+                      </span>
+                    )}
                   </span>
                 ) : null}
                 {canWrite && !level.record ? (

@@ -41,6 +41,7 @@ test.describe("shell aplikasi", () => {
 
   test("tidak ada pelanggaran axe serius di halaman aplikasi", async ({
     page,
+    isMobile,
   }) => {
     // Sembilan halaman dipindai berurutan; default 30 detik habis saat worker paralel.
     test.setTimeout(180_000);
@@ -54,6 +55,7 @@ test.describe("shell aplikasi", () => {
       "/master",
       "/master/vendors",
       "/admin",
+      "/admin/matriks-approval",
     ];
     for (const path of paths) {
       await page.goto(path);
@@ -65,6 +67,29 @@ test.describe("shell aplikasi", () => {
           violation.impact === "serious" || violation.impact === "critical",
       );
       expect(serious, `pelanggaran di ${path}`).toEqual([]);
+    }
+
+    // Workspace proyek butuh data; dipindai hanya bila daftar proyek punya baris.
+    await page.goto("/proyek");
+    const firstCode = isMobile
+      ? page
+          .getByRole("list", { name: "Daftar proyek" })
+          .getByRole("link")
+          .first()
+      : page
+          .getByRole("table", { name: "Daftar proyek" })
+          .getByRole("link")
+          .first();
+    if ((await firstCode.count()) > 0) {
+      await firstCode.click();
+      const results = await new AxeBuilder({ page })
+        .withTags(["wcag2a", "wcag2aa"])
+        .analyze();
+      const serious = results.violations.filter(
+        (violation) =>
+          violation.impact === "serious" || violation.impact === "critical",
+      );
+      expect(serious, "pelanggaran di workspace proyek").toEqual([]);
     }
   });
 });

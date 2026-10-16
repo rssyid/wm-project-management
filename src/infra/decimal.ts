@@ -17,13 +17,6 @@ export function sumDecimal(values: readonly DecimalValue[]): DecimalValue {
   );
 }
 
-export function decimalEquals(
-  left: DecimalValue,
-  right: DecimalValue,
-): boolean {
-  return left.equals(right);
-}
-
 /** Klien menerima angka uang sebagai string desimal (rule 20). */
 export function decimalToString(
   value: DecimalValue | null | undefined,

@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  addCalendarDays,
   businessDateIso,
   calendarDaysBetween,
   compareBusinessDate,
@@ -40,12 +39,5 @@ describe("calendarDaysBetween", () => {
     expect(calendarDaysBetween("2026-10-01", "2026-10-08")).toBe(7);
     expect(calendarDaysBetween("2026-02-26", "2026-03-02")).toBe(4);
     expect(calendarDaysBetween("2026-10-08", "2026-10-01")).toBe(-7);
-  });
-});
-
-describe("addCalendarDays", () => {
-  it("melewati akhir bulan dan tahun", () => {
-    expect(addCalendarDays("2026-12-30", 3)).toBe("2027-01-02");
-    expect(addCalendarDays("2026-03-01", -1)).toBe("2026-02-28");
   });
 });
