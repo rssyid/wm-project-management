@@ -23,6 +23,7 @@ Status: disetujui 10 Oktober 2026. REST JSON di `/api`, dipakai UI sendiri dan t
 | 409 | PRECONDITION_FAILED | Prasyarat belum terpenuhi (pesan menyebutnya) |
 | 409 | PROJECT_LOCKED, FIELD_INPUT_LOCKED | Proyek/input terkunci |
 | 409 | WEIGHT_MISMATCH | Total bobot tidak tepat |
+| 409 | TYPE_LOCKED | Tipe entitas terkunci setelah dibuat (tipe Pekerjaan, AC-33) |
 | 409 | DUPLICATE, ACTIVE_CONFLICT | Melanggar unik / sudah ada yang aktif |
 | 409 | VERSION_CONFLICT | Data diubah orang lain |
 | 409 | IN_USE | Master sudah dipakai |
@@ -88,7 +89,7 @@ Tidak ada endpoint untuk approver.
 | --- | --- | --- | --- |
 | GET | `/api/projects/{id}/work-items` | Semua | |
 | POST | `/api/projects/{id}/work-items` | SA, SP | ≥ AFCE_AR_APPROVED; kirim bobot semua Pekerjaan aktif (tepat 100); fisik dibuat otomatis untuk TENDER/SWAKELOLA |
-| PATCH | `/api/work-items/{id}` | SA, SP | Fisik + material = 100 |
+| PATCH | `/api/work-items/{id}` | SA, SP | Fisik + material = 100; `type` dikunci `TYPE_LOCKED` (AC-33) |
 | PUT | `/api/projects/{id}/work-item-weights` | SA, SP | Tepat 100,00 |
 | POST | `/api/work-items/{id}/cancel` | SA, SP | Alasan + bobot pengganti |
 | POST | `/api/work-items/{id}/tender-attempts` | SA, SP | USPK baru + plan tender + plan fisik; baseline dikunci; USPK pertama → PROCUREMENT |

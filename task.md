@@ -116,12 +116,41 @@ Semua item belum dikerjakan. Centang hanya dengan bukti (lihat perintah `/verify
 
 ## F3 — Pengadaan (AC-30–44)
 
-- [ ] Pekerjaan + bobot (tepat 100,00, bagi rata, default 70/30 saat paket pertama) (AC-30–33).
-- [ ] USPK + tender attempt + baseline + mulai + pemenang + batal (AC-34–36).
-- [ ] SPK: buat, release, batal, multi aktif, swakelola (AC-37–39).
-- [ ] Paket Kerja: item, bobot, PR, PO, produksi, kiriman, koreksi, batal, pembayaran (AC-40–44).
-- [ ] UI tab Pekerjaan dan Paket Kerja; dialog pembatalan per jenis.
-- Bukti:
+- [x] Pekerjaan + bobot (tepat 100,00, bagi rata, default 70/30 saat paket pertama) (AC-30–33).
+- [x] USPK + tender attempt + baseline + mulai + pemenang + batal (AC-34–36).
+- [x] SPK: buat, release, batal, multi aktif, swakelola (AC-37–39).
+- [x] Paket Kerja: item, bobot, PR, PO, produksi, kiriman, koreksi, batal, pembayaran (AC-40–44).
+- [x] UI tab Pekerjaan dan Paket Kerja; dialog pembatalan per jenis.
+- Bukti 17 Oktober 2026 — `pnpm lint` 0 error (1 warning React Compiler bawaan F2), `pnpm typecheck` lulus, `pnpm test` 209/209 (31 file: 67 unit + 142 integrasi), `pnpm build` sukses, `pnpm test:e2e` 68 lulus 5 dilewati 0 gagal (1440×900 + 375×812).
+
+  | AC | Test | Status |
+  | --- | --- | --- |
+  | AC-30 | `work-item.test.ts` "AC-30 menolak Pekerjaan sebelum AFCE Approved (409)" | lulus |
+  | AC-31 | `work-item-weights.test.ts` (unit) + `work-item.test.ts` "AC-31 membuat Pekerjaan setelah AFCE Approved dengan bobot 100" dan "AC-31 menolak total bobot Pekerjaan selain 100,00 (WEIGHT_MISMATCH)" | lulus |
+  | AC-32 | `work-item.test.ts` "AC-32 batal Pekerjaan wajib bobot pengganti dalam transaksi yang sama" | lulus |
+  | AC-33 | `work-item.test.ts` "AC-33 tipe Pekerjaan tidak bisa diubah setelah dibuat (TYPE_LOCKED)" | lulus |
+  | AC-34 | `tender-attempt.test.ts` "AC-34 USPK pertama → PROCUREMENT" | lulus |
+  | AC-35 | `tender-attempt.test.ts` "AC-35 satu attempt aktif per Pekerjaan (ACTIVE_CONFLICT)" + "AC-35 attempt batal tetap tampil"; e2e `procurement.spec.ts` Skenario 1 | lulus |
+  | AC-36 | `tender-winner.test.ts` "AC-36 pemenang nama baru → vendor isComplete=false, lengkap otomatis saat semua field terisi" | lulus |
+  | AC-37 | `spk.test.ts` "AC-37 SPK release pertama → attempt COMPLETED, actualEnd = tanggal release"; e2e Skenario 2 | lulus |
+  | AC-38 | `spk.test.ts` "AC-38 SPK swakelola hanya vendor INTERNAL; pertama → PROCUREMENT" dan "AC-38 SPK swakelola menolak vendor eksternal" | lulus |
+  | AC-39 | `spk.test.ts` describe SPK + e2e `procurement.spec.ts` Skenario 3 | lulus |
+  | AC-40 | `work-package.test.ts` "AC-40 PR → PR_SUBMITTED, baseline paket dikunci, PR pertama → PROCUREMENT" | lulus |
+  | AC-41 | `work-package.test.ts` "AC-41 kiriman sebelum PO → 409" + `delivery.test.ts` "AC-41 kiriman dengan PO wajib, qty positif" | lulus |
+  | AC-42 | `delivery.test.ts` "AC-42 kiriman pertama → EXECUTION tepat sekali"; e2e Skenario 4 | lulus |
+  | AC-43 | `delivery.test.ts` "AC-43 koreksi total per item ≥ 0, di bawah rencana → PARTIALLY_DELIVERED" | lulus |
+  | AC-44 | `delivery.test.ts` "AC-44 pembayaran bisa diubah sampai COMPLETED termasuk WAITING_BAST" | lulus |
+
+  Perbaikan yang ditemukan saat verifikasi:
+  - `src/domain/work-item/service.ts` — total bobot setelah pembatalan dihitung dari bobot pengganti saja, bukan pengganti ditambah sisa; sebelumnya `WEIGHT_MISMATCH` untuk bobot 100,00 yang valid (AC-32).
+  - AC-33 belum diimplementasikan: `updateWorkItem` menerima perubahan `type`. Kini ditolak `TYPE_LOCKED` (409) dan kode errornya didokumentasikan di `docs/04-api.md`.
+  - Error `IN_USE` yang sempat dipakai untuk hapus tier e2e dihapus lagi bersama route-nya karena tidak dipakai alur bisnis (rule 05 §1).
+
+  Catatan untuk F4:
+  - Matriks approval adalah state global dan suite e2e berjalan paralel pada satu branch Neon, jadi `seed-e2e-accounts` kini membuat satu tier e2e bersama `[0, 500.000.000)` sebelum test berjalan dan `project-flow.spec.ts` menambahkan tier di atasnya. Spec tidak boleh membuat atau menghapus tier. Lihat D-34.
+  - `seed-e2e-accounts` juga menjalankan `seedLokasi()`; tanpa itu dropdown Region/Wilayah/Company pada form proyek kosong dan alur proyek tidak bisa diuji.
+  - Placeholder filter master berbunyi "Nama atau kode", tetapi query hanya memfilter kolom `name` (`src/domain/master/registry.ts`). Sudah dilaporkan, belum diubah karena di luar lingkup F3.
+  - `pnpm build` masih mencetak peringatan `HANGING_PROMISE_REJECTION` untuk `/api/approval-tiers/match` (perilaku `connection()` saat prerender). Build tetap sukses; sudah ada sebelum F3.
 
 ## F4 — Jadwal dan progres (AC-45–52)
 

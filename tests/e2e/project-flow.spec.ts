@@ -6,19 +6,18 @@ import { storageStatePath } from "./helpers/storage";
  * Bug produksi 16 Oktober 2026: halaman workspace error saat tab Survei dimuat, dan
  * matriks approval tidak punya tombol tambah saat kosong. Alur ini membuka setiap tab
  * dan berinteraksi di browser, karena gerbang build tidak mengevaluasi modul klien.
- *
- * Tier dibuat dengan rentang nominal tinggi yang unik per run agar tidak bentrok dengan
- * tier dari test lain di database test yang sama.
  */
 /**
- * Tier dibuat sebagai rentang dasar yang menutup dari nol sampai di atas nilai proyek uji, karena
- * matriks approval tidak boleh punya nominal tanpa tier (AC-18). Tier e2e dari run sebelumnya
- * dihapus oleh `seed-e2e-accounts` setiap kali suite e2e mulai, sehingga rentang ini selalu
- * boleh dibuat.
+ * Matriks approval dipakai bersama dengan procurement.spec.ts. `seed-e2e-accounts`
+ * (global-setup) membuat satu tier e2e bersama dengan rentang [0, 500.000.000) sebelum test
+ * berjalan, karena matriks adalah state global dan suite berjalan paralel pada branch Neon
+ * yang sama (D-34). Test ini menambahkan tier tepat di batas atas tier bersama —
+ * [500.000.000, ∞) — sehingga matriks tetap tanpa tumpang tindih maupun berlubang (AC-18).
+ * Nilai AFCE uji Rp450.000.000 dicocokkan oleh tier bersama.
  */
 const RUN = Date.now();
-const TIER_MIN = 0;
-const TIER_MAX = 500_000_000;
+// Batas atas dikosongkan (tanpa batas atas, D-09) karena tier bersama sudah menutup [0, 500 juta).
+const TIER_MIN = 500_000_000;
 
 async function expectNoErrorPage(page: Page) {
   await expect(page.getByText("Application error")).toHaveCount(0);
@@ -49,9 +48,8 @@ test.describe("matriks approval", () => {
     await page.getByRole("button", { name: "Tambah tier" }).click();
     await page.getByLabel("Nama tier").fill(`Tier e2e ${RUN}`);
     await page.getByLabel("Batas bawah").fill(String(TIER_MIN));
-    await page
-      .getByLabel("Batas atas (kosong = tanpa batas)")
-      .fill(String(TIER_MAX));
+    // Batas atas dikosongkan = tanpa batas atas (D-09).
+    await page.getByLabel("Batas atas (kosong = tanpa batas)").fill("");
     await page.getByLabel("Tambah jabatan approver").selectOption({ index: 1 });
     await page.getByRole("button", { name: "Simpan tier" }).click();
 

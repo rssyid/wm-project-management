@@ -265,3 +265,141 @@ export async function getProjectHistory(projectId: string) {
   ]);
   return { statusHistory, auditLogs };
 }
+
+/** Data Pekerjaan untuk tab Pekerjaan workspace proyek. */
+export async function listWorkItems(projectId: string) {
+  return prisma.workItem.findMany({
+    where: { projectId, cancelledAt: null },
+    select: {
+      id: true,
+      name: true,
+      type: true,
+      projectWeightPct: true,
+      physicalWeightPct: true,
+      materialWeightPct: true,
+      targetVolume: true,
+      unitId: true,
+      order: true,
+      version: true,
+      physicalProcess: {
+        select: { id: true, status: true, actualStart: true, actualEnd: true },
+      },
+      tenderAttempts: {
+        select: {
+          id: true,
+          attemptNo: true,
+          status: true,
+          winnerVendorId: true,
+          winnerNameSnapshot: true,
+          cancelledDate: true,
+        },
+        orderBy: { attemptNo: "desc" },
+      },
+      spks: {
+        select: {
+          id: true,
+          number: true,
+          date: true,
+          value: true,
+          status: true,
+          releasedDate: true,
+          cancelledDate: true,
+          vendorId: true,
+          tenderAttemptId: true,
+        },
+        orderBy: { createdAt: "asc" },
+      },
+      workPackages: {
+        select: {
+          id: true,
+          name: true,
+          weightPct: true,
+          status: true,
+          vendorId: true,
+          cancelledDate: true,
+          cancelReason: true,
+          completedDate: true,
+          productionStartDate: true,
+          version: true,
+        },
+        where: { cancelledDate: null },
+        orderBy: { createdAt: "asc" },
+      },
+    },
+    orderBy: { order: "asc" },
+  });
+}
+
+/** Data SPK untuk tab Paket Kerja workspace proyek. */
+export async function listSpks(projectId: string) {
+  return prisma.spk.findMany({
+    where: { workItem: { projectId } },
+    select: {
+      id: true,
+      number: true,
+      date: true,
+      value: true,
+      status: true,
+      releasedDate: true,
+      cancelledDate: true,
+      cancelReason: true,
+      vendorId: true,
+      tenderAttemptId: true,
+      workItemId: true,
+      vendor: { select: { id: true, name: true, type: true } },
+      tenderAttempt: { select: { attemptNo: true, status: true } },
+    },
+    orderBy: { createdAt: "asc" },
+  });
+}
+
+/** Data Paket Kerja untuk tab Paket Kerja workspace proyek. */
+export async function listWorkPackages(projectId: string) {
+  return prisma.workPackage.findMany({
+    where: { workItem: { projectId }, cancelledDate: null },
+    select: {
+      id: true,
+      workItemId: true,
+      name: true,
+      weightPct: true,
+      status: true,
+      vendorId: true,
+      cancelledDate: true,
+      cancelReason: true,
+      completedDate: true,
+      productionStartDate: true,
+      version: true,
+      purchaseRequest: { select: { id: true, number: true, date: true } },
+      purchaseOrder: {
+        select: { id: true, number: true, date: true, vendorId: true },
+      },
+      items: {
+        select: {
+          id: true,
+          materialId: true,
+          unitId: true,
+          plannedQty: true,
+          order: true,
+        },
+        orderBy: { order: "asc" },
+      },
+      deliveries: {
+        select: {
+          id: true,
+          deliveryDate: true,
+          isCorrection: true,
+          correctionReason: true,
+          items: {
+            select: {
+              id: true,
+              workPackageItemId: true,
+              qty: true,
+            },
+          },
+        },
+        orderBy: { deliveryDate: "desc" },
+      },
+    },
+    orderBy: { createdAt: "asc" },
+  });
+}

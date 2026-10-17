@@ -715,6 +715,8 @@ model TenderAttempt {
   workItemId         String
   attemptNo          Int
   status             TenderAttemptStatus @default(PLANNED)
+  planTender         String?
+  planPhysical       String?
   actualStart        DateTime?           @db.Date
   actualEnd          DateTime?           @db.Date
   winnerVendorId     String?

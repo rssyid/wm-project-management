@@ -3,7 +3,9 @@ import "./env";
 import { hashPassword } from "better-auth/crypto";
 
 import { prisma } from "@/infra/db";
+import { Prisma } from "@/generated/prisma/client";
 
+import { seedLokasi } from "../prisma/seed/lokasi";
 import {
   ALL_E2E_ACCOUNTS,
   E2E_PASSWORD,
@@ -11,30 +13,71 @@ import {
 } from "../tests/e2e/accounts";
 
 /**
- * Tier e2e dihapus agar matriks approval bersih dari nol setiap run: matriks tidak boleh punya
- * nominal tanpa tier (AC-18), sehingga tier sisa run sebelumnya membuat penambahan tier baru
- * ditolak. Attempt dan AR uji lebih dulu dilepas dari tier karena relasinya Restrict.
+ * Tier e2e dihapus lalu diganti dengan satu tier bersama.
+ *
+ * D-34: matriks approval adalah state global dan suite e2e berjalan paralel (4 worker pada
+ * branch Neon yang sama), jadi test tidak boleh membuat tier sendiri — dua tier dengan rentang
+ * tumpang tindih saling menabrak dan satu test menghapus tier yang sedang dipakai test lain.
+ * Satu tier bersama dibuat sekali di sini (serial, sebelum test berjalan) dan dipakai semua
+ * spec: rentang [0, 500.000.000) menutup nilai AFCE uji Rp450.000.000 (AC-18), dan
+ * project-flow.spec.ts menambah tier [500.000.000, ∞) di atasnya sehingga tetap tanpa
+ * tumpang tindih maupun berlubang.
+ *
+ * Jabatan approver memakai jabatan seed (rank 1-9) sehingga tidak menambah baris
+ * ApprovalPosition baru; rank-nya unik dan berbatas.
  */
-async function removeE2eTiers() {
-  const tiers = await prisma.approvalMatrixTier.findMany({
-    where: { name: { startsWith: "Tier e2e" } },
+const SHARED_TIER_NAME = "Tier e2e bersama";
+const SHARED_TIER_MIN = "0";
+const SHARED_TIER_MAX = "500000000";
+
+async function resetApprovalMatrix() {
+  // Kedua pola nama adalah sisa test, bukan seed produksi: `Tier e2e` (project-flow.spec.ts dan
+  // tier bersama di bawah) dan `Tier AFCE E2E` (percobaan lama sebelum D-34). Sisa tier dengan
+  // rentang tumpang tindih membuat penambahan tier baru ditolak `assertNoOverlapOrGap`.
+  const stale = await prisma.approvalMatrixTier.findMany({
+    where: {
+      OR: [
+        { name: { startsWith: "Tier e2e" } },
+        { name: { startsWith: "Tier AFCE E2E" } },
+      ],
+    },
     select: { id: true },
   });
-  const ids = tiers.map((tier) => tier.id);
-  if (ids.length === 0) return 0;
+  const staleIds = stale.map((tier) => tier.id);
+  if (staleIds.length > 0) {
+    // Attempt dan AR uji lebih dulu dilepas dari tier karena relasinya Restrict.
+    await prisma.afceAttempt.updateMany({
+      where: { matrixTierId: { in: staleIds } },
+      data: { matrixTierId: null },
+    });
+    await prisma.arSupplement.updateMany({
+      where: { matrixTierId: { in: staleIds } },
+      data: { matrixTierId: null },
+    });
+    await prisma.approvalMatrixTier.deleteMany({
+      where: { id: { in: staleIds } },
+    });
+  }
 
-  await prisma.afceAttempt.updateMany({
-    where: { matrixTierId: { in: ids } },
-    data: { matrixTierId: null },
+  const position = await prisma.approvalPosition.findFirst({
+    orderBy: { rank: "asc" },
+    select: { id: true, name: true },
   });
-  await prisma.arSupplement.updateMany({
-    where: { matrixTierId: { in: ids } },
-    data: { matrixTierId: null },
+  if (!position)
+    throw new Error("Tidak ada jabatan approver untuk tier e2e bersama.");
+
+  const tier = await prisma.approvalMatrixTier.create({
+    data: {
+      name: SHARED_TIER_NAME,
+      forAfce: true,
+      forArSupplement: true,
+      minAmount: new Prisma.Decimal(SHARED_TIER_MIN),
+      maxAmount: new Prisma.Decimal(SHARED_TIER_MAX),
+      levels: { create: [{ levelNo: 1, positionId: position.id }] },
+    },
+    select: { id: true },
   });
-  const deleted = await prisma.approvalMatrixTier.deleteMany({
-    where: { id: { in: ids } },
-  });
-  return deleted.count;
+  return { removed: staleIds.length, position: position.name, tierId: tier.id };
 }
 
 /**
@@ -96,10 +139,15 @@ async function main() {
     });
   }
 
-  const removedTiers = await removeE2eTiers();
+  // Lokasi seed dipakai form proyek: tanpa Region/Wilayah/Company, dropdown "Perusahaan"
+  // kosong dan test alur proyek tidak bisa memilih estate (AC-61).
+  const lokasi = await seedLokasi();
+  const matriks = await resetApprovalMatrix();
 
   console.log(
-    `Akun e2e siap: ${ALL_E2E_ACCOUNTS.length}. Tier e2e dihapus: ${removedTiers}.`,
+    `Akun e2e siap: ${ALL_E2E_ACCOUNTS.length}. ` +
+      `Lokasi seed: ${lokasi.companies} company, ${lokasi.estates} estate. ` +
+      `Tier e2e dihapus: ${matriks.removed}, tier bersama dibuat (jabatan ${matriks.position}).`,
   );
   await prisma.$disconnect();
 }

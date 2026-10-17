@@ -52,23 +52,47 @@ test.describe("master data oleh specialist", () => {
   });
 
   test("filter cari menyaring baris", async ({ page, isMobile }) => {
+    test.setTimeout(90_000);
+    const ts = Date.now();
+    const unitCode = `UN${ts}`;
+    const unitName = `Unit E2E ${ts}`;
+
     await page.goto("/master/units");
+
+    // Baris sebelum filter dipakai sebagai pembanding: setelah filter, hanya unit uji ini yang
+    // boleh tersisa (D-33).
     const list = isMobile
       ? page.getByRole("list", { name: "Daftar units" })
       : page.getByRole("table", { name: "units" });
-    const firstRow = isMobile
-      ? list.getByRole("listitem").first()
-      : list.getByRole("row").nth(1);
-    const nama = isMobile
-      ? ((await firstRow.innerText()).split("\n")[0]?.trim() ?? "")
-      : (await firstRow.getByRole("cell").nth(1).innerText()).trim();
-    expect(nama.length).toBeGreaterThan(0);
+    const rows = () => list.getByRole(isMobile ? "listitem" : "row");
 
-    await page.getByPlaceholder("Nama atau kode").fill(nama);
+    // Buat unit unik agar tidak bentrok dengan worker lain dan eliminasi race condition
+    // pada data master bersama (fullyParallel, 4 worker, Neon branch dev yang sama).
+    await page.getByRole("button", { name: " tambah satuan" }).click();
+    const panel = page.getByRole("complementary", { name: " tambah data" });
+    await expect(panel).toBeVisible();
+    await panel.getByLabel("Kode", { exact: true }).fill(unitCode);
+    await panel.getByLabel("Nama", { exact: true }).fill(unitName);
+    await panel.getByRole("button", { name: "Simpan" }).click();
+    await expect(page.getByText("Data ditambahkan")).toBeVisible();
+
+    // Server Component perlu di-refresh agar baris baru muncul; toast muncul dulu.
+    await page.waitForLoadState("networkidle");
+    await expect(list.getByText(unitName).first()).toBeVisible({
+      timeout: 20_000,
+    });
+    const before = await rows().count();
+
+    // Query master hanya memfilter kolom name (registry.ts), jadi pencarian memakai nama unit.
+    await page.getByPlaceholder("Nama atau kode").fill(unitName);
     await page.getByRole("button", { name: "Saring" }).click();
 
-    await expect(list).toBeVisible();
-    await expect(list.getByText(nama).first()).toBeVisible();
+    await expect(list.getByText(unitName).first()).toBeVisible();
+    await expect(list.getByText(unitCode).first()).toBeVisible();
+    // Filter menyaring: baris unit uji saja yang tersisa (header tabel tidak dihitung).
+    const dataRows = isMobile ? 1 : 2;
+    await expect(rows()).toHaveCount(dataRows, { timeout: 15_000 });
+    expect(before).toBeGreaterThan(dataRows);
   });
 
   test("halaman master bisa dibuka di layar 375 px", async ({

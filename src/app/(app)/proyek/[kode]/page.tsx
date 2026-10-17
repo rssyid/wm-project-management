@@ -6,11 +6,15 @@ import { AfceTab } from "@/components/project/afce-tab";
 import { ArSupplementPanel } from "@/components/project/ar-supplement-panel";
 import { NextSteps, type NextAction } from "@/components/project/next-steps";
 import { SurveyTab } from "@/components/project/survey-tab";
+import { WorkItemTab } from "@/components/project/work-item-tab";
+import { WorkPackageTab } from "@/components/project/work-package-tab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { listArSupplements } from "@/domain/afce/ar-queries";
 import { listAttempts } from "@/domain/afce/queries";
+import { listWorkItems, listWorkPackages } from "@/domain/project/queries";
 import { listOwnerFiles } from "@/domain/files/links";
 import { getProjectByCode } from "@/domain/project/queries";
+import { decimalToString } from "@/infra/decimal";
 import { prisma } from "@/infra/db";
 import { getSessionUser } from "@/infra/session";
 import { formatRupiah } from "@/shared/format";
@@ -91,6 +95,19 @@ function planFor(
           },
         ],
       };
+    case "AFCE_AR_APPROVED":
+    case "PROCUREMENT":
+      return {
+        prerequisites: [],
+        actions: [
+          {
+            key: "add-work-item",
+            label: "Tambah Pekerjaan",
+            method: "POST",
+            path: `/api/projects/${projectId}/work-items`,
+          },
+        ],
+      };
     default:
       return { prerequisites: [], actions: [] };
   }
@@ -107,7 +124,14 @@ export default async function ProjectWorkspacePage({
 
   const user = await getSessionUser();
   const canWrite = can(user?.role ?? "MANAGEMENT_VIEWER", "project.write");
-  const [attempts, supplements, positions, surveyFiles] = await Promise.all([
+  const [
+    attempts,
+    supplements,
+    positions,
+    surveyFiles,
+    workItems,
+    workPackages,
+  ] = await Promise.all([
     listAttempts(project.id),
     listArSupplements(project.id),
     prisma.approvalPosition.findMany({
@@ -117,7 +141,40 @@ export default async function ProjectWorkspacePage({
     project.survey
       ? listOwnerFiles(prisma, "Survey", project.survey.id)
       : Promise.resolve([]),
+    listWorkItems(project.id),
+    listWorkPackages(project.id),
   ]);
+
+  const workItemsView = workItems.map((item) => ({
+    ...item,
+    projectWeightPct: decimalToString(item.projectWeightPct) ?? "",
+    physicalWeightPct: decimalToString(item.physicalWeightPct) ?? "",
+    materialWeightPct: decimalToString(item.materialWeightPct) ?? "",
+    spks: item.spks.map((s) => ({
+      ...s,
+      value: decimalToString(s.value),
+    })),
+    workPackages: item.workPackages.map((p) => ({
+      ...p,
+      weightPct: decimalToString(p.weightPct) ?? "",
+    })),
+  }));
+
+  const workPackagesView = workPackages.map((pkg) => ({
+    ...pkg,
+    weightPct: decimalToString(pkg.weightPct) ?? "",
+    items: pkg.items.map((i) => ({
+      ...i,
+      plannedQty: decimalToString(i.plannedQty) ?? "",
+    })),
+    deliveries: pkg.deliveries.map((d) => ({
+      ...d,
+      items: d.items.map((i) => ({
+        ...i,
+        qty: decimalToString(i.qty) ?? "",
+      })),
+    })),
+  }));
 
   const surveyLocked = attempts.some(
     (attempt) => attempt.submittedDate !== null,
@@ -225,6 +282,8 @@ export default async function ProjectWorkspacePage({
             <TabsTrigger value="ringkasan">Ringkasan</TabsTrigger>
             <TabsTrigger value="survei">Survei</TabsTrigger>
             <TabsTrigger value="afce">AFCE/AR</TabsTrigger>
+            <TabsTrigger value="pekerjaan">Pekerjaan</TabsTrigger>
+            <TabsTrigger value="paket-kerja">Paket Kerja</TabsTrigger>
           </TabsList>
         </div>
 
@@ -332,6 +391,22 @@ export default async function ProjectWorkspacePage({
               )}
             </section>
           </div>
+        </TabsContent>
+
+        <TabsContent value="pekerjaan">
+          <WorkItemTab
+            projectId={project.id}
+            workItems={workItemsView}
+            canWrite={canWrite}
+          />
+        </TabsContent>
+
+        <TabsContent value="paket-kerja">
+          <WorkPackageTab
+            projectId={project.id}
+            workPackages={workPackagesView}
+            canWrite={canWrite}
+          />
         </TabsContent>
       </Tabs>
     </>
