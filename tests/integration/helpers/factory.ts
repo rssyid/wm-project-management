@@ -63,6 +63,7 @@ export async function createProject(options: {
   targetEndDate?: Date;
   plannedBudget?: string | number;
   status?: ProjectStatus;
+  previousStatus?: ProjectStatus | null;
 }) {
   const company = options.companyId
     ? await prisma.company.findUniqueOrThrow({
@@ -87,6 +88,7 @@ export async function createProject(options: {
           ? null
           : new Prisma.Decimal(options.plannedBudget),
       status: options.status ?? "DRAFT",
+      previousStatus: options.previousStatus ?? null,
       createdById: options.createdById,
       estates: { create: { estateId: estate.id, isPrimary: true } },
     },

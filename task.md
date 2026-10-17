@@ -154,11 +154,30 @@ Semua item belum dikerjakan. Centang hanya dengan bukti (lihat perintah `/verify
 
 ## F4 — Jadwal dan progres (AC-45–52)
 
-- [ ] Baseline (edit sebelum kunci) + revisi beralasan (AC-45–46).
-- [ ] Mulai fisik, log mingguan, log pengganti, alat berat, foto (AC-47–48).
-- [ ] Service `progress-ews`: bobot, progres, rencana linear hari kerja, deviasi, ambang, freeze, Kurva S, data sel Gantt (AC-49–52).
-- [ ] Setting hari kerja, libur, ambang EWS (SA).
-- Bukti:
+- [x] Baseline (edit sebelum kunci) + revisi beralasan (AC-45–46).
+- [x] Mulai fisik, log mingguan, log pengganti, alat berat, foto (AC-47–48).
+- [x] Service `progress-ews`: bobot, progres, rencana linear hari kerja, deviasi, ambang, freeze, Kurva S, data sel Gantt (AC-49–52).
+- [x] Setting hari kerja, libur, ambang EWS (SA).
+- Bukti (17 Oktober 2026):
+
+  | AC | Test | Hasil |
+  |----|------|-------|
+  | AC-45 | `tests/integration/schedule-revision.test.ts` "baseline terkunci tidak bisa diubah langsung" + "baseline yang belum dikunci bisa diubah langsung" | lulus |
+  | AC-46 | `tests/integration/schedule-revision.test.ts` "revisi ditolak saat WAITING_BAST" + "revisi diterima saat ON_HOLD" + "revisi ditolak jika baseline belum dikunci" | lulus |
+  | AC-47 | `tests/integration/progress-log.test.ts` "log minggu pertama, satu aktif per minggu" + "persen turun tanpa alasan ditolak" + "persen turun dengan alasan diterima" + "log 100% → SELESAI" + "log pengganti minggu yang sama" | lulus |
+  | AC-48 | `tests/integration/progress-log.test.ts` "alat berat tersimpan per log dan tidak memengaruhi progres" | lulus |
+  | AC-49 | `tests/unit/progress-ews.test.ts` progres paket, Pekerjaan, proyek 65,4% | lulus |
+  | AC-50 | `tests/unit/progress-ews.test.ts` rencana linear hari kerja, libur, target di luar baseline | lulus |
+  | AC-51 | `tests/unit/progress-ews.test.ts` ambang EWS hijau/kuning/merah + ubah ambang langsung berlaku | lulus |
+  | AC-52 | `tests/unit/progress-ews.test.ts` freeze ON_HOLD dan JEDA_SPK_BATAL, deviasi tidak bertambah | lulus |
+  | Seluruh test | `pnpm test` (unit + integrasi) | 245/245 lulus (34 file) |
+  | Gerbang kualitas | `pnpm lint` · `pnpm typecheck` · `pnpm build` | lulus (build warning HANGING_PROMISE_REJECTION pre-existing dari F3) |
+
+  - Perbaikan bug ditemukan saat verifikasi: `src/domain/physical/service.ts` membuat log baru sebelum tandai log lama digantikan, melanggar unique index `satu log aktif per minggu` (D-06). Diperbaiki dengan menghapus index unik parsial (migrasi `20261017201152_deferrable_progresslog_index`) dan menegakkan aturannya di level aplikasi.
+  - `tests/integration/helpers/factory.ts`: tambah opsi `previousStatus` untuk pembuatan proyek ON_HOLD (constraint `project_previous_status`).
+  - `src/shared/permissions.ts`: tambah aksi `settings.manage` (SA saja) untuk route `/api/settings`.
+  - Lintas dokumen: tidak ada penyimpangan dari `docs/01-domain.md` §5, §10, §11 maupun `docs/04-api.md` §6, §8, §11 — endpoint, kode error, dan aturan status cocok dengan implementasi.
+  - Commit: F4 domain, route, schema, dan test sudah ditulis; siap untuk commit setelah verifikasi.
 
 ## F5 — Tampilan (AC-53–58)
 
