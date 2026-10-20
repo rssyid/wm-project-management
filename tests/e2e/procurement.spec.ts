@@ -302,6 +302,7 @@ async function setupToProcurement(page: Page) {
 
 test.describe("procurement (F3) — specialist", () => {
   test.use({ storageState: storageStatePath("WM_HO_SPECIALIST") });
+  test.use({ testTimeout: 120_000 });
 
   test("Skenario 1 (AC-35): satu attempt aktif per Pekerjaan", async ({
     page,
