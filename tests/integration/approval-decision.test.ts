@@ -202,11 +202,16 @@ describe("keputusan approval AFCE", () => {
   it("AC-23 attempt baru menyalin BOQ attempt yang ditolak", async () => {
     const { projectId, levels } = await submittedAttempt("320000000.00");
     const first = levels[0]!;
-    await decide(first.id, {
-      result: "DITOLAK",
-      approverName: "Bapak EM",
-      decisionDate: "2026-10-10",
-    });
+    const { response: rejectResponse, json: rejectJson } = await decide(
+      first.id,
+      {
+        result: "DITOLAK",
+        approverName: "Bapak EM",
+        decisionDate: "2026-10-10",
+      },
+    );
+    expect(rejectJson.error, "keputusan DITOLAK harus berhasil").toBeUndefined();
+    expect(rejectResponse.status).toBe(200);
 
     const rejected = await prisma.afceAttempt.findFirstOrThrow({
       where: { projectId, status: "DITOLAK" },
