@@ -8,7 +8,7 @@ export default defineConfig({
   globalSetup: "./tests/e2e/global-setup.ts",
   // Neon branch dev punya compute kecil: transaksi paralel dari banyak worker bisa kehabisan
   // koneksi (Prisma P2028), jadi jumlah worker dibatasi.
-  workers: process.env.CI ? 2 : 4,
+  workers: process.env.CI ? 1 : 4,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
