@@ -21,10 +21,13 @@ export type UpdateSettingsInput = z.infer<typeof updateSettingsSchema>;
 
 /** Libur (docs/04 §11). */
 export const createHolidaySchema = z.object({
-  date: z.string().trim().refine(
-    (v) => /^\d{4}-\d{2}-\d{2}$/.test(v),
-    "Isi tanggal dengan format YYYY-MM-DD.",
-  ),
+  date: z
+    .string()
+    .trim()
+    .refine(
+      (v) => /^\d{4}-\d{2}-\d{2}$/.test(v),
+      "Isi tanggal dengan format YYYY-MM-DD.",
+    ),
   name: z.string().trim().min(1, "Nama libur wajib diisi.").max(100),
 });
 

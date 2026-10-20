@@ -144,9 +144,9 @@ describe("AC-51 ambang EWS", () => {
   });
 
   it("deviasi > 10 merah", () => {
-    expect(ewsLevel({ deviationPct: decimal("10.01"), ...standard }).level).toBe(
-      "RED",
-    );
+    expect(
+      ewsLevel({ deviationPct: decimal("10.01"), ...standard }).level,
+    ).toBe("RED");
   });
 
   it("computeEws nilai string dua desimal", () => {
@@ -187,9 +187,7 @@ describe("AC-52 freeze ON_HOLD dan JEDA_SPK_BATAL", () => {
   });
 
   it("freeze 2 hari kerja di luar target (deviasi tidak bertambah)", () => {
-    const frozen = freezeDays([
-      { fromIso: "2026-10-12", toIso: "2026-10-13" },
-    ]);
+    const frozen = freezeDays([{ fromIso: "2026-10-12", toIso: "2026-10-13" }]);
     expect(frozen).toEqual(["2026-10-12", "2026-10-13"]);
     const result = plannedPercent({ ...base, frozenDays: frozen });
     // total 11 (13-2), target masih 7 → 63.64
@@ -224,7 +222,9 @@ describe("validasi bobot", () => {
   });
 
   it("assertWorkItemWeights lolos bila fisik + material = 100", () => {
-    expect(() => assertWorkItemWeights(decimal("70"), decimal("30"))).not.toThrow();
+    expect(() =>
+      assertWorkItemWeights(decimal("70"), decimal("30")),
+    ).not.toThrow();
   });
 
   it("assertWorkItemWeights gagal bila fisik + material != 100", () => {

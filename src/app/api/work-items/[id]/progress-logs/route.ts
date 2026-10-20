@@ -2,10 +2,7 @@ import { ok, toErrorResponse } from "@/app/api/_lib/respond";
 import { requirePermission, parseJson } from "@/app/api/_lib/session";
 import { prisma } from "@/infra/db";
 import { DomainError } from "@/shared/errors";
-import {
-  createProgressLog,
-  listProgressLogs,
-} from "@/domain/physical/service";
+import { createProgressLog, listProgressLogs } from "@/domain/physical/service";
 import { createProgressLogSchema } from "@/shared/schemas/physical";
 
 type Context = { params: Promise<{ id: string }> };

@@ -7,12 +7,8 @@ import { Prisma } from "@/generated/prisma/client";
 import { callRoute, readJson } from "./helpers/call-route";
 import { createProject, createUser, ensureSeed } from "./helpers/factory";
 
-import {
-  POST as createProgressLogRoute,
-} from "@/app/api/work-items/[id]/progress-logs/route";
-import {
-  POST as supersedeProgressLogRoute,
-} from "@/app/api/progress-logs/[id]/supersede/route";
+import { POST as createProgressLogRoute } from "@/app/api/work-items/[id]/progress-logs/route";
+import { POST as supersedeProgressLogRoute } from "@/app/api/progress-logs/[id]/supersede/route";
 
 type Envelope = {
   data?: unknown;
@@ -213,7 +209,9 @@ describe("AC-47, AC-48 log progres mingguan dan alat berat", () => {
     const log = await prisma.progressLog.findUnique({ where: { id: logId } });
     expect(log?.cumulativePct?.toFixed(2)).toBe("20.00");
     // Alat berat tidak memengaruhi progres (dihitung oleh progress-ews, bukan log itu sendiri)
-    const process = await prisma.physicalProcess.findUnique({ where: { id: processId } });
+    const process = await prisma.physicalProcess.findUnique({
+      where: { id: processId },
+    });
     expect(process?.status).toBe("BERJALAN");
   });
 
@@ -245,7 +243,9 @@ describe("AC-47, AC-48 log progres mingguan dan alat berat", () => {
     if (response.status !== 200) {
       throw new Error(`Supersede gagal: ${response.status} ${responseBody}`);
     }
-    const original = await prisma.progressLog.findUnique({ where: { id: log!.id } });
+    const original = await prisma.progressLog.findUnique({
+      where: { id: log!.id },
+    });
     expect(original!.supersededById).not.toBeNull();
     const replacement = await prisma.progressLog.findUnique({
       where: { id: original!.supersededById! },

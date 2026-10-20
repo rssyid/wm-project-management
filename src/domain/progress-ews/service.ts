@@ -1,10 +1,6 @@
 // docs/01 §10–11: semua perhitungan progres dan EWS ada di sini. UI, laporan,
 // dan ekspor tidak boleh menghitung ulang.
-import {
-  decimal,
-  sumDecimal,
-  type DecimalValue,
-} from "@/infra/decimal";
+import { decimal, sumDecimal, type DecimalValue } from "@/infra/decimal";
 import { todayBusinessDateIso } from "@/shared/date";
 import { DomainError } from "@/shared/errors";
 import {
@@ -125,10 +121,15 @@ export function workItemProgress({
  * Contoh uji: A 59,0% @60% + B 75,0% @40% = 65,4%.
  */
 export function projectProgress(
-  items: readonly { projectWeightPct: DecimalValue; progressPct: DecimalValue }[],
+  items: readonly {
+    projectWeightPct: DecimalValue;
+    progressPct: DecimalValue;
+  }[],
 ): DecimalValue {
   return sumDecimal(
-    items.map((i) => i.progressPct.times(i.projectWeightPct).div(decimal("100"))),
+    items.map((i) =>
+      i.progressPct.times(i.projectWeightPct).div(decimal("100")),
+    ),
   );
 }
 
@@ -180,9 +181,11 @@ export function plannedPercent(input: PlannedPercentInput): DecimalValue {
   const pct = decimal(targetWorking)
     .times(decimal("100"))
     .div(decimal(totalWorking));
-  return pct.lessThan(decimal("0")) ? ZERO : pct.greaterThan(decimal("100"))
-    ? decimal("100")
-    : pct;
+  return pct.lessThan(decimal("0"))
+    ? ZERO
+    : pct.greaterThan(decimal("100"))
+      ? decimal("100")
+      : pct;
 }
 
 function countWorkingDays(

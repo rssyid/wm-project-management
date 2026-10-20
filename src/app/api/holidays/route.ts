@@ -1,9 +1,6 @@
 import { ok, toErrorResponse } from "@/app/api/_lib/respond";
 import { requirePermission, parseJson } from "@/app/api/_lib/session";
-import {
-  listHolidays,
-  createHoliday,
-} from "@/domain/settings/service";
+import { listHolidays, createHoliday } from "@/domain/settings/service";
 import { createHolidaySchema } from "@/shared/schemas/settings";
 
 export async function GET(request: Request) {

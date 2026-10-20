@@ -1,9 +1,5 @@
 // docs/01 §10–11: membaca data progres dan EWS dari database untuk API dan Gantt (F5).
-import {
-  decimal,
-  sumDecimal,
-  type DecimalValue,
-} from "@/infra/decimal";
+import { decimal, sumDecimal, type DecimalValue } from "@/infra/decimal";
 import { todayBusinessDateIso } from "@/shared/date";
 
 type DeliveryItemWithItem = {
@@ -43,7 +39,7 @@ type WorkItemWithRelations = {
 export function activeLog(
   logs: ProcessLogs,
   weekStartIso: string,
-): (ProcessLogs[number]) | undefined {
+): ProcessLogs[number] | undefined {
   return logs.find(
     (log) =>
       log.supersededById === null &&
@@ -62,9 +58,7 @@ export function latestCumulativePct(logs: ProcessLogs): DecimalValue {
 }
 
 /** Progres paket dari item dan kiriman (AC-49 paket). */
-export function packageProgressFromDb(
-  pkg: PackageWithItems,
-): DecimalValue {
+export function packageProgressFromDb(pkg: PackageWithItems): DecimalValue {
   const items = pkg.items;
   if (items.length === 0) return decimal("0");
   const total = sumDecimal(

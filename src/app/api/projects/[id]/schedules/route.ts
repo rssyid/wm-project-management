@@ -94,12 +94,12 @@ export async function GET(request: Request, context: Context) {
         processType = "TENDER_ATTEMPT";
         referenceId = b.tenderAttemptId;
         const wiId = attemptToWorkItem[b.tenderAttemptId];
-        referenceName = wiId ? workItemById[wiId] ?? null : null;
+        referenceName = wiId ? (workItemById[wiId] ?? null) : null;
       } else if (b.physicalProcessId) {
         processType = "PHYSICAL";
         referenceId = b.physicalProcessId;
         const wiId = processToWorkItem[b.physicalProcessId];
-        referenceName = wiId ? workItemById[wiId] ?? null : null;
+        referenceName = wiId ? (workItemById[wiId] ?? null) : null;
       } else if (b.workPackageId) {
         processType = "WORK_PACKAGE";
         referenceId = b.workPackageId;

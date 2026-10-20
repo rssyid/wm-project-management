@@ -188,7 +188,9 @@ describe("AC-45, AC-46 revisi jadwal dan kunci baseline", () => {
     expect(response.status).toBe(200);
     const json = await readJson<Envelope>(response);
     expect((json.data as { revisionNo: number }).revisionNo).toBe(1);
-    expect((json.data as { reason: string }).reason).toBe("Revisi saat ditahan");
+    expect((json.data as { reason: string }).reason).toBe(
+      "Revisi saat ditahan",
+    );
   });
 
   it("AC-46 revisi ditolak jika baseline belum dikunci (409 INVALID_TRANSITION)", async () => {

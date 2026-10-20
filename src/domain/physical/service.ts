@@ -157,7 +157,11 @@ export async function createProgressLog(
 
     const latest = process.progressLogs[0];
     const newPct = decimal(input.cumulativePct);
-    if (latest && newPct.lessThan(latest.cumulativePct) && !input.decreaseReason) {
+    if (
+      latest &&
+      newPct.lessThan(latest.cumulativePct) &&
+      !input.decreaseReason
+    ) {
       throw new DomainError(
         "PRECONDITION_FAILED",
         "Persen turun wajib disertai alasan.",
