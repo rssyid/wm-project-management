@@ -29,7 +29,30 @@ export function errorBody(
  * docs/02 §4: semua error dari route handler melewati sini, jadi pemetaan ke HTTP hanya di
  * satu tempat. 403 hanya untuk role; gate, prasyarat, dan konflik selalu 409.
  */
+/**
+ * Sinyal prerender Next (bail-out dinamis, connection() saat prerender) bukan kegagalan request.
+ * Dilempar ulang supaya framework menandai route sebagai dinamis, bukan dijadikan 500.
+ */
+const PRERENDER_SIGNAL_DIGESTS = new Set([
+  "HANGING_PROMISE_REJECTION",
+  "NEXT_PRERENDER_INTERRUPTED",
+]);
+
+function isPrerenderSignal(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) return false;
+  const digest = (error as { digest?: unknown }).digest;
+  if (typeof digest === "string" && PRERENDER_SIGNAL_DIGESTS.has(digest)) {
+    return true;
+  }
+  return (
+    error instanceof Error &&
+    error.message.includes("needs to bail out of prerendering")
+  );
+}
+
 export function toErrorResponse(error: unknown): Response {
+  if (isPrerenderSignal(error)) throw error;
+
   if (error instanceof DomainError) {
     return Response.json(errorBody(error.code, error.message, error.fields), {
       status: ERROR_STATUS[error.code],

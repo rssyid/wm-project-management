@@ -50,6 +50,12 @@ test.describe("menu Admin user", () => {
     await expect(page.getByText("User dibuat")).toBeVisible({
       timeout: 20_000,
     });
+    // Toast sonner menutupi tombol aksi di 375 px dan tidak selalu hilang tepat waktu; muat
+    // ulang supaya baris user dibaca dari data server tanpa toast di atasnya.
+    await page.reload();
+    await expect(
+      page.getByRole("table", { name: "Daftar user" }),
+    ).toBeVisible();
     const row = page.getByRole("row", { name: new RegExp(email) });
     await expect(row).toBeVisible();
     await expect(row.getByText("Belum diganti")).toBeVisible();
