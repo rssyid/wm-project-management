@@ -210,7 +210,10 @@ describe("keputusan approval AFCE", () => {
         decisionDate: "2026-10-10",
       },
     );
-    expect(rejectJson.error, "keputusan DITOLAK harus berhasil").toBeUndefined();
+    expect(
+      rejectJson.error,
+      "keputusan DITOLAK harus berhasil",
+    ).toBeUndefined();
     expect(rejectResponse.status).toBe(200);
 
     const rejected = await prisma.afceAttempt.findFirstOrThrow({
