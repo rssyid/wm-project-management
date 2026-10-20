@@ -33,13 +33,13 @@ async function apiJson(
   }
   let response: APIResponse;
   if (method === "get") {
-    response = await page.request.get(path, options);
+    response = await page.request.get(path, { ...options, timeout: 60_000 });
   } else if (method === "post") {
-    response = await page.request.post(path, options);
+    response = await page.request.post(path, { ...options, timeout: 60_000 });
   } else if (method === "put") {
-    response = await page.request.put(path, options);
+    response = await page.request.put(path, { ...options, timeout: 60_000 });
   } else {
-    response = await page.request.patch(path, options);
+    response = await page.request.patch(path, { ...options, timeout: 60_000 });
   }
   return { status: response.status(), json: (await response.json()) as Json };
 }
