@@ -1,5 +1,4 @@
 import { headers } from "next/headers";
-import { cache } from "react";
 
 import { auth } from "@/infra/auth";
 import { isRole, type Role } from "@/shared/role";
@@ -49,6 +48,6 @@ export async function sessionUserFromHeaders(
 }
 
 /** Untuk Server Component; route handler memakai sessionUserFromHeaders dengan request-nya. */
-export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
+export const getSessionUser = async (): Promise<SessionUser | null> => {
   return sessionUserFromHeaders(await headers());
-});
+};

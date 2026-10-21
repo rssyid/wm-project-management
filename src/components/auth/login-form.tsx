@@ -36,8 +36,7 @@ export function LoginForm() {
       return;
     }
     const next = searchParams.get("next");
-    router.replace(next && next.startsWith("/") ? next : "/dashboard");
-    router.refresh();
+    await router.replace(next && next.startsWith("/") ? next : "/dashboard");
   });
 
   return (

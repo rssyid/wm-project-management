@@ -8,3 +8,12 @@ export async function apiUrl(path: string): Promise<string> {
   const host = headersList.get("host") ?? "localhost:3000";
   return `${proto}://${host}${path}`;
 }
+
+/** Header Cookie dari permintaan saat ini, untuk dibawa fetch server-side ke API
+ * milik sendiri sehingga cookie session Better Auth ikut terkirim (undici tidak
+ * mengirim cookie otomatis meski `credentials: "include"`). */
+export async function sessionCookieHeaders(): Promise<HeadersInit> {
+  const headersList = await headers();
+  const cookie = headersList.get("cookie");
+  return cookie ? { cookie } : {};
+}

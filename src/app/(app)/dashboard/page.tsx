@@ -5,6 +5,7 @@ import { SCurveChart } from "@/components/dashboard/s-curve";
 import { WeeklyLogReminder } from "@/components/dashboard/weekly-reminder";
 import { fetchDashboard } from "@/domain/dashboard/queries";
 import { validateDashboardFilters } from "@/domain/dashboard/queries";
+import { redirect } from "next/navigation";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -27,7 +28,16 @@ export default async function DashboardPage({
     page: single(query.page) || "1",
   });
 
-  const dashboard = await fetchDashboard(filters);
+  let dashboard: Awaited<ReturnType<typeof fetchDashboard>>;
+  try {
+    dashboard = await fetchDashboard(filters);
+  } catch (error) {
+    const err = error as { code?: string; message?: string };
+    if (err.code === "UNAUTHENTICATED" || err.message === "Silakan masuk terlebih dahulu.") {
+      redirect("/login");
+    }
+    throw error;
+  }
 
   const scurveData = dashboard.sCurve.length
     ? dashboard.sCurve.map((s) => ({

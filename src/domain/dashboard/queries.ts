@@ -1,5 +1,5 @@
 // docs/04 §10: data dashboard dari API. UI tidak menghitung ulang progres/EWS.
-import { apiUrl } from "@/shared/api-url";
+import { apiUrl, sessionCookieHeaders } from "@/shared/api-url";
 import { projectFiltersSchema } from "@/shared/schemas/project";
 
 export type DashboardData = {
@@ -50,11 +50,13 @@ export async function fetchDashboard(filters: {
 
   const response = await fetch(await apiUrl(`/api/dashboard?${params}`), {
     cache: "no-store",
-    credentials: "include",
+    ...(await sessionCookieHeaders()),
   });
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    throw new Error(body?.error?.message ?? "Gagal memuat dashboard.");
+    const error = new Error(body?.error?.message ?? "Gagal memuat dashboard.");
+    (error as { code?: string }).code = body?.error?.code;
+    throw error;
   }
   const body = await response.json();
   return {

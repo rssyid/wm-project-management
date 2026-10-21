@@ -1,6 +1,6 @@
 import { GanttMatrix } from "@/components/gantt/gantt-matrix";
 import { GanttProjectData } from "@/domain/gantt/queries";
-import { apiUrl } from "@/shared/api-url";
+import { apiUrl, sessionCookieHeaders } from "@/shared/api-url";
 import {
   projectFiltersSchema,
   type ProjectFilters,
@@ -22,7 +22,7 @@ async function fetchPortfolioGantt(
 
   const response = await fetch(await apiUrl(`/api/portfolio/gantt?${params}`), {
     cache: "no-store",
-    credentials: "include",
+    ...(await sessionCookieHeaders()),
   });
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
