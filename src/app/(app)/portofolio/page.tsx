@@ -22,6 +22,7 @@ async function fetchPortfolioGantt(
 
   const response = await fetch(await apiUrl(`/api/portfolio/gantt?${params}`), {
     cache: "no-store",
+    credentials: "include",
   });
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));

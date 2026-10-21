@@ -50,6 +50,7 @@ export async function fetchDashboard(filters: {
 
   const response = await fetch(await apiUrl(`/api/dashboard?${params}`), {
     cache: "no-store",
+    credentials: "include",
   });
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
