@@ -12,13 +12,25 @@ export async function GET(request: Request) {
       Object.fromEntries(new URL(request.url).searchParams),
     );
     const { data } = await listProjects(filters);
-    const gantts = await Promise.all(data.map((row) => getGanttProject(row.id)));
+    const gantts = await Promise.all(
+      data.map((row) => getGanttProject(row.id)),
+    );
 
     const byStatus: Record<string, number> = {};
     let totalProgress = decimal("0");
     let progressCount = 0;
-    const deviations: { projectCode: string; projectName: string; deviationPct: number }[] = [];
-    const ewsByProject: Array<{ projectId: string; projectCode: string; projectName: string; level: string | null; label: string }> = [];
+    const deviations: {
+      projectCode: string;
+      projectName: string;
+      deviationPct: number;
+    }[] = [];
+    const ewsByProject: Array<{
+      projectId: string;
+      projectCode: string;
+      projectName: string;
+      level: string | null;
+      label: string;
+    }> = [];
     const sCurve: Array<{ week: string; planned: number; actual: number }> = [];
 
     for (const g of gantts) {
@@ -66,12 +78,17 @@ export async function GET(request: Request) {
       }
     }
 
-    deviations.sort((a, b) => Math.abs(b.deviationPct) - Math.abs(a.deviationPct));
+    deviations.sort(
+      (a, b) => Math.abs(b.deviationPct) - Math.abs(a.deviationPct),
+    );
     const topDeviations = deviations.slice(0, 10);
 
     return ok({
       byStatus,
-      averageProgress: progressCount > 0 ? totalProgress.div(decimal(progressCount)).toFixed(2) : "0.00",
+      averageProgress:
+        progressCount > 0
+          ? totalProgress.div(decimal(progressCount)).toFixed(2)
+          : "0.00",
       projectCount: gantts.length,
       deviations: topDeviations,
       ews: ewsByProject,

@@ -30,12 +30,19 @@ export default async function DashboardPage({
   const dashboard = await fetchDashboard(filters);
 
   const scurveData = dashboard.sCurve.length
-    ? dashboard.sCurve.map((s) => ({ week: s.week, planned: s.planned, actual: s.actual }))
+    ? dashboard.sCurve.map((s) => ({
+        week: s.week,
+        planned: s.planned,
+        actual: s.actual,
+      }))
     : [{ week: "W1", planned: 0, actual: 0 }];
 
   return (
     <>
-      <PageHeader title="Dashboard" description="Ringkasan portofolio, EWS, dan progres." />
+      <PageHeader
+        title="Dashboard"
+        description="Ringkasan portofolio, EWS, dan progres."
+      />
       <DashboardKpis
         projectCount={dashboard.projectCount}
         averageProgress={dashboard.averageProgress}
@@ -43,7 +50,10 @@ export default async function DashboardPage({
       />
       <DeviationsTable deviations={dashboard.deviations} />
       <SCurveChart data={scurveData} />
-      <WeeklyLogReminder count={dashboard.ews.length} projectCount={dashboard.projectCount} />
+      <WeeklyLogReminder
+        count={dashboard.ews.length}
+        projectCount={dashboard.projectCount}
+      />
     </>
   );
 }

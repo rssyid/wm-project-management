@@ -8,14 +8,22 @@ import ExcelJS from "exceljs";
 
 type Context = { params: Promise<{ type: string }> };
 
-const REPORT_TYPES = ["portfolio", "project-detail", "work-packages", "ews-red"] as const;
+const REPORT_TYPES = [
+  "portfolio",
+  "project-detail",
+  "work-packages",
+  "ews-red",
+] as const;
 type ReportType = (typeof REPORT_TYPES)[number];
 
 function escapePdfString(s: string): string {
   return s.replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
 }
 
-async function buildXlsx(type: ReportType, projects: unknown[]): Promise<Buffer> {
+async function buildXlsx(
+  type: ReportType,
+  projects: unknown[],
+): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet(type);
 
@@ -25,7 +33,11 @@ async function buildXlsx(type: ReportType, projects: unknown[]): Promise<Buffer>
       { header: "Nama", key: "name", width: 40 },
       { header: "Status", key: "status", width: 20 },
     ];
-    for (const p of projects as Array<{ code: string; name: string; status: string }>) {
+    for (const p of projects as Array<{
+      code: string;
+      name: string;
+      status: string;
+    }>) {
       sheet.addRow({ code: p.code, name: p.name, status: p.status });
     }
   } else if (type === "project-detail") {
@@ -35,7 +47,12 @@ async function buildXlsx(type: ReportType, projects: unknown[]): Promise<Buffer>
       { header: "Nama", key: "name", width: 40 },
       { header: "Status", key: "status", width: 20 },
     ];
-    for (const p of projects as Array<{ id: string; code: string; name: string; status: string }>) {
+    for (const p of projects as Array<{
+      id: string;
+      code: string;
+      name: string;
+      status: string;
+    }>) {
       sheet.addRow({ id: p.id, code: p.code, name: p.name, status: p.status });
     }
   } else if (type === "work-packages") {
@@ -44,8 +61,16 @@ async function buildXlsx(type: ReportType, projects: unknown[]): Promise<Buffer>
       { header: "Paket Kerja", key: "name", width: 40 },
       { header: "Status", key: "status", width: 20 },
     ];
-    for (const p of projects as Array<{ projectCode: string; name: string; status: string }>) {
-      sheet.addRow({ projectCode: p.projectCode, name: p.name, status: p.status });
+    for (const p of projects as Array<{
+      projectCode: string;
+      name: string;
+      status: string;
+    }>) {
+      sheet.addRow({
+        projectCode: p.projectCode,
+        name: p.name,
+        status: p.status,
+      });
     }
   } else {
     sheet.columns = [
@@ -53,7 +78,11 @@ async function buildXlsx(type: ReportType, projects: unknown[]): Promise<Buffer>
       { header: "Nama", key: "name", width: 40 },
       { header: "EWS", key: "ews", width: 20 },
     ];
-    for (const p of projects as Array<{ code: string; name: string; ews: string | null }>) {
+    for (const p of projects as Array<{
+      code: string;
+      name: string;
+      ews: string | null;
+    }>) {
       sheet.addRow({ code: p.code, name: p.name, ews: p.ews ?? "-" });
     }
   }
@@ -140,7 +169,11 @@ export async function GET(request: Request, context: Context) {
     const query = Object.fromEntries(new URL(request.url).searchParams);
     const filters = projectFiltersSchema.parse(query);
     const format =
-      query.format === "pdf" ? "pdf" : query.format === "xlsx" ? "xlsx" : "json";
+      query.format === "pdf"
+        ? "pdf"
+        : query.format === "xlsx"
+          ? "xlsx"
+          : "json";
     const { data } = await listProjects(filters);
 
     const gantts = await Promise.all(data.map((p) => getGanttProject(p.id)));
@@ -153,14 +186,18 @@ export async function GET(request: Request, context: Context) {
           code: p.code,
           name: p.name,
           status: p.status,
-          ews: gantts[i]?.rows.find((r) => r.type === "workItem")?.ewsLevel ?? null,
+          ews:
+            gantts[i]?.rows.find((r) => r.type === "workItem")?.ewsLevel ??
+            null,
         })),
       };
     } else if (type === "project-detail") {
       result = {
         projects: data.map((p, i) => ({
           ...p,
-          ews: gantts[i]?.rows.find((r) => r.type === "workItem")?.ewsLevel ?? null,
+          ews:
+            gantts[i]?.rows.find((r) => r.type === "workItem")?.ewsLevel ??
+            null,
         })),
       };
     } else if (type === "work-packages") {
@@ -170,7 +207,11 @@ export async function GET(request: Request, context: Context) {
           code: p.code,
           workPackages: gantts[i]?.rows
             .filter((r) => r.type === "workPackage")
-            .map((r) => ({ name: r.label, status: r.status, progressPct: r.progressPct })),
+            .map((r) => ({
+              name: r.label,
+              status: r.status,
+              progressPct: r.progressPct,
+            })),
         })),
       };
     } else {
@@ -179,7 +220,9 @@ export async function GET(request: Request, context: Context) {
           id: p.id,
           code: p.code,
           name: p.name,
-          ews: gantts[i]?.rows.find((r) => r.type === "workItem")?.ewsLevel ?? null,
+          ews:
+            gantts[i]?.rows.find((r) => r.type === "workItem")?.ewsLevel ??
+            null,
         })),
       };
     }
@@ -205,7 +248,11 @@ export async function GET(request: Request, context: Context) {
         },
       });
     }
-    return ok(result, { page: filters.page, pageSize: filters.pageSize, total: data.length });
+    return ok(result, {
+      page: filters.page,
+      pageSize: filters.pageSize,
+      total: data.length,
+    });
   } catch (error) {
     return toErrorResponse(error);
   }

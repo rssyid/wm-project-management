@@ -1,8 +1,15 @@
-'use client';
+"use client";
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-import { formatPercent } from '@/shared/format';
+import { formatPercent } from "@/shared/format";
 
 type DeviationRow = {
   projectCode: string;
@@ -17,15 +24,15 @@ export function DeviationsTable({
 }) {
   if (deviations.length === 0) {
     return (
-      <div className="border border-line rounded-sm bg-panel p-6 text-center text-sm text-ink-muted">
+      <div className="rounded-sm border border-line bg-panel p-6 text-center text-sm text-ink-muted">
         Tidak ada deviasi yang mencolok.
       </div>
     );
   }
 
   return (
-    <section className="mb-6 border border-line rounded-sm bg-panel overflow-hidden">
-      <h2 className="text-base font-semibold border-b border-line p-4 mb-0">
+    <section className="mb-6 overflow-hidden rounded-sm border border-line bg-panel">
+      <h2 className="mb-0 border-b border-line p-4 text-base font-semibold">
         10 Deviasi Terbesar
       </h2>
       <Table>
@@ -41,7 +48,7 @@ export function DeviationsTable({
             <TableRow key={row.projectCode} className="border-b border-line">
               <TableCell className="p-3 text-sm">{row.projectCode}</TableCell>
               <TableCell className="p-3 text-sm">{row.projectName}</TableCell>
-              <TableCell className="p-3 text-sm text-right tabular-nums">
+              <TableCell className="p-3 text-right text-sm tabular-nums">
                 {formatPercent(row.deviationPct.toString())}
               </TableCell>
             </TableRow>

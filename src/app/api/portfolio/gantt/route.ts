@@ -11,9 +11,7 @@ export async function GET(request: Request) {
       Object.fromEntries(new URL(request.url).searchParams),
     );
     const { data } = await listProjects(filters);
-    const gantt = await Promise.all(
-      data.map((row) => getGanttProject(row.id)),
-    );
+    const gantt = await Promise.all(data.map((row) => getGanttProject(row.id)));
     return ok({ projects: gantt, filters });
   } catch (error) {
     return toErrorResponse(error);

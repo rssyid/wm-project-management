@@ -32,7 +32,12 @@ describe("AC-57, AC-58 Laporan dan ekspor", () => {
     cookie = await signIn(specialist.email, specialist.password);
   });
 
-  const reportTypes = ["portfolio", "project-detail", "work-packages", "ews-red"];
+  const reportTypes = [
+    "portfolio",
+    "project-detail",
+    "work-packages",
+    "ews-red",
+  ];
 
   for (const type of reportTypes) {
     it(`mengembalikan JSON untuk laporan ${type}`, async () => {

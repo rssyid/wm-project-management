@@ -148,7 +148,9 @@ describe("AC-53, AC-54, AC-55 Gantt matriks", () => {
     const weeks = (body.data as { weeks: unknown[] })?.weeks ?? [];
     expect(weeks.length).toBeGreaterThan(0);
     // W1 harus Senin (weekday 1)
-    const firstWeek = new Date((weeks[0] as { weekStart: string }).weekStart + "T00:00:00Z");
+    const firstWeek = new Date(
+      (weeks[0] as { weekStart: string }).weekStart + "T00:00:00Z",
+    );
     expect(firstWeek.getUTCDay()).toBe(1);
   });
 });

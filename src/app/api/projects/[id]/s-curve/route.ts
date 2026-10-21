@@ -21,8 +21,14 @@ export async function GET(request: Request, context: Context) {
           count += 1;
         }
         const cell = gantt.rows.find((r) => r.id === row.id)?.cells?.[i];
-        if (cell?.color === "base" || cell?.color === "rev1" || cell?.color === "rev2") {
-          planned = planned.plus(decimal((i + 1) / gantt.weeks.length).times(decimal("100")));
+        if (
+          cell?.color === "base" ||
+          cell?.color === "rev1" ||
+          cell?.color === "rev2"
+        ) {
+          planned = planned.plus(
+            decimal((i + 1) / gantt.weeks.length).times(decimal("100")),
+          );
         }
       }
       return {

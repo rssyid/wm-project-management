@@ -1,10 +1,15 @@
 import { GanttMatrix } from "@/components/gantt/gantt-matrix";
 import { GanttProjectData } from "@/domain/gantt/queries";
-import { projectFiltersSchema, type ProjectFilters } from "@/shared/schemas/project";
+import {
+  projectFiltersSchema,
+  type ProjectFilters,
+} from "@/shared/schemas/project";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
-async function fetchPortfolioGantt(filters: ProjectFilters): Promise<GanttProjectData[]> {
+async function fetchPortfolioGantt(
+  filters: ProjectFilters,
+): Promise<GanttProjectData[]> {
   const params = new URLSearchParams();
   if (filters.q) params.set("q", filters.q);
   if (filters.status.length) params.set("status", filters.status.join(","));
@@ -43,14 +48,14 @@ export default async function PortfolioPage({
   const gantts = await fetchPortfolioGantt(filters);
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="space-y-4 p-4">
       <h2 className="text-base font-semibold">Gantt Portofolio</h2>
       <p className="text-sm text-ink-muted">
         Gantt matriks mingguan untuk proyek terfilter. Setiap proyek ditampilkan
         sebagai blok terpisah.
       </p>
       {gantts.length === 0 ? (
-        <div className="border border-line rounded-sm bg-panel p-6 text-center text-sm text-ink-muted">
+        <div className="rounded-sm border border-line bg-panel p-6 text-center text-sm text-ink-muted">
           Tidak ada proyek yang cocok dengan filter.
         </div>
       ) : (
@@ -58,7 +63,7 @@ export default async function PortfolioPage({
           {gantts.map((g) => (
             <section
               key={g.projectId}
-              className="border border-line rounded-sm bg-panel overflow-hidden"
+              className="overflow-hidden rounded-sm border border-line bg-panel"
             >
               <div className="border-b border-line bg-surface p-3">
                 <h3 className="text-sm font-semibold text-ink">

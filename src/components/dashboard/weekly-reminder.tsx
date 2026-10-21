@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export function WeeklyLogReminder({
   count,
@@ -12,18 +12,18 @@ export function WeeklyLogReminder({
 }) {
   if (count === 0) {
     return (
-      <div className="border border-line rounded-sm bg-panel p-4 text-center text-sm text-ink-muted">
+      <div className="rounded-sm border border-line bg-panel p-4 text-center text-sm text-ink-muted">
         Semua Pekerjaan sudah memiliki log minggu ini.
       </div>
     );
   }
 
   return (
-    <section className="mb-6 border border-line rounded-sm bg-ews-yellow-soft p-4">
-      <h2 className="text-base font-semibold text-ews-yellow mb-2">
+    <section className="mb-6 rounded-sm border border-line bg-ews-yellow-soft p-4">
+      <h2 className="mb-2 text-base font-semibold text-ews-yellow">
         Pengingat Log Mingguan
       </h2>
-      <p className="text-sm text-ink mb-2">
+      <p className="mb-2 text-sm text-ink">
         {count} Pekerjaan di {projectCount} proyek belum memiliki log progres
         minggu ini.
       </p>

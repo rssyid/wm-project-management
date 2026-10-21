@@ -33,11 +33,17 @@ export async function fetchDashboard(filters: {
 }): Promise<DashboardData> {
   const params = new URLSearchParams();
   if (filters.q) params.set("q", filters.q);
-  const statuses = Array.isArray(filters.status) ? filters.status : [filters.status].filter(Boolean);
+  const statuses = Array.isArray(filters.status)
+    ? filters.status
+    : [filters.status].filter(Boolean);
   if (statuses.length) params.set("status", statuses.join(","));
-  const ids = Array.isArray(filters.companyIds) ? filters.companyIds : [filters.companyIds].filter(Boolean);
+  const ids = Array.isArray(filters.companyIds)
+    ? filters.companyIds
+    : [filters.companyIds].filter(Boolean);
   if (ids.length) params.set("companyId", ids.join(","));
-  const regionIds = Array.isArray(filters.regionIds) ? filters.regionIds : [filters.regionIds].filter(Boolean);
+  const regionIds = Array.isArray(filters.regionIds)
+    ? filters.regionIds
+    : [filters.regionIds].filter(Boolean);
   if (regionIds.length) params.set("regionId", regionIds.join(","));
   if (filters.categoryId) params.set("categoryId", filters.categoryId);
 

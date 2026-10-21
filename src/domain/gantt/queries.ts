@@ -68,8 +68,15 @@ export function weekLabel(iso: string): string {
   return `${day}/${m}`;
 }
 
-export function inRange(weekStart: string, fromIso: string, toIso: string): boolean {
-  return compareBusinessDate(weekStart, fromIso) >= 0 && compareBusinessDate(weekStart, toIso) <= 0;
+export function inRange(
+  weekStart: string,
+  fromIso: string,
+  toIso: string,
+): boolean {
+  return (
+    compareBusinessDate(weekStart, fromIso) >= 0 &&
+    compareBusinessDate(weekStart, toIso) <= 0
+  );
 }
 
 export function cellColorFor(
@@ -108,7 +115,10 @@ export function cellSymbolFor(
     return null;
   }
   if (rowType === "tenderAttempt") {
-    if (actualStart !== null && compareBusinessDate(weekStart, actualStart) >= 0) {
+    if (
+      actualStart !== null &&
+      compareBusinessDate(weekStart, actualStart) >= 0
+    ) {
       return "#";
     }
     return null;
@@ -117,7 +127,10 @@ export function cellSymbolFor(
     if (actualEnd !== null && compareBusinessDate(weekStart, actualEnd) >= 0) {
       return "✓";
     }
-    if (actualStart !== null && compareBusinessDate(weekStart, actualStart) >= 0) {
+    if (
+      actualStart !== null &&
+      compareBusinessDate(weekStart, actualStart) >= 0
+    ) {
       return "#";
     }
     return null;
@@ -126,7 +139,10 @@ export function cellSymbolFor(
 }
 
 /** Persen rencana linear pada tanggal target berdasarkan rentang rencana (0–100). */
-function plannedLinearPct(planned: PlannedRange | null, targetIso: string): DecimalValue {
+function plannedLinearPct(
+  planned: PlannedRange | null,
+  targetIso: string,
+): DecimalValue {
   if (!planned) return decimal("0");
   const ps = planned.start.split("-").map((v) => Number(v));
   const pe = planned.end.split("-").map((v) => Number(v));
@@ -173,7 +189,9 @@ type RawRow = {
   progressPct: DecimalValue | null;
 };
 
-export async function getGanttProject(projectId: string): Promise<GanttProjectData> {
+export async function getGanttProject(
+  projectId: string,
+): Promise<GanttProjectData> {
   const project = await prisma.project.findUnique({
     where: { id: projectId },
     select: {
@@ -212,7 +230,12 @@ export async function getGanttProject(projectId: string): Promise<GanttProjectDa
               plannedEnd: true,
               revisions: {
                 orderBy: { revisionNo: "asc" },
-                select: { id: true, revisionNo: true, plannedStart: true, plannedEnd: true },
+                select: {
+                  id: true,
+                  revisionNo: true,
+                  plannedStart: true,
+                  plannedEnd: true,
+                },
               },
             },
           },
@@ -226,7 +249,12 @@ export async function getGanttProject(projectId: string): Promise<GanttProjectDa
           actualEnd: true,
           progressLogs: {
             orderBy: { weekStart: "asc" },
-            select: { id: true, weekStart: true, cumulativePct: true, supersededById: true },
+            select: {
+              id: true,
+              weekStart: true,
+              cumulativePct: true,
+              supersededById: true,
+            },
           },
           baselines: {
             select: { id: true, plannedStart: true, plannedEnd: true },
@@ -249,7 +277,12 @@ export async function getGanttProject(projectId: string): Promise<GanttProjectDa
               plannedEnd: true,
               revisions: {
                 orderBy: { revisionNo: "asc" },
-                select: { id: true, revisionNo: true, plannedStart: true, plannedEnd: true },
+                select: {
+                  id: true,
+                  revisionNo: true,
+                  plannedStart: true,
+                  plannedEnd: true,
+                },
               },
             },
           },
@@ -316,8 +349,12 @@ export async function getGanttProject(projectId: string): Promise<GanttProjectDa
         level: 2,
         planned,
         revisions,
-        actualStart: attempt.actualStart ? (businessDateIso(attempt.actualStart) ?? null) : null,
-        actualEnd: attempt.actualEnd ? (businessDateIso(attempt.actualEnd) ?? null) : null,
+        actualStart: attempt.actualStart
+          ? (businessDateIso(attempt.actualStart) ?? null)
+          : null,
+        actualEnd: attempt.actualEnd
+          ? (businessDateIso(attempt.actualEnd) ?? null)
+          : null,
         status: attempt.status,
         progressPct: null,
       });
@@ -333,7 +370,8 @@ export async function getGanttProject(projectId: string): Promise<GanttProjectDa
             end: businessDateIso(base.plannedEnd) ?? "",
           }
         : null;
-      const revisions: { start: string; end: string; revisionNo: number }[] = [];
+      const revisions: { start: string; end: string; revisionNo: number }[] =
+        [];
       if (base) {
         const s = businessDateIso(base.plannedStart) ?? "";
         const e = businessDateIso(base.plannedEnd) ?? "";
@@ -351,14 +389,20 @@ export async function getGanttProject(projectId: string): Promise<GanttProjectDa
         allDates.push(e);
       }
 
-      const activeLogs = phys.progressLogs.filter((l) => l.supersededById === null);
+      const activeLogs = phys.progressLogs.filter(
+        (l) => l.supersededById === null,
+      );
       const latest =
         activeLogs.length > 0
           ? activeLogs.sort(
-              (a, b) => new Date(b.weekStart).getTime() - new Date(a.weekStart).getTime(),
+              (a, b) =>
+                new Date(b.weekStart).getTime() -
+                new Date(a.weekStart).getTime(),
             )[0]
           : null;
-      const progressPct = latest ? decimal(latest.cumulativePct.toString()) : null;
+      const progressPct = latest
+        ? decimal(latest.cumulativePct.toString())
+        : null;
 
       processRows.push({
         id: phys.id,
@@ -367,8 +411,12 @@ export async function getGanttProject(projectId: string): Promise<GanttProjectDa
         level: 2,
         planned,
         revisions,
-        actualStart: phys.actualStart ? (businessDateIso(phys.actualStart) ?? null) : null,
-        actualEnd: phys.actualEnd ? (businessDateIso(phys.actualEnd) ?? null) : null,
+        actualStart: phys.actualStart
+          ? (businessDateIso(phys.actualStart) ?? null)
+          : null,
+        actualEnd: phys.actualEnd
+          ? (businessDateIso(phys.actualEnd) ?? null)
+          : null,
         status: phys.status,
         progressPct,
       });
@@ -433,7 +481,9 @@ export async function getGanttProject(projectId: string): Promise<GanttProjectDa
         actualStart: pkg.purchaseRequest
           ? (businessDateIso(pkg.purchaseRequest.date) ?? null)
           : null,
-        actualEnd: pkg.completedDate ? (businessDateIso(pkg.completedDate) ?? null) : null,
+        actualEnd: pkg.completedDate
+          ? (businessDateIso(pkg.completedDate) ?? null)
+          : null,
         status: pkg.status,
         progressPct: pkgProgress,
       });
@@ -492,15 +542,28 @@ export async function getGanttProject(projectId: string): Promise<GanttProjectDa
   for (const raw of rawRows) {
     const cells: GanttCell[] = weeks.map((w) => {
       const color = cellColorFor(w.weekStart, raw.planned, raw.revisions);
-      const symbol = cellSymbolFor(raw.type, w.weekStart, raw.actualStart, raw.actualEnd, raw.progressPct);
+      const symbol = cellSymbolFor(
+        raw.type,
+        w.weekStart,
+        raw.actualStart,
+        raw.actualEnd,
+        raw.progressPct,
+      );
       let tooltip: string | null = null;
       if (color || symbol) {
         tooltip = `${raw.label}: ${w.label}`;
-        if (raw.progressPct) tooltip += ` · progres ${raw.progressPct.toFixed(2)}%`;
+        if (raw.progressPct)
+          tooltip += ` · progres ${raw.progressPct.toFixed(2)}%`;
       }
       return { weekStart: w.weekStart, color, symbol, tooltip };
     });
-    const ewsLevel = await ewsForRow(raw.planned, raw.progressPct, todayIso, yellowFrom, redAbove);
+    const ewsLevel = await ewsForRow(
+      raw.planned,
+      raw.progressPct,
+      todayIso,
+      yellowFrom,
+      redAbove,
+    );
     rows.push({
       id: raw.id,
       type: raw.type,
@@ -529,7 +592,12 @@ export async function getGanttProject(projectId: string): Promise<GanttProjectDa
     status: project.status,
     progressPct: null,
     ewsLevel: null,
-    cells: weeks.map((w) => ({ weekStart: w.weekStart, color: null, symbol: null, tooltip: null })),
+    cells: weeks.map((w) => ({
+      weekStart: w.weekStart,
+      color: null,
+      symbol: null,
+      tooltip: null,
+    })),
   };
 
   return {

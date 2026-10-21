@@ -90,13 +90,7 @@ describe("AC-55 simbol Gantt", () => {
 
   it("workPackage: # sejak purchaseRequest, ✓ setelah completedDate", () => {
     expect(
-      cellSymbolFor(
-        "workPackage",
-        "2026-10-12",
-        "2026-10-12",
-        null,
-        null,
-      ),
+      cellSymbolFor("workPackage", "2026-10-12", "2026-10-12", null, null),
     ).toBe("#");
     expect(
       cellSymbolFor(
