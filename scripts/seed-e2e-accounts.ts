@@ -6,6 +6,7 @@ import { prisma } from "@/infra/db";
 import { Prisma } from "@/generated/prisma/client";
 
 import { seedLokasi } from "../prisma/seed/lokasi";
+import { seedMaster } from "../prisma/seed/master";
 import {
   ALL_E2E_ACCOUNTS,
   E2E_PASSWORD,
@@ -142,11 +143,13 @@ async function main() {
   // Lokasi seed dipakai form proyek: tanpa Region/Wilayah/Company, dropdown "Perusahaan"
   // kosong dan test alur proyek tidak bisa memilih estate (AC-61).
   const lokasi = await seedLokasi();
+  const master = await seedMaster();
   const matriks = await resetApprovalMatrix();
 
   console.log(
     `Akun e2e siap: ${ALL_E2E_ACCOUNTS.length}. ` +
       `Lokasi seed: ${lokasi.companies} company, ${lokasi.estates} estate. ` +
+      `Master seed: ${master.approvalPositions} jabatan, systemSetting dijamin ada. ` +
       `Tier e2e dihapus: ${matriks.removed}, tier bersama dibuat (jabatan ${matriks.position}).`,
   );
   await prisma.$disconnect();

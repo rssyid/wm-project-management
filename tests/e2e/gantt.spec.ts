@@ -58,11 +58,11 @@ test.describe("Gantt matriks", () => {
     await page.getByRole("tab", { name: "Jadwal" }).click();
 
     // Gantt matrix harus muncul.
-    await expect(page.getByText("Rencana")).toBeVisible();
-    await expect(page.getByText("Revisi 1")).toBeVisible();
-    await expect(page.getByText("Revisi 2+")).toBeVisible();
-    await expect(page.getByText("# Berjalan")).toBeVisible();
-    await expect(page.getByText("✓ Selesai")).toBeVisible();
+    await expect(page.getByText("Rencana", { exact: true })).toBeVisible();
+    await expect(page.getByText("Revisi 1", { exact: true })).toBeVisible();
+    await expect(page.getByText("Revisi 2+", { exact: true })).toBeVisible();
+    await expect(page.getByText("# Berjalan", { exact: true })).toBeVisible();
+    await expect(page.getByText("✓ Selesai", { exact: true })).toBeVisible();
 
     // Identitas sticky di kiri.
     await expect(page.getByText("Job Item", { exact: false })).toBeVisible();
@@ -79,8 +79,8 @@ test.describe("Gantt matriks", () => {
     await page.getByRole("tab", { name: "Jadwal" }).click();
 
     // Gantt matrix harus muncul di mobile.
-    await expect(page.getByText("Rencana")).toBeVisible();
-    await expect(page.getByText("# Berjalan")).toBeVisible();
+    await expect(page.getByText("Rencana", { exact: true })).toBeVisible();
+    await expect(page.getByText("# Berjalan", { exact: true })).toBeVisible();
 
     // Kolom identitas tetap ada.
     await expect(page.getByText("Job Item", { exact: false })).toBeVisible();
