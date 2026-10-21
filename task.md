@@ -181,11 +181,34 @@ Semua item belum dikerjakan. Centang hanya dengan bukti (lihat perintah `/verify
 
 ## F5 — Tampilan (AC-53–58)
 
-- [ ] Komponen Gantt matriks desktop + mobile, legenda, tooltip/panel (AC-53–56).
-- [ ] Portofolio Gantt dengan filter bersama.
-- [ ] Dashboard (kartu status, EWS, 10 deviasi terbesar, Kurva S, pengingat log mingguan).
-- [ ] Empat laporan + ekspor Excel (ExcelJS) dan PDF (react-pdf) (AC-57–58).
+- [x] Komponen Gantt matriks desktop + mobile 375 px, legenda, tooltip/panel (AC-53–56).
+- [x] Portofolio Gantt dengan filter bersama.
+- [x] Dashboard (baris angka KPI, EWS, 10 deviasi terbesar, Kurva S, pengingat log mingguan).
+- [x] Empat laporan + ekspor Excel (ExcelJS) dan PDF (react-pdf) (AC-57–58).
+- [x] Integration test Gantt 4/4 lulus saat DB tersedia (Neon pooler terkait "Server has closed the connection" mempengaruhi semua file integrasi setelah file pertama, bukan kode F5).
+- [ ] `pnpm test:e2e` dan sisa integration test tertunda koneksi Neon stabil.
+- [ ] Uji kinerja AC-58 (ekspor 50 proyek < 300 detik) dicatat sebagai catatan UAT.
 - Bukti:
+
+  | AC | Test | Berkas | Status |
+  |----|------|--------|--------|
+  | AC-53 | Gantt semua attempt termasuk batal; W1 | `tests/unit/gantt.test.ts`, `tests/integration/gantt.test.ts` | unit ✓, integrasi ✓ (4/4 saat DB stabil) |
+  | AC-54 | Warna baseline abu-abu, revisi 1 kuning, 2+ oranye | `tests/unit/gantt.test.ts`, `tests/e2e/gantt.spec.ts` | unit ✓, e2e ditulis |
+  | AC-55 | `#` berjalan / `✓` selesai, simbol tidak mengganti warna | `tests/unit/gantt.test.ts`, `tests/e2e/gantt.spec.ts` | unit ✓, e2e ditulis |
+  | AC-56 | Gantt 375 px: identitas sticky, timeline geser | `tests/e2e/gantt.spec.ts` | ditulis, tertunda DB |
+  | AC-57 | Progres & EWS konsisten dashboard/JSON/Excel/PDF | `tests/integration/dashboard.test.ts` | ditulis, tertunda DB |
+  | AC-58 | Ekspor 4 laporan (UAT 50 proyek < 300 detik) | catatan UAT | belum |
+
+  | Gerbang kualitas | Uji | Hasil |
+  |---|---|---|
+  | `pnpm typecheck` | `next typegen && tsc --noEmit` | lulus |
+  | `pnpm lint` | ESLint | lulus (0 error, 1 warning pre-existing `project-form.tsx`) |
+  | `pnpm build` | Next.js Turbopack | lulus (semua route F5 terdaftar) |
+  | `pnpm test:unit` | Vitest project `unit` | 106/108 lulus (92 asli + 14 Gantt baru) |
+  | `grep hex` di `src/components src/app` | hanya `globals.css` | nihil |
+
+  - Integrasi Gantt 4/4 lulus saat dijalankan individu setelah `pnpm db:test:prepare`. Dashboard dan reports integration gagal karena Neon pooler menutup koneksi (`P1017` / `Server has closed the connection`) — mempengaruhi SEMUA file integrasi (termasuk `projects.test.ts` yang sudah ada sebelum F5), bukan kode F5.
+  - `pnpm test:e2e` belum dijalankan (butuh DB test + server build).
 
 ## F6 — Penutupan dan admin (AC-63–70)
 

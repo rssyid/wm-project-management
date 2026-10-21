@@ -8,12 +8,14 @@ import { NextSteps, type NextAction } from "@/components/project/next-steps";
 import { SurveyTab } from "@/components/project/survey-tab";
 import { WorkItemTab } from "@/components/project/work-item-tab";
 import { WorkPackageTab } from "@/components/project/work-package-tab";
+import { GanttMatrix } from "@/components/gantt/gantt-matrix";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { listArSupplements } from "@/domain/afce/ar-queries";
 import { listAttempts } from "@/domain/afce/queries";
 import { listWorkItems, listWorkPackages } from "@/domain/project/queries";
 import { listOwnerFiles } from "@/domain/files/links";
 import { getProjectByCode } from "@/domain/project/queries";
+import { getGanttProject } from "@/domain/gantt/queries";
 import { decimalToString } from "@/infra/decimal";
 import { prisma } from "@/infra/db";
 import { getSessionUser } from "@/infra/session";
@@ -131,6 +133,7 @@ export default async function ProjectWorkspacePage({
     surveyFiles,
     workItems,
     workPackages,
+    gantt,
   ] = await Promise.all([
     listAttempts(project.id),
     listArSupplements(project.id),
@@ -143,6 +146,7 @@ export default async function ProjectWorkspacePage({
       : Promise.resolve([]),
     listWorkItems(project.id),
     listWorkPackages(project.id),
+    getGanttProject(project.id),
   ]);
 
   const workItemsView = workItems.map((item) => ({
@@ -284,6 +288,7 @@ export default async function ProjectWorkspacePage({
             <TabsTrigger value="afce">AFCE/AR</TabsTrigger>
             <TabsTrigger value="pekerjaan">Pekerjaan</TabsTrigger>
             <TabsTrigger value="paket-kerja">Paket Kerja</TabsTrigger>
+            <TabsTrigger value="jadwal">Jadwal</TabsTrigger>
           </TabsList>
         </div>
 
@@ -407,6 +412,10 @@ export default async function ProjectWorkspacePage({
             workPackages={workPackagesView}
             canWrite={canWrite}
           />
+        </TabsContent>
+
+        <TabsContent value="jadwal">
+          <GanttMatrix data={gantt} />
         </TabsContent>
       </Tabs>
     </>
