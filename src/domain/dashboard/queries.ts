@@ -10,6 +10,18 @@ export type DashboardData = {
     projectName: string;
     deviationPct: number;
   }>;
+  ews: Array<{
+    projectId: string;
+    projectCode: string;
+    projectName: string;
+    level: string | null;
+    label: string;
+  }>;
+  sCurve: Array<{
+    week: string;
+    planned: number;
+    actual: number;
+  }>;
 };
 
 export async function fetchDashboard(filters: {
@@ -42,6 +54,8 @@ export async function fetchDashboard(filters: {
     averageProgress: body.data?.averageProgress ?? "0.00",
     byStatus: body.data?.byStatus ?? {},
     deviations: body.data?.deviations ?? [],
+    ews: body.data?.ews ?? [],
+    sCurve: body.data?.sCurve ?? [],
   };
 }
 

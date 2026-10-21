@@ -29,13 +29,9 @@ export default async function DashboardPage({
 
   const dashboard = await fetchDashboard(filters);
 
-  const scurveData = [
-    { week: "W1", planned: 6.25, actual: 5.0 },
-    { week: "W2", planned: 12.5, actual: 10.0 },
-    { week: "W3", planned: 18.75, actual: 18.0 },
-    { week: "W4", planned: 25.0, actual: 22.0 },
-    { week: "W5", planned: 31.25, actual: 35.0 },
-  ];
+  const scurveData = dashboard.sCurve.length
+    ? dashboard.sCurve.map((s) => ({ week: s.week, planned: s.planned, actual: s.actual }))
+    : [{ week: "W1", planned: 0, actual: 0 }];
 
   return (
     <>
@@ -47,7 +43,7 @@ export default async function DashboardPage({
       />
       <DeviationsTable deviations={dashboard.deviations} />
       <SCurveChart data={scurveData} />
-      <WeeklyLogReminder count={0} projectCount={dashboard.projectCount} />
+      <WeeklyLogReminder count={dashboard.ews.length} projectCount={dashboard.projectCount} />
     </>
   );
 }

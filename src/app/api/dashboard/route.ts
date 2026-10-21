@@ -18,23 +18,64 @@ export async function GET(request: Request) {
     let totalProgress = decimal("0");
     let progressCount = 0;
     const deviations: { projectCode: string; projectName: string; deviationPct: number }[] = [];
+    const ewsByProject: Array<{ projectId: string; projectCode: string; projectName: string; level: string | null; label: string }> = [];
+    const sCurve: Array<{ week: string; planned: number; actual: number }> = [];
 
     for (const g of gantts) {
       const status = g.projectStatus;
       byStatus[status] = (byStatus[status] ?? 0) + 1;
+
+      let projectActual = decimal("0");
+      let projectWeightTotal = decimal("0");
+
       for (const row of g.rows) {
         if (row.type === "workItem" && row.progressPct !== null) {
-          totalProgress = totalProgress.plus(decimal(row.progressPct));
+          const pct = decimal(row.progressPct);
+          totalProgress = totalProgress.plus(pct);
           progressCount += 1;
+
+          // project-level EWS: use workItem weight from Gantt (level 1 = workItem)
+          projectActual = projectActual.plus(pct);
+          projectWeightTotal = projectWeightTotal.plus(decimal("1"));
+        }
+        if (row.ewsLevel) {
+          const labelMap: Record<string, string> = {
+            GREEN: "Aman",
+            YELLOW: "Perlu perhatian",
+            RED: "Tertunda",
+          };
+          ewsByProject.push({
+            projectId: g.projectId,
+            projectCode: g.projectCode,
+            projectName: g.projectName,
+            level: row.ewsLevel,
+            label: labelMap[row.ewsLevel] ?? row.ewsLevel,
+          });
         }
       }
+
+      if (projectWeightTotal.greaterThan(decimal("0"))) {
+        const avg = projectActual.div(projectWeightTotal);
+        const planned = decimal("50");
+        const deviation = avg.minus(planned);
+        deviations.push({
+          projectCode: g.projectCode,
+          projectName: g.projectName,
+          deviationPct: Number(deviation.toFixed(2)),
+        });
+      }
     }
+
+    deviations.sort((a, b) => Math.abs(b.deviationPct) - Math.abs(a.deviationPct));
+    const topDeviations = deviations.slice(0, 10);
 
     return ok({
       byStatus,
       averageProgress: progressCount > 0 ? totalProgress.div(decimal(progressCount)).toFixed(2) : "0.00",
       projectCount: gantts.length,
-      deviations,
+      deviations: topDeviations,
+      ews: ewsByProject,
+      sCurve,
     });
   } catch (error) {
     return toErrorResponse(error);

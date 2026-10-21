@@ -9,7 +9,15 @@ export async function GET(request: Request, context: Context) {
     await requirePermission(request, "read");
     const { id } = await context.params;
     const gantt = await getGanttProject(id);
-    return ok({ projectId: id, rows: gantt.rows, weeks: gantt.weeks });
+    const rows = gantt.rows.map((r) => ({
+      id: r.id,
+      type: r.type,
+      label: r.label,
+      level: r.level,
+      progressPct: r.progressPct,
+      ewsLevel: r.ewsLevel,
+    }));
+    return ok({ projectId: id, rows, weeks: gantt.weeks });
   } catch (error) {
     return toErrorResponse(error);
   }

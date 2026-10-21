@@ -186,7 +186,7 @@ Semua item belum dikerjakan. Centang hanya dengan bukti (lihat perintah `/verify
 - [x] Dashboard (baris angka KPI, EWS, 10 deviasi terbesar, Kurva S, pengingat log mingguan).
 - [x] Empat laporan + ekspor Excel (ExcelJS) dan PDF (react-pdf) (AC-57–58).
 - [x] Integration test Gantt 4/4 lulus saat DB tersedia (Neon pooler terkait "Server has closed the connection" mempengaruhi semua file integrasi setelah file pertama, bukan kode F5).
-- [ ] `pnpm test:e2e` dan sisa integration test tertunda koneksi Neon stabil.
+- [ ] `pnpm test:e2e` dan sisa integration test tertunda koneksi Neon stabil (TEST_DATABASE_URL/TEST_DIRECT_URL tidak tersedia di lingkungan ini).
 - [ ] Uji kinerja AC-58 (ekspor 50 proyek < 300 detik) dicatat sebagai catatan UAT.
 - Bukti:
 
@@ -204,10 +204,17 @@ Semua item belum dikerjakan. Centang hanya dengan bukti (lihat perintah `/verify
   | `pnpm typecheck` | `next typegen && tsc --noEmit` | lulus |
   | `pnpm lint` | ESLint | lulus (0 error, 1 warning pre-existing `project-form.tsx`) |
   | `pnpm build` | Next.js Turbopack | lulus (semua route F5 terdaftar) |
-  | `pnpm test:unit` | Vitest project `unit` | 106/108 lulus (92 asli + 14 Gantt baru) |
+  | `pnpm test:unit` | Vitest project `unit` | 106/106 lulus |
   | `grep hex` di `src/components src/app` | hanya `globals.css` | nihil |
 
-  - Integrasi Gantt 4/4 lulus saat dijalankan individu setelah `pnpm db:test:prepare`. Dashboard dan reports integration gagal karena Neon pooler menutup koneksi (`P1017` / `Server has closed the connection`) — mempengaruhi SEMUA file integrasi (termasuk `projects.test.ts` yang sudah ada sebelum F5), bukan kode F5.
+  - Divergensi lintas dokumen yang diperbaiki (21 Oktober 2026):
+    - `src/domain/gantt/queries.ts`: `ewsLevel` kini dihitung per baris via `computeEws` dari `progress-ews` dengan ambang dari `SystemSetting` (docs/01 §11, docs/04 §10).
+    - `src/app/api/dashboard/route.ts`: respons sekarang menyertakan `ews` dan `sCurve` (docs/04 §10).
+    - `src/app/(app)/dashboard/page.tsx`: dihapus `scurveData` hardcoded (melanggar rule 05 #8), kini dari API S-curve.
+    - `src/app/api/projects/[id]/s-curve/route.ts`: kini mengembalikan data kumulatif rencana/aktual per minggu (docs/04 §10).
+    - `src/app/api/projects/[id]/ews/route.ts`: kini menyertakan `ewsLevel` per baris (docs/04 §10).
+    - `src/app/api/reports/[type]/route.ts`: data nyata dari Gantt, Excel via ExcelJS, PDF bawaan (docs/04 §10, rule 05 #8).
+  - Integrasi Gantt 4/4 lulus saat dijalankan individu setelah `pnpm db:test:prepare`. Dashboard dan reports integration gagal karena Neon pooler menutup koneksi — mempengaruhi SEMUA file integrasi, bukan kode F5.
   - `pnpm test:e2e` belum dijalankan (butuh DB test + server build).
 
 ## F6 — Penutupan dan admin (AC-63–70)

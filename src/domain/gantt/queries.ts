@@ -6,6 +6,8 @@ import { DomainError } from "@/shared/errors";
 import type { EwsLevel } from "@/shared/project-status";
 import { prisma } from "@/infra/db";
 import { businessDateIso, compareBusinessDate } from "@/shared/date";
+import { computeEws } from "@/domain/progress-ews/service";
+import { getSettings } from "@/domain/settings/service";
 
 export type GanttCellColor = "base" | "rev1" | "rev2" | null;
 
@@ -123,6 +125,41 @@ export function cellSymbolFor(
   return null;
 }
 
+/** Persen rencana linear pada tanggal target berdasarkan rentang rencana (0–100). */
+function plannedLinearPct(planned: PlannedRange | null, targetIso: string): DecimalValue {
+  if (!planned) return decimal("0");
+  const ps = planned.start.split("-").map((v) => Number(v));
+  const pe = planned.end.split("-").map((v) => Number(v));
+  const ts = targetIso.split("-").map((v) => Number(v));
+  const start = new Date(Date.UTC(ps[0]!, ps[1]! - 1, ps[2]!));
+  const end = new Date(Date.UTC(pe[0]!, pe[1]! - 1, pe[2]!));
+  const target = new Date(Date.UTC(ts[0]!, ts[1]! - 1, ts[2]!));
+  if (target <= start) return decimal("0");
+  if (target >= end) return decimal("100");
+  const total = end.getTime() - start.getTime();
+  const elapsed = target.getTime() - start.getTime();
+  return decimal(elapsed).div(decimal(total)).times(decimal("100"));
+}
+
+/** EWS level untuk satu baris Gantt pada tanggal hari ini. */
+async function ewsForRow(
+  planned: PlannedRange | null,
+  actualPct: DecimalValue | null,
+  todayIso: string,
+  yellowFrom: DecimalValue,
+  redAbove: DecimalValue,
+): Promise<EwsLevel | null> {
+  if (!planned || actualPct === null) return null;
+  const plannedPct = plannedLinearPct(planned, todayIso);
+  const { level } = computeEws({
+    plannedPct,
+    actualPct,
+    yellowFrom,
+    redAbove,
+  });
+  return level;
+}
+
 type RawRow = {
   id: string;
   type: GanttRow["type"];
@@ -147,6 +184,11 @@ export async function getGanttProject(projectId: string): Promise<GanttProjectDa
     },
   });
   if (!project) throw new DomainError("NOT_FOUND", "Proyek tidak ditemukan.");
+
+  const setting = await getSettings();
+  const yellowFrom = decimal(setting.ewsYellowFrom?.toString() ?? "5");
+  const redAbove = decimal(setting.ewsRedAbove?.toString() ?? "10");
+  const todayIso = todayBusinessDateIso();
 
   const workItems = await prisma.workItem.findMany({
     where: { projectId, cancelledAt: null },
@@ -458,6 +500,7 @@ export async function getGanttProject(projectId: string): Promise<GanttProjectDa
       }
       return { weekStart: w.weekStart, color, symbol, tooltip };
     });
+    const ewsLevel = await ewsForRow(raw.planned, raw.progressPct, todayIso, yellowFrom, redAbove);
     rows.push({
       id: raw.id,
       type: raw.type,
@@ -469,7 +512,7 @@ export async function getGanttProject(projectId: string): Promise<GanttProjectDa
       actualEnd: raw.actualEnd,
       status: raw.status,
       progressPct: raw.progressPct?.toFixed(2) ?? null,
-      ewsLevel: null,
+      ewsLevel,
       cells,
     });
   }
