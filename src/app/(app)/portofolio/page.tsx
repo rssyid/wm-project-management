@@ -1,5 +1,6 @@
 import { GanttMatrix } from "@/components/gantt/gantt-matrix";
 import { GanttProjectData } from "@/domain/gantt/queries";
+import { apiUrl } from "@/shared/api-url";
 import {
   projectFiltersSchema,
   type ProjectFilters,
@@ -19,7 +20,7 @@ async function fetchPortfolioGantt(
     params.set("regionId", filters.regionIds.join(","));
   if (filters.categoryId) params.set("categoryId", filters.categoryId);
 
-  const response = await fetch(`/api/portfolio/gantt?${params}`, {
+  const response = await fetch(await apiUrl(`/api/portfolio/gantt?${params}`), {
     cache: "no-store",
   });
   if (!response.ok) {

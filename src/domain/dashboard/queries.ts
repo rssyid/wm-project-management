@@ -1,4 +1,5 @@
 // docs/04 §10: data dashboard dari API. UI tidak menghitung ulang progres/EWS.
+import { apiUrl } from "@/shared/api-url";
 import { projectFiltersSchema } from "@/shared/schemas/project";
 
 export type DashboardData = {
@@ -47,7 +48,7 @@ export async function fetchDashboard(filters: {
   if (regionIds.length) params.set("regionId", regionIds.join(","));
   if (filters.categoryId) params.set("categoryId", filters.categoryId);
 
-  const response = await fetch(`/api/dashboard?${params}`, {
+  const response = await fetch(await apiUrl(`/api/dashboard?${params}`), {
     cache: "no-store",
   });
   if (!response.ok) {
