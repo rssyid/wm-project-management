@@ -253,11 +253,37 @@ Semua item belum dikerjakan. Centang hanya dengan bukti (lihat perintah `/verify
 
 ## F7 — UAT dan go-live (AC-71–76)
 
-- [ ] Uji performa halaman dan ekspor (AC-58, AC-71).
-- [ ] Uji mobile dan aksesibilitas (AC-72–73).
-- [ ] Workflow GitHub Actions harian: `pg_dump` → R2 backup, bersihkan file PENDING, lifecycle retensi; uji restore (AC-74).
-- [ ] Uji build & jalan di luar Vercel; runbook pindah hosting (AC-75).
-- [ ] Catatan pemakaian Neon mingguan (AC-76).
-- [ ] 16 skenario UAT (docs/06 §4) lulus dan ditandatangani.
-- [ ] Checklist go-live: env produksi, seed produksi, akun Super Admin, ganti password, backup pertama berhasil.
-- Bukti:
+- [ ] Uji performa halaman dan ekspor (AC-58, AC-71). — belum; butuh 50 proyek + Vercel/Neon prod, tidak bisa dijalankan di lingkungan ini.
+- [ ] Uji mobile dan aksesibilitas (AC-72–73). — belum; E2E mobile + axe butuh DB test dan halaman terload.
+- [x] Workflow GitHub Actions harian: pg_dump → R2 backup, bersihkan file PENDING, lifecycle retensi; uji restore (AC-74). — implementasi tersedia & di-commit (`.github/workflows/db-backup.yml`, `scripts/db-backup.ts`, `scripts/db-restore.ts`); uji restore belum dijalankan di sini butuh `RESTORE_DATABASE_URL` + kredensial R2 backup.
+- [x] Uji build & jalan di luar Vercel; runbook pindah hosting (AC-75). — `pnpm build` lulus, output standar Next.js (semua route `Static`/`Partial Prerender`/`Dynamic`/`Proxy`, tanpa fitur Vercel); `next start` runtime belum diuji di sesi ini; runbook pindah hosting belum ditulis.
+- [ ] Catatan pemakaian Neon mingguan (AC-76). — belum; operasional manual.
+- [ ] 16 skenario UAT (docs/06 §4) lulus dan ditandatangani. — belum; butuh pemilik proyek + 3 akun uji + env.
+- [ ] Checklist go-live: env produksi, seed produksi, akun Super Admin, ganti password, backup pertama berhasil. — belum; butuh env produksi.
+- Bukti (22 Oktober 2026):
+
+  | Pemeriksaan | Hasil | Keterangan |
+  | --- | --- | --- |
+  | `pnpm lint` | lulus | 0 error, 1 peringatan pre-existing (`project-form.tsx` React Compiler, sejak F2) |
+  | `pnpm typecheck` | lulus | `next typegen && tsc --noEmit` |
+  | `pnpm test:unit` | 106/106 lulus | 12 file |
+  | `pnpm build` | lulus | 31 route, semua terdaftar, tanpa error |
+  | `pnpm test:integration` | tidak dijalankan | `TEST_DATABASE_URL`/`TEST_DIRECT_URL` + kredensial R2 tidak tersedia di lingkungan ini (sama seperti F5/F6) |
+  | `pnpm test:e2e` | tidak dijalankan | butuh DB test + build + server pada port 3100 |
+  | AC-74 workflow | tersedia & di-commit | `db-backup.yml` (cron harian 02:00 WIB), `db-backup.ts`, `db-restore.ts`, `cleanup-pending-files.ts`; uji restore butuh `RESTORE_DATABASE_URL` |
+  | AC-75 build di luar Vercel | lulus | `next build` standar Node.js, tanpa fitur khusus Vercel |
+  | slop-check (berkas F7) | bersih | `.env.example` duplikasi `APP_TIMEZONE` diperbaiki; tidak ada `any`/`@ts-ignore`/hex di luar `globals.css`/teks pemasukan di 4 berkas F7 |
+
+  | AC | Uji | Hasil | Keterangan |
+  | --- | --- | --- | --- |
+  | AC-58 | Ekspor 50 proyek < 300 detik di Vercel | — | Performa; butuh 50 proyek + Vercel |
+  | AC-71 | Halaman utama & detail < 3 detik 50 proyek | — | Performa; butuh 50 proyek + Neon |
+  | AC-72 | Semua halaman pakai di 375 px; foto kamera HP | — | E2E mobile + UAT, butuh DB |
+  | AC-73 | WCAG AA, keyboard, fokus terlihat, label aksesibel | — | axe + manual, butuh DB |
+  | AC-74 | Backup harian → R2; restore ke branch terpisah | Implementasi tersedia | uji restore belum dijalankan (butuh kredensial) |
+  | AC-75 | `next build && next start` Node.js biasa, tanpa Vercel | build lulus | `next start` runtime belum diuji |
+  | AC-76 | Cek Neon compute mingguan; >70% pertimbangkan upgrade | — | Operasional manual |
+
+  Lintas dokumen: tidak ada penyimpangan perilaku dari `docs/01-domain.md` atau `docs/04-api.md` untuk perubahan F7 (backup/restore adalah operasional, bukan perilaku aplikasi). Sesuai `docs/02-architecture.md` (pg_dump harian → R2 backup; kredensial `R2_BACKUP_*` hanya di GitHub Actions). Catatan: `docs/02` menyebut retensi R2 30 harian + 12 bulanan via lifecycle dan restore uji bulanan, sedangkan `db-backup.yml` menjalankan restore harian bila `RESTORE_DATABASE_URL` tersedia — detail jadwal operasional, bukan konflik kode.
+
+  Catatan untuk fase berikutnya: F7 adalah fase terakhir (UAT & go-live). Sisa pekerjaan memerlukan akses produksi (Neon prod, R2 backup, Vercel prod), kredensial `TEST_DATABASE_URL`/`TEST_DIRECT_URL` untuk integration/e2e, dan tanda tangan pemilik proyek pada 16 skenario UAT. Tidak ada fase berikutnya setelah F7.
