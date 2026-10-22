@@ -1,0 +1,46 @@
+name: DB Backup
+
+on:
+  schedule:
+    # Harian 02:00 WIB (18:00 UTC hari sebelumnya).
+    - cron: "0 18 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: db-backup
+  cancel-in-progress: false
+
+env:
+  TEST_DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+  TEST_DIRECT_URL: ${{ secrets.TEST_DIRECT_URL }}
+  R2_BACKUP_BUCKET: ${{ secrets.R2_BACKUP_BUCKET }}
+  R2_BACKUP_ACCOUNT_ID: ${{ secrets.R2_BACKUP_ACCOUNT_ID }}
+  R2_BACKUP_ACCESS_KEY_ID: ${{ secrets.R2_BACKUP_ACCESS_KEY_ID }}
+  R2_BACKUP_SECRET_ACCESS_KEY: ${{ secrets.R2_BACKUP_SECRET_ACCESS_KEY }}
+  RESTORE_DATABASE_URL: ${{ secrets.RESTORE_DATABASE_URL }}
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # pg_dump / pg_restore membutuhkan postgresql-client pada runner.
+      - run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      # Siapkan branch Neon `test` (migrasi + seed) sebagai sumber backup.
+      - run: pnpm db:test:prepare
+      # Cadangkan ke bucket R2 `backup`.
+      - run: tsx scripts/db-backup.ts
+      # Uji restore ke branch Neon terpisah, lalu catat hasilnya.
+      - run: tsx scripts/db-restore.ts
+        if: ${{ secrets.RESTORE_DATABASE_URL != '' }}
+      # Bersihkan berkas PENDING > 24 jam (AC-62 / AC-74).
+      - run: tsx scripts/cleanup-pending-files.ts
+        env:
+          DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.TEST_DIRECT_URL }}
