@@ -4,6 +4,7 @@ import { prisma } from "@/infra/db";
 import { getSessionUser } from "@/infra/session";
 import { can } from "@/shared/permissions";
 import { projectFiltersSchema } from "@/shared/schemas/project";
+import { connection } from "next/server";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -21,6 +22,7 @@ export default async function ProjectListPage({
 }: {
   searchParams: SearchParams;
 }) {
+  await connection();
   const query = await searchParams;
   const filters = projectFiltersSchema.parse({
     q: single(query.q),

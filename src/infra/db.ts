@@ -18,7 +18,9 @@ function createPrismaClient() {
   }
   // docs/02 §8: runtime uses the pooled Neon URL through the pg driver adapter.
   return new PrismaClient({
-    adapter: new PrismaPg({ connectionString: withVerifyFullTls(connectionString) }),
+    adapter: new PrismaPg({
+      connectionString: withVerifyFullTls(connectionString),
+    }),
   });
 }
 

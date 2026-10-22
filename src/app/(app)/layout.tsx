@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 
 import { AppShell } from "@/components/app-shell/app-shell";
 import { UserMenu } from "@/components/app-shell/user-menu";
@@ -17,6 +18,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 }
 
 async function SessionShell({ children }: { children: ReactNode }) {
+  await connection();
   // docs/02 §7: setiap halaman memvalidasi session sendiri; proxy hanya redirect cepat.
   const user = await getSessionUser();
   if (!user) redirect("/login");

@@ -7,7 +7,10 @@ import { Prisma } from "@/generated/prisma/client";
 import { callRoute, readJson } from "./helpers/call-route";
 import { createUser, ensureSeed } from "./helpers/factory";
 
-import { GET as getProjectRoute, DELETE as deleteProjectRoute } from "@/app/api/projects/[id]/route";
+import {
+  GET as getProjectRoute,
+  DELETE as deleteProjectRoute,
+} from "@/app/api/projects/[id]/route";
 import { POST as purgeProjectRoute } from "@/app/api/projects/[id]/purge/route";
 
 type Envelope = {

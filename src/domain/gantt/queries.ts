@@ -8,6 +8,8 @@ import { prisma } from "@/infra/db";
 import { businessDateIso, compareBusinessDate } from "@/shared/date";
 import { computeEws } from "@/domain/progress-ews/service";
 import { getSettings } from "@/domain/settings/service";
+import { listProjects } from "@/domain/project/queries";
+import type { ProjectFilters } from "@/shared/schemas/project";
 
 export type GanttCellColor = "base" | "rev1" | "rev2" | null;
 
@@ -609,4 +611,15 @@ export async function getGanttProject(
     rows: [projectRow, ...rows],
     todayWeekIndex: todayWeekIndex >= 0 ? todayWeekIndex : null,
   };
+}
+
+/**
+ * docs/05 §8: data Gantt portofolio untuk daftar proyek terfilter.
+ * Dipanggil langsung oleh Server Component halaman portofolio dan API route handler.
+ */
+export async function getPortfolioGantt(
+  filters: ProjectFilters,
+): Promise<GanttProjectData[]> {
+  const { data } = await listProjects(filters);
+  return Promise.all(data.map((row) => getGanttProject(row.id)));
 }

@@ -5,6 +5,7 @@ import { SCurveChart } from "@/components/dashboard/s-curve";
 import { WeeklyLogReminder } from "@/components/dashboard/weekly-reminder";
 import { fetchDashboard } from "@/domain/dashboard/queries";
 import { validateDashboardFilters } from "@/domain/dashboard/queries";
+import { connection } from "next/server";
 
 // Halaman membaca searchParams (filter per permintaan) dan data Prisma live,
 // sehingga harus dirender pada setiap permintaan (blocking). cacheComponents
@@ -22,6 +23,7 @@ export default async function DashboardPage({
 }: {
   searchParams: SearchParams;
 }) {
+  await connection();
   const query = await searchParams;
   const filters = validateDashboardFilters({
     q: single(query.q),

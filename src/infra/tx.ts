@@ -10,5 +10,6 @@ export type Tx = Prisma.TransactionClient;
 export function withTransaction<T>(fn: (tx: Tx) => Promise<T>): Promise<T> {
   return prisma.$transaction(fn, {
     isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted,
+    timeout: 15_000,
   });
 }

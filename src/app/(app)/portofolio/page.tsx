@@ -1,42 +1,16 @@
 import { GanttMatrix } from "@/components/gantt/gantt-matrix";
-import { GanttProjectData } from "@/domain/gantt/queries";
-import { apiUrl, sessionCookieHeaders } from "@/shared/api-url";
-import {
-  projectFiltersSchema,
-  type ProjectFilters,
-} from "@/shared/schemas/project";
+import { getPortfolioGantt } from "@/domain/gantt/queries";
+import { projectFiltersSchema } from "@/shared/schemas/project";
+import { connection } from "next/server";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
-
-async function fetchPortfolioGantt(
-  filters: ProjectFilters,
-): Promise<GanttProjectData[]> {
-  const params = new URLSearchParams();
-  if (filters.q) params.set("q", filters.q);
-  if (filters.status.length) params.set("status", filters.status.join(","));
-  if (filters.companyIds.length)
-    params.set("companyId", filters.companyIds.join(","));
-  if (filters.regionIds.length)
-    params.set("regionId", filters.regionIds.join(","));
-  if (filters.categoryId) params.set("categoryId", filters.categoryId);
-
-  const response = await fetch(await apiUrl(`/api/portfolio/gantt?${params}`), {
-    cache: "no-store",
-    ...(await sessionCookieHeaders()),
-  });
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new Error(body?.error?.message ?? "Gagal memuat Gantt portofolio.");
-  }
-  const body = await response.json();
-  return body.data?.projects ?? [];
-}
 
 export default async function PortfolioPage({
   searchParams,
 }: {
   searchParams: SearchParams;
 }) {
+  await connection();
   const query = await searchParams;
   const filters = projectFiltersSchema.parse({
     q: query.q ?? undefined,
@@ -47,7 +21,7 @@ export default async function PortfolioPage({
     page: query.page ?? "1",
   });
 
-  const gantts = await fetchPortfolioGantt(filters);
+  const gantts = await getPortfolioGantt(filters);
 
   return (
     <div className="space-y-4 p-4">

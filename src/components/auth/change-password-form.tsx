@@ -41,8 +41,7 @@ export function ChangePasswordForm() {
       return;
     }
     toast.success("Password disimpan");
-    router.replace("/dashboard");
-    router.refresh();
+    await router.replace("/dashboard");
   });
 
   return (

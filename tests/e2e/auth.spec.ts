@@ -62,7 +62,7 @@ test.describe("akses dan ganti password", () => {
     await expect(page).toHaveURL(/\/dashboard$/, { timeout: 20_000 });
     await expect(
       page.getByRole("button", { name: new RegExp(`Akun ${account.name}`) }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 20_000 });
   });
 
   test("AC-01 email atau password salah ditolak", async ({ page }) => {

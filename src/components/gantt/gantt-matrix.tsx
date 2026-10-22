@@ -38,7 +38,12 @@ export function GanttMatrix({ data }: GanttMatrixProps) {
             </button>
           ))}
         </div>
-        <div className="relative overflow-x-auto overflow-y-hidden border-b border-line">
+        <div
+          className="relative overflow-x-auto overflow-y-hidden border-b border-line"
+          tabIndex={0}
+          role="region"
+          aria-label="Matriks Gantt"
+        >
           <div className="relative min-w-[calc(100%+1px)]">
             {/* Identity header — sticky di kiri di mobile */}
             <div

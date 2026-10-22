@@ -53,16 +53,9 @@ export async function submitBast(
 ) {
   return withTransaction(async (tx) => {
     const project = await requireMutableProject(tx, projectId);
-    if (project.status !== "EXECUTION") {
-      throw new DomainError(
-        "INVALID_TRANSITION",
-        `BAST hanya bisa diajukan saat status "Pelaksanaan", bukan "${project.status}".`,
-      );
-    }
 
-    await assertPhysicalAll100(tx, projectId);
-
-    // Satu DIAJUKAN per proyek (partial unique index di DB sebagai cadangan).
+    // Satu DIAJUKAN per proyek — cek ini dulu agar pesan error lebih informatif
+    // dibandingkan INVALID_TRANSITION saat status sudah WAITING_BAST.
     const existing = await tx.bastDocument.findFirst({
       where: { projectId, status: "DIAJUKAN" },
     });
@@ -72,6 +65,15 @@ export async function submitBast(
         "Sudah ada pengajuan BAST yang diajukan. Batalkan pengajuan lama terlebih dahulu atau verifikasi.",
       );
     }
+
+    if (project.status !== "EXECUTION") {
+      throw new DomainError(
+        "INVALID_TRANSITION",
+        `BAST hanya bisa diajukan saat status "Pelaksanaan", bukan "${project.status}".`,
+      );
+    }
+
+    await assertPhysicalAll100(tx, projectId);
 
     const bast = await tx.bastDocument.create({
       data: {
