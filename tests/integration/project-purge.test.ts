@@ -30,13 +30,19 @@ async function domainError(promise: Promise<unknown>): Promise<string> {
   try {
     await promise;
   } catch (error) {
-    if ((error as { code?: string }).code) return (error as { code: string }).code;
+    if ((error as { code?: string }).code)
+      return (error as { code: string }).code;
     throw error;
   }
   throw new Error("Fungsi seharusnya melempar error.");
 }
 
-async function draftProject(actorId: string, companyId: string, categoryId: string, estateId: string) {
+async function draftProject(
+  actorId: string,
+  companyId: string,
+  categoryId: string,
+  estateId: string,
+) {
   return prisma.project.create({
     data: {
       code: `WM-TEST-${crypto.randomUUID().slice(0, 4).toUpperCase()}`,
@@ -84,7 +90,11 @@ describe("API soft delete / purge proyek (AC-70)", () => {
     ).id;
   });
 
-  async function doSoftDelete(projectId: string, cookie: string, reason = "Alasan hapus") {
+  async function doSoftDelete(
+    projectId: string,
+    cookie: string,
+    reason = "Alasan hapus",
+  ) {
     const response = await callRoute(deleteProjectRoute, {
       cookie,
       method: "DELETE",
@@ -114,7 +124,9 @@ describe("API soft delete / purge proyek (AC-70)", () => {
     const { response: r2 } = await doSoftDelete(project.id, cookieSuperAdmin);
     expect(r2.status).toBe(200);
 
-    const softDeleted = await prisma.project.findUnique({ where: { id: project.id } });
+    const softDeleted = await prisma.project.findUnique({
+      where: { id: project.id },
+    });
     expect(softDeleted?.deletedAt).not.toBeNull();
     expect(softDeleted?.deletedById).toBe(userId);
 
@@ -134,12 +146,16 @@ describe("API soft delete / purge proyek (AC-70)", () => {
   it("AC-70 purge hanya untuk ter-soft delete + konfirmasi kode", async () => {
     const project = await draftProject(userId, companyId, categoryId, estateId);
 
-    const code1 = await domainError(doPurge(project.id, cookieSuperAdmin, project.code));
+    const code1 = await domainError(
+      doPurge(project.id, cookieSuperAdmin, project.code),
+    );
     expect(code1).toBe("INVALID_TRANSITION");
 
     await doSoftDelete(project.id, cookieSuperAdmin);
 
-    const code2 = await domainError(doPurge(project.id, cookieSuperAdmin, "SALAH"));
+    const code2 = await domainError(
+      doPurge(project.id, cookieSuperAdmin, "SALAH"),
+    );
     expect(code2).toBe("VALIDATION_ERROR");
 
     await prisma.fileObject.create({
@@ -157,7 +173,11 @@ describe("API soft delete / purge proyek (AC-70)", () => {
       },
     });
 
-    const { response } = await doPurge(project.id, cookieSuperAdmin, project.code);
+    const { response } = await doPurge(
+      project.id,
+      cookieSuperAdmin,
+      project.code,
+    );
     expect(response.status).toBe(200);
 
     const gone = await prisma.project.findUnique({ where: { id: project.id } });
@@ -169,10 +189,14 @@ describe("API soft delete / purge proyek (AC-70)", () => {
     expect(tombstone).not.toBeNull();
     expect(tombstone?.code).toBe(project.code);
 
-    const files = await prisma.fileObject.findMany({ where: { projectId: project.id } });
+    const files = await prisma.fileObject.findMany({
+      where: { projectId: project.id },
+    });
     expect(files.length).toBe(0);
 
-    const logs = await prisma.auditLog.findMany({ where: { projectId: project.id } });
+    const logs = await prisma.auditLog.findMany({
+      where: { projectId: project.id },
+    });
     expect(logs.length).toBeGreaterThan(0);
 
     await expect(
@@ -191,7 +215,11 @@ describe("API soft delete / purge proyek (AC-70)", () => {
     const project = await draftProject(userId, companyId, categoryId, estateId);
     await doSoftDelete(project.id, cookieSuperAdmin);
 
-    const { response, json } = await doPurge(project.id, cookieSpecialist, project.code);
+    const { response, json } = await doPurge(
+      project.id,
+      cookieSpecialist,
+      project.code,
+    );
     expect(response.status).toBe(403);
     expect(json.error?.code).toBe("FORBIDDEN_ROLE");
   });

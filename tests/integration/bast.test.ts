@@ -32,7 +32,8 @@ async function domainError(promise: Promise<unknown>): Promise<string> {
   try {
     await promise;
   } catch (error) {
-    if ((error as { code?: string }).code) return (error as { code: string }).code;
+    if ((error as { code?: string }).code)
+      return (error as { code: string }).code;
     throw error;
   }
   throw new Error("Fungsi seharusnya melempar error.");
@@ -246,17 +247,24 @@ describe("API BAST (AC-63–66)", () => {
     const { json } = await doSubmitBast(project.id, cookieSpecialist);
     const bastId = (json.data as { id: string }).id;
 
-    const { response, json: vjson } = await doVerifyBast(bastId, cookieSuperAdmin);
+    const { response, json: vjson } = await doVerifyBast(
+      bastId,
+      cookieSuperAdmin,
+    );
     expect(response.status).toBe(200);
     expect((vjson.data as { projectStatus: string }).projectStatus).toBe(
       "COMPLETED",
     );
 
-    const bast = await prisma.bastDocument.findUnique({ where: { id: bastId } });
+    const bast = await prisma.bastDocument.findUnique({
+      where: { id: bastId },
+    });
     expect(bast?.status).toBe("TERVERIFIKASI");
     expect(bast?.verifiedById).toBeDefined();
 
-    const refreshed = await prisma.project.findUnique({ where: { id: project.id } });
+    const refreshed = await prisma.project.findUnique({
+      where: { id: project.id },
+    });
     expect(refreshed?.status).toBe("COMPLETED");
 
     const code = await domainError(
@@ -275,7 +283,10 @@ describe("API BAST (AC-63–66)", () => {
     const { json } = await doSubmitBast(project.id, cookieSpecialist);
     const bastId = (json.data as { id: string }).id;
 
-    const { response, json: vjson } = await doVerifyBast(bastId, cookieSpecialist);
+    const { response, json: vjson } = await doVerifyBast(
+      bastId,
+      cookieSpecialist,
+    );
     expect(response.status).toBe(403);
     expect(vjson.error?.code).toBe("FORBIDDEN_ROLE");
   });
@@ -300,11 +311,15 @@ describe("API BAST (AC-63–66)", () => {
       "EXECUTION",
     );
 
-    const bast = await prisma.bastDocument.findUnique({ where: { id: bastId } });
+    const bast = await prisma.bastDocument.findUnique({
+      where: { id: bastId },
+    });
     expect(bast?.status).toBe("DIBATALKAN");
     expect(bast?.cancelReason).toBe("Alasan batal");
 
-    const refreshed = await prisma.project.findUnique({ where: { id: project.id } });
+    const refreshed = await prisma.project.findUnique({
+      where: { id: project.id },
+    });
     expect(refreshed?.status).toBe("EXECUTION");
   });
 

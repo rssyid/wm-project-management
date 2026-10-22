@@ -62,7 +62,10 @@ export default async function AuditLogsPage({
   if (!user) redirect("/login");
 
   const page = Math.max(Number(searchParams.page ?? "1"), 1);
-  const pageSize = Math.min(Math.max(Number(searchParams.pageSize ?? "25"), 1), 100);
+  const pageSize = Math.min(
+    Math.max(Number(searchParams.pageSize ?? "25"), 1),
+    100,
+  );
 
   const { rows, total } = await listAuditLogs({
     projectId: searchParams.projectId,
@@ -80,35 +83,41 @@ export default async function AuditLogsPage({
     <>
       <PageHeader title="Log audit" />
       <div className="max-w-[720px]">
-        <div className="mb-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="rounded-lg border bg-panel p-4">
-            <label className="block text-xs font-medium text-ink-muted mb-1">Proyek</label>
+            <label className="mb-1 block text-xs font-medium text-ink-muted">
+              Proyek
+            </label>
             <input
               defaultValue={searchParams.projectId ?? ""}
-              className="w-full border rounded px-2 py-1 text-sm"
+              className="w-full rounded border px-2 py-1 text-sm"
               placeholder="ID proyek"
             />
           </div>
           <div className="rounded-lg border bg-panel p-4">
-            <label className="block text-xs font-medium text-ink-muted mb-1">Entitas</label>
+            <label className="mb-1 block text-xs font-medium text-ink-muted">
+              Entitas
+            </label>
             <input
               defaultValue={searchParams.entityType ?? ""}
-              className="w-full border rounded px-2 py-1 text-sm"
+              className="w-full rounded border px-2 py-1 text-sm"
               placeholder="Project / BastDocument"
             />
           </div>
           <div className="rounded-lg border bg-panel p-4">
-            <label className="block text-xs font-medium text-ink-muted mb-1">Dari / sampai</label>
+            <label className="mb-1 block text-xs font-medium text-ink-muted">
+              Dari / sampai
+            </label>
             <div className="flex gap-2">
               <input
                 defaultValue={searchParams.from ?? ""}
                 type="date"
-                className="border rounded px-2 py-1 text-sm flex-1"
+                className="flex-1 rounded border px-2 py-1 text-sm"
               />
               <input
                 defaultValue={searchParams.to ?? ""}
                 type="date"
-                className="border rounded px-2 py-1 text-sm flex-1"
+                className="flex-1 rounded border px-2 py-1 text-sm"
               />
             </div>
           </div>
@@ -118,13 +127,27 @@ export default async function AuditLogsPage({
           <table className="w-full text-dense" aria-label="Log audit">
             <thead className="bg-surface">
               <tr>
-                <th className="px-3 py-2 text-left font-medium text-ink-muted">Waktu</th>
-                <th className="px-3 py-2 text-left font-medium text-ink-muted">Aktor</th>
-                <th className="px-3 py-2 text-left font-medium text-ink-muted">Entitas</th>
-                <th className="px-3 py-2 text-left font-medium text-ink-muted">Aksi</th>
-                <th className="px-3 py-2 text-left font-medium text-ink-muted">Sebelum</th>
-                <th className="px-3 py-2 text-left font-medium text-ink-muted">Sesudah</th>
-                <th className="px-3 py-2 text-left font-medium text-ink-muted">Alasan</th>
+                <th className="px-3 py-2 text-left font-medium text-ink-muted">
+                  Waktu
+                </th>
+                <th className="px-3 py-2 text-left font-medium text-ink-muted">
+                  Aktor
+                </th>
+                <th className="px-3 py-2 text-left font-medium text-ink-muted">
+                  Entitas
+                </th>
+                <th className="px-3 py-2 text-left font-medium text-ink-muted">
+                  Aksi
+                </th>
+                <th className="px-3 py-2 text-left font-medium text-ink-muted">
+                  Sebelum
+                </th>
+                <th className="px-3 py-2 text-left font-medium text-ink-muted">
+                  Sesudah
+                </th>
+                <th className="px-3 py-2 text-left font-medium text-ink-muted">
+                  Alasan
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -151,7 +174,10 @@ export default async function AuditLogsPage({
               ))}
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-3 py-4 text-center text-ink-muted">
+                  <td
+                    colSpan={7}
+                    className="px-3 py-4 text-center text-ink-muted"
+                  >
                     Tidak ada log audit.
                   </td>
                 </tr>

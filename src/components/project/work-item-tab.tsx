@@ -390,7 +390,10 @@ export function WorkItemTab({
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => internalSetAddOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => internalSetAddOpen(false)}
+              >
                 Batal
               </Button>
               <Button onClick={addWorkItem}>Tambah Pekerjaan</Button>
@@ -456,7 +459,10 @@ export function WorkItemTab({
               </p>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setProjectWeightOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setProjectWeightOpen(false)}
+              >
                 Batal
               </Button>
               <Button onClick={saveProjectWeight}>Simpan Bobot Proyek</Button>

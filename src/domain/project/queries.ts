@@ -95,9 +95,7 @@ export async function listProjects(filters: ProjectFilters) {
   ];
 
   const where = {
-    ...(filters.archived
-      ? {}
-      : { deletedAt: null }),
+    ...(filters.archived ? {} : { deletedAt: null }),
     ...(filters.status.length > 0
       ? { status: { in: filters.status as ProjectStatus[] } }
       : {}),

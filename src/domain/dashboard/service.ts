@@ -34,9 +34,7 @@ export async function getDashboardData(
   filters: ProjectFilters,
 ): Promise<DashboardData> {
   const { data } = await listProjects(filters);
-  const gantts = await Promise.all(
-    data.map((row) => getGanttProject(row.id)),
-  );
+  const gantts = await Promise.all(data.map((row) => getGanttProject(row.id)));
 
   const byStatus: Record<string, number> = {};
   let totalProgress = decimal("0");

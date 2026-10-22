@@ -82,7 +82,13 @@ export async function submitBast(
         submittedById: actorId,
         submittedAt: new Date(),
       },
-      select: { id: true, number: true, status: true, date: true, submittedAt: true },
+      select: {
+        id: true,
+        number: true,
+        status: true,
+        date: true,
+        submittedAt: true,
+      },
     });
 
     await transitionProject(tx, {

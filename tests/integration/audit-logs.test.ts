@@ -74,8 +74,24 @@ describe("API audit log (AC-05)", () => {
     });
     projectId = project.id;
 
-    await createAuditEntry(projectId, actorId, "Project", project.id, "UPDATE", { a: 1 }, { a: 2 });
-    await createAuditEntry(projectId, actorId, "BastDocument", "bast-1", "CREATE", null, { n: 1 });
+    await createAuditEntry(
+      projectId,
+      actorId,
+      "Project",
+      project.id,
+      "UPDATE",
+      { a: 1 },
+      { a: 2 },
+    );
+    await createAuditEntry(
+      projectId,
+      actorId,
+      "BastDocument",
+      "bast-1",
+      "CREATE",
+      null,
+      { n: 1 },
+    );
   });
 
   async function list(query: string, cookie: string) {
@@ -124,18 +140,27 @@ describe("API audit log (AC-05)", () => {
   it("AC-05 filter from/to tanggal", async () => {
     const from = "2026-01-01";
     const to = "2026-12-31";
-    const { response, body } = await list(`from=${from}&to=${to}`, cookieViewer);
+    const { response, body } = await list(
+      `from=${from}&to=${to}`,
+      cookieViewer,
+    );
     expect(response.status).toBe(200);
     expect(body.data).toBeDefined();
   });
 
   it("AC-01 tanpa session audit log 401", async () => {
-    const response = await callRoute(auditLogsRoute, { path: "/api/audit-logs" });
+    const response = await callRoute(auditLogsRoute, {
+      path: "/api/audit-logs",
+    });
     expect(response.status).toBe(401);
   });
 
   it("pagination meta tersedia", async () => {
     const { body } = await list("", cookieViewer);
-    expect(body.meta).toMatchObject({ page: 1, pageSize: 25, total: expect.any(Number) });
+    expect(body.meta).toMatchObject({
+      page: 1,
+      pageSize: 25,
+      total: expect.any(Number),
+    });
   });
 });

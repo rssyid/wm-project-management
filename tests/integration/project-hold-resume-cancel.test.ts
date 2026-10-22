@@ -32,7 +32,8 @@ async function domainError(promise: Promise<unknown>): Promise<string> {
   try {
     await promise;
   } catch (error) {
-    if ((error as { code?: string }).code) return (error as { code: string }).code;
+    if ((error as { code?: string }).code)
+      return (error as { code: string }).code;
     throw error;
   }
   throw new Error("Fungsi seharusnya melempar error.");
@@ -133,7 +134,13 @@ describe("API tahan/lanjutkan/batal proyek (AC-67, AC-68)", () => {
   }
 
   it("AC-67 tahan menyimpan status sebelumnya dan lanjutkan mengembalikannya", async () => {
-    const project = await draftProject(userId, companyId, categoryId, estateId, "SURVEY");
+    const project = await draftProject(
+      userId,
+      companyId,
+      categoryId,
+      estateId,
+      "SURVEY",
+    );
 
     const { response } = await doHold(project.id, cookieSpecialist);
     expect(response.status).toBe(200);
@@ -146,33 +153,59 @@ describe("API tahan/lanjutkan/batal proyek (AC-67, AC-68)", () => {
     const { response: r2 } = await doResume(project.id, cookieSpecialist);
     expect(r2.status).toBe(200);
 
-    const resumed = await prisma.project.findUnique({ where: { id: project.id } });
+    const resumed = await prisma.project.findUnique({
+      where: { id: project.id },
+    });
     expect(resumed?.status).toBe("SURVEY");
     expect(resumed?.previousStatus).toBeNull();
     expect(resumed?.onHoldReason).toBeNull();
   });
 
   it("AC-67 proyek DRAFT tidak bisa ditahan", async () => {
-    const project = await draftProject(userId, companyId, categoryId, estateId, "DRAFT");
+    const project = await draftProject(
+      userId,
+      companyId,
+      categoryId,
+      estateId,
+      "DRAFT",
+    );
     const code = await domainError(doHold(project.id, cookieSpecialist));
     expect(code).toBe("INVALID_TRANSITION");
   });
 
   it("AC-67 proyek COMPLETED tidak bisa ditahan", async () => {
-    const project = await draftProject(userId, companyId, categoryId, estateId, "COMPLETED");
+    const project = await draftProject(
+      userId,
+      companyId,
+      categoryId,
+      estateId,
+      "COMPLETED",
+    );
     const code = await domainError(doHold(project.id, cookieSpecialist));
     expect(code).toBe("INVALID_TRANSITION");
   });
 
   it("AC-67 SP tidak bisa resume dari non-ON_HOLD", async () => {
-    const project = await draftProject(userId, companyId, categoryId, estateId, "SURVEY");
+    const project = await draftProject(
+      userId,
+      companyId,
+      categoryId,
+      estateId,
+      "SURVEY",
+    );
     const { response, json } = await doResume(project.id, cookieSpecialist);
     expect(response.status).toBe(409);
     expect(json.error?.code).toBe("INVALID_TRANSITION");
   });
 
   it("AC-68 batal proyek hanya SA, alasan wajib, riwayat tetap terbaca", async () => {
-    const project = await draftProject(userId, companyId, categoryId, estateId, "DRAFT");
+    const project = await draftProject(
+      userId,
+      companyId,
+      categoryId,
+      estateId,
+      "DRAFT",
+    );
 
     const { response, json } = await doCancel(project.id, cookieSpecialist);
     expect(response.status).toBe(403);
@@ -181,7 +214,9 @@ describe("API tahan/lanjutkan/batal proyek (AC-67, AC-68)", () => {
     const { response: r2 } = await doCancel(project.id, cookieSuperAdmin);
     expect(r2.status).toBe(200);
 
-    const cancelled = await prisma.project.findUnique({ where: { id: project.id } });
+    const cancelled = await prisma.project.findUnique({
+      where: { id: project.id },
+    });
     expect(cancelled?.status).toBe("CANCELLED");
     expect(cancelled?.cancelReason).toBe("Dana tidak tersedia");
     expect(cancelled?.cancelledById).toBeDefined();
@@ -195,13 +230,25 @@ describe("API tahan/lanjutkan/batal proyek (AC-67, AC-68)", () => {
   });
 
   it("AC-68 batal proyek dari COMPLETED ditolak", async () => {
-    const project = await draftProject(userId, companyId, categoryId, estateId, "COMPLETED");
+    const project = await draftProject(
+      userId,
+      companyId,
+      categoryId,
+      estateId,
+      "COMPLETED",
+    );
     const code = await domainError(doCancel(project.id, cookieSuperAdmin));
     expect(code).toBe("INVALID_TRANSITION");
   });
 
   it("AC-01 tanpa session hold/resume/cancel mendapat 401", async () => {
-    const project = await draftProject(userId, companyId, categoryId, estateId, "SURVEY");
+    const project = await draftProject(
+      userId,
+      companyId,
+      categoryId,
+      estateId,
+      "SURVEY",
+    );
     const h = await callRoute(holdRoute, {
       method: "POST",
       params: { id: project.id },

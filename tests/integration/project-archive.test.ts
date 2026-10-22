@@ -49,7 +49,9 @@ async function createClosedProject(
       plannedBudget: new Prisma.Decimal("500000000.00"),
       status,
       createdById: actorId,
-      ...(status === "COMPLETED" ? { completedAt: closedAt } : { cancelledAt: closedAt }),
+      ...(status === "COMPLETED"
+        ? { completedAt: closedAt }
+        : { cancelledAt: closedAt }),
       estates: { create: { estateId, isPrimary: true } },
     },
     select: { id: true, code: true, status: true },
@@ -136,7 +138,9 @@ describe("API arsip proyek (AC-69)", () => {
     expect(archivedRows.every((r) => r.archived === true)).toBe(true);
 
     // Tidak ada data yang dihapus (deletedAt null)
-    const dbOld = await prisma.project.findUnique({ where: { id: oldCompleted.id } });
+    const dbOld = await prisma.project.findUnique({
+      where: { id: oldCompleted.id },
+    });
     expect(dbOld?.deletedAt).toBeNull();
     expect(dbOld?.status).toBe("COMPLETED");
   });

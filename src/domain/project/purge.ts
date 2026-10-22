@@ -18,7 +18,13 @@ export async function softDeleteProject(
   return withTransaction(async (tx) => {
     const project = await tx.project.findUnique({
       where: { id: projectId },
-      select: { id: true, code: true, name: true, status: true, deletedAt: true },
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        status: true,
+        deletedAt: true,
+      },
     });
     if (!project) {
       throw new DomainError("NOT_FOUND", "Proyek tidak ditemukan.");
@@ -36,7 +42,11 @@ export async function softDeleteProject(
       );
     }
 
-    const before = { code: project.code, name: project.name, status: project.status };
+    const before = {
+      code: project.code,
+      name: project.name,
+      status: project.status,
+    };
 
     const updated = await tx.project.updateMany({
       where: { id: projectId, deletedAt: null },
@@ -48,7 +58,10 @@ export async function softDeleteProject(
       },
     });
     if (updated.count === 0) {
-      throw new DomainError("VERSION_CONFLICT", "Data sudah diubah orang lain.");
+      throw new DomainError(
+        "VERSION_CONFLICT",
+        "Data sudah diubah orang lain.",
+      );
     }
 
     await writeAudit(tx, {
@@ -93,7 +106,10 @@ export async function restoreProject(projectId: string, actorId: string) {
       },
     });
     if (updated.count === 0) {
-      throw new DomainError("VERSION_CONFLICT", "Data sudah diubah orang lain.");
+      throw new DomainError(
+        "VERSION_CONFLICT",
+        "Data sudah diubah orang lain.",
+      );
     }
 
     await writeAudit(tx, {
@@ -191,7 +207,11 @@ export async function purgeProject(
     });
 
     // File R2 dihapus di luar transaksi (setelah commit) melalui caller.
-    return { id: deleted.id, code: deleted.code, fileKeys: files.map((f) => f.key) };
+    return {
+      id: deleted.id,
+      code: deleted.code,
+      fileKeys: files.map((f) => f.key),
+    };
   });
 }
 
@@ -224,8 +244,12 @@ async function deleteProjectChildren(tx: Tx, projectId: string) {
   });
 
   // Tabel tengah
-  await tx.packageDelivery.deleteMany({ where: { workPackage: { projectId } } });
-  await tx.workPackageItem.deleteMany({ where: { workPackage: { projectId } } });
+  await tx.packageDelivery.deleteMany({
+    where: { workPackage: { projectId } },
+  });
+  await tx.workPackageItem.deleteMany({
+    where: { workPackage: { projectId } },
+  });
   await tx.physicalProcess.deleteMany({ where: { workItem: { projectId } } });
   await tx.spk.deleteMany({ where: { workItem: { projectId } } });
   await tx.tenderAttempt.deleteMany({ where: { workItem: { projectId } } });
