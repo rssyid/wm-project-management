@@ -46,6 +46,8 @@ export async function GET(request: Request) {
     return ok(
       rows.map((row) => ({
         id: row.id,
+        projectId: row.projectId,
+        actorId: row.actorId,
         actor: row.actor,
         entityType: row.entityType,
         entityId: row.entityId,

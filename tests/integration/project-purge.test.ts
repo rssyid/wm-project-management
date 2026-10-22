@@ -7,7 +7,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { callRoute, readJson } from "./helpers/call-route";
 import { createUser, ensureSeed } from "./helpers/factory";
 
-import { DELETE as deleteProjectRoute } from "@/app/api/projects/[id]/route";
+import { GET as getProjectRoute, DELETE as deleteProjectRoute } from "@/app/api/projects/[id]/route";
 import { POST as purgeProjectRoute } from "@/app/api/projects/[id]/purge/route";
 
 type Envelope = {
@@ -26,15 +26,14 @@ async function signIn(email: string, password: string): Promise<string> {
     .join("; ");
 }
 
-async function domainError(promise: Promise<unknown>): Promise<string> {
-  try {
-    await promise;
-  } catch (error) {
-    if ((error as { code?: string }).code)
-      return (error as { code: string }).code;
-    throw error;
-  }
-  throw new Error("Fungsi seharusnya melempar error.");
+async function domainError(
+  result: Promise<{ response: Response; json: Envelope }>,
+): Promise<string> {
+  const { response, json } = await result;
+  if (json.error?.code) return json.error.code;
+  throw new Error(
+    `Fungsi seharusnya melempar error, tetapi berhasil dengan status ${response.status}.`,
+  );
 }
 
 async function draftProject(
@@ -130,7 +129,7 @@ describe("API soft delete / purge proyek (AC-70)", () => {
     expect(softDeleted?.deletedAt).not.toBeNull();
     expect(softDeleted?.deletedById).toBe(userId);
 
-    const r3 = await callRoute(deleteProjectRoute, {
+    const r3 = await callRoute(getProjectRoute, {
       cookie: cookieSuperAdmin,
       method: "GET",
       params: { id: project.id },

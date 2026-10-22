@@ -94,7 +94,25 @@ export async function listProjects(filters: ProjectFilters) {
     })),
   ];
 
-  const where = {
+  const oneYearAgo = new Date();
+  oneYearAgo.setUTCFullYear(oneYearAgo.getUTCFullYear() - 1);
+
+  /** Kondisi arsip otomatis: COMPLETED/CANCELLED yang sudah berusia ≥ 1 tahun (docs/01 §12). */
+  const isArchivedCondition = {
+    status: { in: ["COMPLETED", "CANCELLED"] as ProjectStatus[] },
+    OR: [
+      {
+        status: "COMPLETED" as ProjectStatus,
+        completedAt: { lte: oneYearAgo },
+      },
+      {
+        status: "CANCELLED" as ProjectStatus,
+        cancelledAt: { lte: oneYearAgo },
+      },
+    ],
+  };
+
+  const where: Prisma.ProjectWhereInput = {
     ...(filters.archived ? {} : { deletedAt: null }),
     ...(filters.status.length > 0
       ? { status: { in: filters.status as ProjectStatus[] } }
@@ -116,29 +134,11 @@ export async function listProjects(filters: ProjectFilters) {
       : {}),
     ...(filters.archived
       ? {
+          deletedAt: null,
           status: { in: ["COMPLETED", "CANCELLED"] as ProjectStatus[] },
-          deletedAt: null,
-          OR: [
-            {
-              status: "COMPLETED" as ProjectStatus,
-              completedAt: {
-                lte: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000),
-              },
-            },
-            {
-              status: "CANCELLED" as ProjectStatus,
-              cancelledAt: {
-                lte: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000),
-              },
-            },
-          ],
+          AND: [isArchivedCondition],
         }
-      : {
-          deletedAt: null,
-          status: {
-            notIn: ["COMPLETED", "CANCELLED"] as ProjectStatus[],
-          },
-        }),
+      : { NOT: isArchivedCondition }),
   };
 
   const [rows, total] = await Promise.all([

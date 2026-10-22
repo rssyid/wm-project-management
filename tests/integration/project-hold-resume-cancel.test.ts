@@ -28,15 +28,14 @@ async function signIn(email: string, password: string): Promise<string> {
     .join("; ");
 }
 
-async function domainError(promise: Promise<unknown>): Promise<string> {
-  try {
-    await promise;
-  } catch (error) {
-    if ((error as { code?: string }).code)
-      return (error as { code: string }).code;
-    throw error;
-  }
-  throw new Error("Fungsi seharusnya melempar error.");
+async function domainError(
+  result: Promise<{ response: Response; json: Envelope }>,
+): Promise<string> {
+  const { response, json } = await result;
+  if (json.error?.code) return json.error.code;
+  throw new Error(
+    `Fungsi seharusnya melempar error, tetapi berhasil dengan status ${response.status}.`,
+  );
 }
 
 const TARGET_START = new Date(Date.UTC(2026, 9, 1));

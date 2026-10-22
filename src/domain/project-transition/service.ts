@@ -218,7 +218,13 @@ export async function holdProject(
   reason: string,
   actorId: string,
 ): Promise<void> {
-  const project = await requireMutableProject(tx, projectId);
+  const project = await tx.project.findUnique({
+    where: { id: projectId },
+    select: { id: true, status: true, deletedAt: true },
+  });
+  if (!project || project.deletedAt) {
+    throw new DomainError("NOT_FOUND", "Proyek tidak ditemukan.");
+  }
   if (!isHoldable(project.status)) {
     throw new DomainError(
       "INVALID_TRANSITION",
@@ -260,7 +266,13 @@ export async function cancelProject(
   actorId: string,
   cancelledAt: Date,
 ): Promise<void> {
-  const project = await requireMutableProject(tx, projectId);
+  const project = await tx.project.findUnique({
+    where: { id: projectId },
+    select: { id: true, status: true, deletedAt: true },
+  });
+  if (!project || project.deletedAt) {
+    throw new DomainError("NOT_FOUND", "Proyek tidak ditemukan.");
+  }
   if (!isCancellable(project.status)) {
     throw new DomainError(
       "INVALID_TRANSITION",
