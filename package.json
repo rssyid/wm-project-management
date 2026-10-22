@@ -17,6 +17,7 @@
     "db:test:prepare": "tsx scripts/db-test.ts",
     "cleanup:pending-files": "tsx scripts/cleanup-pending-files.ts",
     "seed:e2e": "tsx scripts/seed-e2e-accounts.ts",
+    "benchmark:50": "tsx scripts/benchmark-50-projects.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {
