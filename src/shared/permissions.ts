@@ -11,6 +11,9 @@ export const ACTIONS = [
   "approval.record",
   "approval.matrix.manage",
   "project.cancel",
+  "bast.manage",
+  "project.delete",
+  "project.purge",
   "settings.manage",
 ] as const;
 
@@ -26,6 +29,9 @@ const ROLE_MATRIX: Record<Action, readonly Role[]> = {
   "approval.record": ["SUPER_ADMIN", "WM_HO_SPECIALIST"],
   "approval.matrix.manage": ["SUPER_ADMIN"],
   "project.cancel": ["SUPER_ADMIN"],
+  "bast.manage": ["SUPER_ADMIN"],
+  "project.delete": ["SUPER_ADMIN"],
+  "project.purge": ["SUPER_ADMIN"],
   "settings.manage": ["SUPER_ADMIN"],
 };
 

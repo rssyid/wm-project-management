@@ -1,5 +1,6 @@
-import { decimalToString, type DecimalValue } from "@/infra/decimal";
+import { decimalToString } from "@/infra/decimal";
 import { prisma } from "@/infra/db";
+import { Prisma } from "@/generated/prisma/client";
 import { businessDateIso } from "@/shared/date";
 import type { ProjectFilters } from "@/shared/schemas/project";
 import type { ProjectStatus } from "@/shared/project-status";
@@ -12,6 +13,9 @@ const listSelect = {
   targetStartDate: true,
   targetEndDate: true,
   plannedBudget: true,
+  completedAt: true,
+  cancelledAt: true,
+  deletedAt: true,
   company: { select: { id: true, code: true, name: true } },
   category: { select: { id: true, code: true, name: true } },
   pic: { select: { id: true, name: true } },
@@ -30,27 +34,7 @@ const listSelect = {
   },
 } as const;
 
-type ListRow = {
-  id: string;
-  code: string;
-  name: string;
-  status: ProjectStatus;
-  targetStartDate: Date | null;
-  targetEndDate: Date | null;
-  plannedBudget: DecimalValue | null;
-  company: { id: string; code: string; name: string };
-  category: { id: string; code: string; name: string };
-  pic: { id: string; name: string } | null;
-  estates: {
-    isPrimary: boolean;
-    estate: {
-      id: string;
-      code: string;
-      name: string;
-      wilayah: { id: string; name: string };
-    };
-  }[];
-};
+type ListRow = Prisma.ProjectGetPayload<{ select: typeof listSelect }>;
 
 function iso(value: Date | null): string | null {
   return value ? businessDateIso(value) : null;
@@ -59,11 +43,16 @@ function iso(value: Date | null): string | null {
 /** Bentuk untuk UI: uang jadi string desimal dan tanggal jadi `YYYY-MM-DD` (rule 20). */
 function toListItem(row: ListRow) {
   const main = row.estates.find((estate) => estate.isPrimary)?.estate;
+  const archived =
+    (row.status === "COMPLETED" || row.status === "CANCELLED") &&
+    row.deletedAt === null &&
+    isArchivedByAge(row.status, row.completedAt, row.cancelledAt);
   return {
     id: row.id,
     code: row.code,
     name: row.name,
     status: row.status,
+    archived,
     company: row.company,
     category: row.category,
     mainEstate: main
@@ -75,6 +64,19 @@ function toListItem(row: ListRow) {
     targetStartDate: iso(row.targetStartDate),
     targetEndDate: iso(row.targetEndDate),
   };
+}
+
+/** Arsip otomatis 1 tahun setelah COMPLETED/CANCELLED (docs/01 §12, AC-69). */
+function isArchivedByAge(
+  status: ProjectStatus,
+  completedAt: Date | null,
+  cancelledAt: Date | null,
+): boolean {
+  const reference = status === "COMPLETED" ? completedAt : cancelledAt;
+  if (!reference) return false;
+  const oneYearAgo = new Date();
+  oneYearAgo.setUTCFullYear(oneYearAgo.getUTCFullYear() - 1);
+  return reference <= oneYearAgo;
 }
 
 /**
@@ -93,7 +95,9 @@ export async function listProjects(filters: ProjectFilters) {
   ];
 
   const where = {
-    deletedAt: null,
+    ...(filters.archived
+      ? {}
+      : { deletedAt: null }),
     ...(filters.status.length > 0
       ? { status: { in: filters.status as ProjectStatus[] } }
       : {}),
@@ -112,6 +116,31 @@ export async function listProjects(filters: ProjectFilters) {
     ...(locationFilter.length > 0
       ? { estates: { some: { OR: locationFilter } } }
       : {}),
+    ...(filters.archived
+      ? {
+          status: { in: ["COMPLETED", "CANCELLED"] as ProjectStatus[] },
+          deletedAt: null,
+          OR: [
+            {
+              status: "COMPLETED" as ProjectStatus,
+              completedAt: {
+                lte: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000),
+              },
+            },
+            {
+              status: "CANCELLED" as ProjectStatus,
+              cancelledAt: {
+                lte: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000),
+              },
+            },
+          ],
+        }
+      : {
+          deletedAt: null,
+          status: {
+            notIn: ["COMPLETED", "CANCELLED"] as ProjectStatus[],
+          },
+        }),
   };
 
   const [rows, total] = await Promise.all([

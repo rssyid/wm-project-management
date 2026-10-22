@@ -76,6 +76,8 @@ interface WorkItemTabProps {
   projectId: string;
   workItems: WorkItemView[];
   canWrite: boolean;
+  addOpen?: boolean;
+  setAddOpen?: (open: boolean) => void;
 }
 
 const TYPE_LABEL: Record<string, string> = {
@@ -92,13 +94,21 @@ export function WorkItemTab({
   projectId,
   workItems,
   canWrite,
+  addOpen: propAddOpen,
+  setAddOpen: propSetAddOpen,
 }: WorkItemTabProps) {
   const router = useRouter();
-  const [addOpen, setAddOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(propAddOpen ?? false);
   const [weightOpen, setWeightOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelId, setCancelId] = useState("");
   const [cancelVersion, setCancelVersion] = useState(0);
+  const [projectWeightOpen, setProjectWeightOpen] = useState(false);
+  const [projectWeightItemId, setProjectWeightItemId] = useState("");
+  const [projectWeightVersion, setProjectWeightVersion] = useState(0);
+  const [projectWeightPct, setProjectWeightPct] = useState("");
+
+  const internalSetAddOpen = propSetAddOpen ?? setAddOpen;
 
   const [addName, setAddName] = useState("");
   const [addType, setAddType] = useState("TENDER_CONTRACT");
@@ -150,12 +160,37 @@ export function WorkItemTab({
       materialWeightPct: addMaterialWeight,
     });
     if (ok) {
-      setAddOpen(false);
+      internalSetAddOpen(false);
       setAddName("");
       setAddProjectWeight("");
       setAddPhysicalWeight("");
       setAddMaterialWeight("");
       toast.success("Pekerjaan dibuat");
+    }
+  }
+
+  async function saveProjectWeight() {
+    const existingTotal = workItems.reduce(
+      (sum, w) => sum + toCents(w.projectWeightPct),
+      0,
+    );
+    const current = workItems.find((w) => w.id === projectWeightItemId);
+    if (!current) return;
+    const currentCents = toCents(current.projectWeightPct);
+    const newCents = toCents(projectWeightPct || "0");
+    const total = existingTotal - currentCents + newCents;
+    if (total !== 10000) {
+      toast.error("Total bobot Pekerjaan harus tepat 100,00%.");
+      return;
+    }
+    const ok = await call("PATCH", `/api/work-items/${projectWeightItemId}`, {
+      version: projectWeightVersion,
+      projectWeightPct,
+    });
+    if (ok) {
+      setProjectWeightOpen(false);
+      toast.success("Bobot Proyek diperbarui");
+      router.refresh();
     }
   }
 
@@ -274,6 +309,18 @@ export function WorkItemTab({
                           Ubah bobot
                         </Button>
                         <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setProjectWeightItemId(item.id);
+                            setProjectWeightVersion(item.version);
+                            setProjectWeightPct(item.projectWeightPct);
+                            setProjectWeightOpen(true);
+                          }}
+                        >
+                          Ubah Bobot Proyek
+                        </Button>
+                        <Button
                           variant="destructive"
                           size="sm"
                           onClick={() => {
@@ -295,7 +342,7 @@ export function WorkItemTab({
       </section>
 
       {addOpen && (
-        <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <Dialog open={addOpen} onOpenChange={internalSetAddOpen}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Tambah Pekerjaan</DialogTitle>
@@ -343,7 +390,7 @@ export function WorkItemTab({
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setAddOpen(false)}>
+              <Button variant="outline" onClick={() => internalSetAddOpen(false)}>
                 Batal
               </Button>
               <Button onClick={addWorkItem}>Tambah Pekerjaan</Button>
@@ -384,6 +431,35 @@ export function WorkItemTab({
                 Batal
               </Button>
               <Button onClick={saveWeight}>Simpan Bobot</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {projectWeightOpen && (
+        <Dialog open={projectWeightOpen} onOpenChange={setProjectWeightOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Ubah Bobot Proyek</DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-1">
+                <Label>Bobot Proyek (%)</Label>
+                <Input
+                  value={projectWeightPct}
+                  onChange={(e) => setProjectWeightPct(e.target.value)}
+                  required
+                />
+              </div>
+              <p className="text-xs text-ink-muted">
+                Total bobot semua Pekerjaan aktif harus tepat 100,00%.
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setProjectWeightOpen(false)}>
+                Batal
+              </Button>
+              <Button onClick={saveProjectWeight}>Simpan Bobot Proyek</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

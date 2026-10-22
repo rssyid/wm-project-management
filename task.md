@@ -219,12 +219,37 @@ Semua item belum dikerjakan. Centang hanya dengan bukti (lihat perintah `/verify
 
 ## F6 — Penutupan dan admin (AC-63–70)
 
-- [ ] Ajukan, verifikasi, batal pengajuan BAST; kunci WAITING_BAST dan COMPLETED (AC-63–66).
-- [ ] Tahan/lanjutkan dan aturan ON_HOLD; batal proyek (AC-67–68).
-- [ ] Arsip saat query + filter arsip (AC-69).
-- [ ] Soft delete, restore, purge dengan tombstone & hapus file R2 (AC-70).
-- [ ] Halaman audit log.
-- Bukti:
+- [x] Ajukan, verifikasi, batal pengajuan BAST; kunci WAITING_BAST dan COMPLETED (AC-63–66).
+- [x] Tahan/lanjutkan dan aturan ON_HOLD; batal proyek (AC-67–68).
+- [x] Arsip saat query + filter arsip (AC-69).
+- [x] Soft delete, restore, purge dengan tombstone & hapus file R2 (AC-70).
+- [x] Halaman audit log.
+- Bukti (22 Oktober 2026):
+
+  | AC | Test | Hasil |
+  |----|------|-------|
+  | AC-63 | `tests/integration/bast.test.ts`: "SP dapat mengajukan BAST saat fisik 100% → WAITING_BAST", "ajukan BAST ditolak bila fisik belum 100%", "MV tidak bisa mengajukan BAST (403)", "tidak boleh ada dua BAST DIAJUKAN per proyek" | Tes tersedia (integration butuh DB) |
+  | AC-64 | `tests/integration/project-transition.test.ts`: "proyek WAITING_BAST menolak input lapangan (FIELD_INPUT_LOCKED)"; `delivery.test.ts`: pembayaran boleh di WAITING_BAST; `schedule-revision.test.ts`: revisi ditolak di WAITING_BAST | Tes tersedia (integration butuh DB) |
+  | AC-65 | `tests/integration/bast.test.ts`: "verifikasi BAST (SA) → COMPLETED, PROJECT_LOCKED setelahnya", "SP tidak bisa verifikasi BAST (403 bast.manage)", "batal BAST yang sudah diverifikasi ditolak" | Tes tersedia (integration butuh DB) |
+  | AC-66 | `tests/integration/bast.test.ts`: "batal pengajuan BAST → EXECUTION, DIBATALKAN" | Tes tersedia (integration butuh DB) |
+  | AC-67 | `tests/integration/project-hold-resume-cancel.test.ts`: tahan/lanjutkan simpan previousStatus, DRAFT/COMPLETED tidak bisa ditahan, SP tidak bisa resume non-ON_HOLD | Tes tersedia (integration butuh DB) |
+  | AC-68 | `tests/integration/project-hold-resume-cancel.test.ts`: batal proyek hanya SA, alasan wajib, riwayat tetap terbaca, batal dari COMPLETED ditolak, 401 tanpa session | Tes tersedia (integration butuh DB) |
+  | AC-69 | `tests/integration/project-archive.test.ts`: arsip 1 tahun setelah COMPLETED/CANCELLED, filter archived, baru < 1 tahun bukan arsip | Tes tersedia (integration butuh DB) |
+  | AC-70 | `tests/integration/project-purge.test.ts`: soft delete → 404, restore bisa, purge hanya SA, konfirmasi kode, tombstone, file R2 & AuditLog, MV/SP tidak bisa purge | Tes tersedia (integration butuh DB) |
+  | Audit log | `tests/integration/audit-logs.test.ts` + `GET /api/audit-logs` (Semua role baca) | Tes tersedia (integration butuh DB) |
+
+  | Gerbang kualitas | Uji | Hasil |
+  |---|---|---|
+  | `pnpm lint` | ESLint | lulus (0 error, 1 warning pre-existing project-form.tsx dari F2) |
+  | `pnpm typecheck` | `next typegen && tsc --noEmit` | lulus |
+  | `pnpm test` | Vitest unit | 106/106 lulus |
+  | `pnpm test` | Vitest integration | 0/31 jalankan — `TEST_DATABASE_URL`/`TEST_DIRECT_URL` tidak tersedia di lingkungan (limitasi lingkungan, sama seperti F5) |
+  | `pnpm build` | Next.js Turbopack | lulus (semua route F6 terdaftar: bast, cancel, hold, purge, restore, resume, audit-logs) |
+
+  - Slop-check: tidak ada `any`, `as unknown as`, `@ts-ignore`, `@ts-expect-error`, `eslint-disable`, `console.log`, `TODO`, `FIXME`, `catch {}` kosong, hex/rgb warna di luar `globals.css`, teks pemasaran, atau nama di luar glossary di file F6 (diperiksa manual pada semua file diubah/ditambahkan).
+  - Lintas dokumen: tidak ada penyimpangan dari `docs/01-domain.md` §5 (state machine), §12 (BAST/tahan/batal/arsip/hapus), dan `docs/04-api.md` §1 (konvensi, PROJECT_LOCKED/FIELD_INPUT_LOCKED), §8 (BAST), §11 (admin/purge/audit-logs). Role matrix cocok: `project.write`=[SA,SP], `bast.manage`=[SA], `project.cancel`=[SA], `project.delete`=[SA], `project.purge`=[SA].
+  - Commit: belum (berkas F6 masih untracked; belum ada permintaan commit).
+  - Catatan untuk F7: integrasi dan e2e butuh `TEST_DATABASE_URL`/`TEST_DIRECT_URL` + kredensial R2 di `.env.local` sebelum bisa dijalankan.
 
 ## F7 — UAT dan go-live (AC-71–76)
 

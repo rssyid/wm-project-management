@@ -11,6 +11,11 @@ function single(value: string | string[] | undefined): string {
   return typeof value === "string" ? value : "";
 }
 
+// Route /proyek membaca searchParams dan Prisma langsung; tidak dapat
+// di-prerender statis, blocking render per permintaan. cacheComponents
+// diaktifkan di next.config, jadi dynamic/revalidate tidak bisa dipakai.
+export const instant = false;
+
 export default async function ProjectListPage({
   searchParams,
 }: {

@@ -115,6 +115,7 @@ export const projectFiltersSchema = z.object({
     .transform((value) => (value ? value.split(",").filter(Boolean) : [])),
   categoryId: z.string().trim().optional(),
   q: z.string().trim().max(120).optional(),
+  archived: z.coerce.boolean().default(false),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(25),
 });

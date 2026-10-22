@@ -9,6 +9,7 @@ import { getSessionUser } from "@/infra/session";
 const ADMIN_ROUTES: Partial<Record<AdminMenu["label"], string>> = {
   User: "/admin/user",
   "Matriks approval": "/admin/matriks-approval",
+  "Audit log": "/admin/audit-logs",
 };
 
 export default async function AdminPage() {

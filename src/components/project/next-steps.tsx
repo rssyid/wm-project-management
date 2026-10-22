@@ -24,19 +24,32 @@ type Props = {
   status: ProjectStatus;
   prerequisites: Prerequisite[];
   actions: NextAction[];
+  onAddWorkItem?: () => void;
 };
 
 /**
  * docs/05 §6: panel "Langkah berikutnya" berisi aksi utama beserta prasyarat yang belum
  * terpenuhi. Aksi nonaktif menampilkan alasannya sebagai daftar prasyarat.
  */
-export function NextSteps({ status, prerequisites, actions }: Props) {
+export function NextSteps({
+  status,
+  prerequisites,
+  actions,
+  onAddWorkItem,
+}: Props) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
 
   const blocked = prerequisites.filter((item) => !item.done);
 
   async function run(action: NextAction) {
+    if (action.key === "add-work-item") {
+      if (onAddWorkItem) {
+        onAddWorkItem();
+        return;
+      }
+      return;
+    }
     setBusy(true);
     try {
       const response = await fetch(action.path, {

@@ -115,6 +115,11 @@ function planFor(
   }
 }
 
+// Route dinamis [kode] membaca Prisma langsung dan tidak dapat
+// di-prerender statis; blocking render per permintaan. cacheComponents
+// diaktifkan di next.config, jadi dynamic/revalidate tidak bisa dipakai.
+export const instant = false;
+
 export default async function ProjectWorkspacePage({
   params,
 }: {
